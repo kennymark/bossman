@@ -1,4 +1,5 @@
 import { format, formatDistanceToNow, isValid, parse, parseISO } from 'date-fns'
+import { DateTime } from 'luxon'
 
 type DateInput = string | Date
 
@@ -84,51 +85,4 @@ export function dateTimeFormatter(date: DateInput, formatType: DateFormat = 'sho
   }
 
   return format(dateObj, formatMap[formatType])
-}
-
-/**
- * Returns a human-readable time ago string (e.g., "2 hours ago", "3 days ago")
- * @param date - The date to calculate time ago from (string or Date object)
- * @param options - Optional configuration for formatDistanceToNow
- * @returns Human-readable time ago string
- */
-export function timeAgo(
-  date: DateInput,
-  options?: {
-    includeSeconds?: boolean
-    addSuffix?: boolean
-  },
-): string {
-  let dateObj: Date | null
-
-  if (typeof date === 'string') {
-    dateObj = parseDateString(date)
-  } else {
-    dateObj = date
-  }
-
-  if (!dateObj || !isValid(dateObj)) {
-    return 'Invalid date'
-  }
-
-  // If date is within the last 90 seconds, show "Just now"
-  const now = new Date()
-  const diffMs = now.getTime() - dateObj.getTime()
-  if (diffMs < 90_000 && diffMs >= 0) {
-    return 'Just now'
-  }
-
-  // display "1 minute ago" instead of "1 hr ago" for recent times
-  if (diffMs < 3_600_000 && diffMs >= 90_000) {
-    const mins = Math.floor(diffMs / 60_000)
-    if (mins <= 1) {
-      return '1 minute ago'
-    }
-    return `${mins} minutes ago`
-  }
-
-  return formatDistanceToNow(dateObj, {
-    addSuffix: options?.addSuffix ?? true,
-    includeSeconds: options?.includeSeconds ?? false,
-  })
 }

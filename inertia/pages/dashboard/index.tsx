@@ -5,6 +5,7 @@ import { Activity, FileText, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawActivity } from '#types/model-types'
+import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
 import { DataTable } from '@/components/dashboard/data-table'
 import { DashboardLayout } from '@/components/dashboard/layout'
@@ -27,7 +28,7 @@ type DashboardStats = {
 }
 
 const activityColumns: Column<RawActivity>[] = [
-  { key: 'summary', header: 'Summary', },
+  { key: 'summary', header: 'Summary' },
   {
     key: 'type',
     header: 'Type',
@@ -53,7 +54,7 @@ const activityColumns: Column<RawActivity>[] = [
     key: 'createdAt',
     header: 'When',
     width: 140,
-    cell: (row) => (row.createdAt ? dateFormatter(row.createdAt) : '—'),
+    cell: (row) => (row.createdAt ? timeAgo(row.createdAt) : '—'),
   },
 ]
 
@@ -145,7 +146,6 @@ export default function DashboardIndex(_props: DashboardIndexProps) {
   })
 
   const stats = statsData
-  console.log("🚀 ~ DashboardIndex ~ stats:", stats)
   const activities = activityData?.data ?? []
   const activityMeta = activityData?.meta
 
