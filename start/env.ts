@@ -51,11 +51,17 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
 
+  MEILISEARCH_HOST: Env.schema.string(),
+  MEILISEARCH_API_KEY: Env.schema.string(),
+
   /*
   |----------------------------------------------------------
-  | Variables for configuring ally package
+  | Variables for configuring database connection
   |----------------------------------------------------------
   */
-  GOOGLE_CLIENT_ID: Env.schema.string.optional(),
-  GOOGLE_CLIENT_SECRET: Env.schema.string.optional(),
+  DB_HOST: Env.schema.string({ format: 'host' }),
+  DB_PORT: Env.schema.number(),
+  DB_USER: Env.schema.string(),
+  DB_PASSWORD: Env.schema.string.optional(),
+  DB_DATABASE: Env.schema.string()
 })

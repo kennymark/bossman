@@ -4,8 +4,6 @@ import {
   Activity,
   ArrowRight,
   CheckCircle2,
-  LayoutDashboard,
-  Mail,
   Newspaper,
   Rocket,
   ShieldCheck,
@@ -167,12 +165,6 @@ export default function Home(props: SharedProps) {
             description='shadcn/ui components for fast, consistent UI.'
             bullets={['Reusable Button', 'Dialogs & popovers', 'Data tables']}
           />
-          <FeatureCard
-            icon={<Mail className='h-4 w-4' />}
-            title='Contact'
-            description='A contact form that posts to the API and sends email.'
-            bullets={['Contact page', 'Validation', 'Email notification']}
-          />
         </SimpleGrid>
       </section>
 
@@ -187,9 +179,6 @@ export default function Home(props: SharedProps) {
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={3}>
                 <Button variant='outline' leftIcon={<Newspaper className='h-4 w-4' />} asChild>
                   <Link href='/blog'>Blog</Link>
-                </Button>
-                <Button variant='outline' leftIcon={<Mail className='h-4 w-4' />} asChild>
-                  <Link href='/contact'>Contact</Link>
                 </Button>
                 {isLoggedIn ? (
                   <Button variant='outline' asChild>

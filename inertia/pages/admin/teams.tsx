@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import type { Column } from '#types/extra'
@@ -47,6 +47,14 @@ interface TeamMemberRow {
   role: string
   createdAt: string
   adminPages: AdminPageKey[] | null
+}
+
+function togglePageInSet(pages: AdminPageKey[], key: AdminPageKey, next: boolean): AdminPageKey[] {
+  const set = new Set(pages)
+  if (next) set.add(key)
+  else set.delete(key)
+  set.add('admin_dashboard')
+  return Array.from(set)
 }
 
 interface InvitationRow {
@@ -96,6 +104,10 @@ export default function AdminTeamsPage() {
   const [membersPage, setMembersPage] = useState(1)
   const [membersPerPage, setMembersPerPage] = useState(10)
   const [membersSearch, setMembersSearch] = useState('')
+  const [editMember, setEditMember] = useState<TeamMemberRow | null>(null)
+  const [editMemberPages, setEditMemberPages] = useState<AdminPageKey[]>(ADMIN_PAGE_OPTIONS.map((o) => o.key))
+  const [editInvitation, setEditInvitation] = useState<InvitationRow | null>(null)
+  const [editInvitationPages, setEditInvitationPages] = useState<AdminPageKey[]>(ADMIN_PAGE_OPTIONS.map((o) => o.key))
 
   const teamsQuery = useQuery({
     queryKey: ['admin-team'],
@@ -188,14 +200,67 @@ export default function AdminTeamsPage() {
 
   const toggleInvitePage = (key: AdminPageKey, next: boolean) => {
     if (key === 'admin_dashboard') return
-    setInvitePages((prev) => {
-      const set = new Set(prev)
-      if (next) set.add(key)
-      else set.delete(key)
-      set.add('admin_dashboard')
-      return Array.from(set)
-    })
+    setInvitePages((prev) => togglePageInSet(prev, key, next))
   }
+
+  const updateMemberMutation = useMutation({
+    mutationFn: async ({ memberId, adminPages }: { memberId: string; adminPages: AdminPageKey[] }) => {
+      if (!adminTeam) throw new Error('No team')
+      await api.put(`/teams/${adminTeam.id}/members/${memberId}`, { adminPages })
+    },
+    onSuccess: () => {
+      setEditMember(null)
+      toast.success('Member updated')
+      queryClient.invalidateQueries({ queryKey: ['admin-team-members', adminTeamId] })
+    },
+    onError: (err: ServerErrorResponse) => {
+      toast.error(serverErrorResponder(err) || 'Failed to update member')
+    },
+  })
+
+  const updateInvitationMutation = useMutation({
+    mutationFn: async ({ invitationId, adminPages }: { invitationId: string; adminPages: AdminPageKey[] }) => {
+      if (!adminTeam) throw new Error('No team')
+      await api.put(`/teams/${adminTeam.id}/invitations/${invitationId}`, { adminPages })
+    },
+    onSuccess: () => {
+      setEditInvitation(null)
+      toast.success('Invitation updated')
+      queryClient.invalidateQueries({ queryKey: ['admin-team-members', adminTeamId] })
+    },
+    onError: (err: ServerErrorResponse) => {
+      toast.error(serverErrorResponder(err) || 'Failed to update invitation')
+    },
+  })
+
+  const openEditMember = (row: TeamMemberRow) => {
+    setEditMember(row)
+    setEditMemberPages(row.adminPages?.length ? [...row.adminPages] : ADMIN_PAGE_OPTIONS.map((o) => o.key))
+  }
+  const openEditInvitation = (inv: InvitationRow) => {
+    setEditInvitation(inv)
+    setEditInvitationPages(inv.adminPages?.length ? [...inv.adminPages] : ADMIN_PAGE_OPTIONS.map((o) => o.key))
+  }
+
+  const memberColumnsWithActions: Column<TeamMemberRow>[] = useMemo(
+    () => [
+      ...memberColumns,
+      {
+        key: 'actions',
+        header: '',
+        cell: (row: TeamMemberRow) => (
+          <Button
+            variant='ghost'
+            size='icon'
+            aria-label='Edit page access'
+            onClick={() => openEditMember(row)}>
+            <Pencil className='h-4 w-4' />
+          </Button>
+        ),
+      },
+    ],
+    [],
+  )
 
   return (
     <DashboardLayout>
@@ -306,6 +371,7 @@ export default function AdminTeamsPage() {
                           <TableHead>Admin pages</TableHead>
                           <TableHead>Invited by</TableHead>
                           <TableHead>Invited</TableHead>
+                          <TableHead className='w-10' />
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -332,6 +398,15 @@ export default function AdminTeamsPage() {
                             <TableCell className='text-muted-foreground'>
                               {inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : '—'}
                             </TableCell>
+                            <TableCell>
+                              <Button
+                                variant='ghost'
+                                size='icon'
+                                aria-label='Edit page access'
+                                onClick={() => openEditInvitation(inv)}>
+                                <Pencil className='h-4 w-4' />
+                              </Button>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -353,7 +428,7 @@ export default function AdminTeamsPage() {
                   </Alert>
                 ) : (
                   <DataTable
-                    columns={memberColumns}
+                    columns={memberColumnsWithActions}
                     data={memberRows}
                     searchable
                     searchPlaceholder='Search team members...'
@@ -384,6 +459,112 @@ export default function AdminTeamsPage() {
             </Card>
           </>
         ) : null}
+
+        {/* Edit member page access modal */}
+        <BaseModal
+          title='Edit page access'
+          description={
+            editMember
+              ? `Choose which pages ${editMember.fullName || editMember.email || 'this member'} can access.`
+              : ''
+          }
+          open={Boolean(editMember)}
+          onOpenChange={(open) => !open && setEditMember(null)}
+          primaryText='Save'
+          secondaryText='Cancel'
+          primaryVariant='default'
+          secondaryVariant='outline'
+          isLoading={updateMemberMutation.isPending}
+          onSecondaryAction={() => setEditMember(null)}
+          onPrimaryAction={() => {
+            if (!editMember || !adminTeam) return
+            updateMemberMutation.mutate({
+              memberId: editMember.id,
+              adminPages: editMemberPages,
+            })
+          }}
+          className='max-w-2xl'>
+          <Stack spacing={4}>
+            <div className='space-y-2'>
+              <Label>Page access</Label>
+              <div className='grid gap-2 rounded-lg border border-border p-3'>
+                {ADMIN_PAGE_OPTIONS.map((opt) => {
+                  const checked = editMemberPages.includes(opt.key)
+                  const disabled = Boolean(opt.required)
+                  return (
+                    <HStack key={opt.key} spacing={3} align='start'>
+                      <Checkbox
+                        checked={checked}
+                        disabled={disabled}
+                        onCheckedChange={(v) =>
+                          setEditMemberPages((prev) => togglePageInSet(prev, opt.key, v === true))
+                        }
+                      />
+                      <div className='min-w-0'>
+                        <div className='text-sm font-medium'>{opt.label}</div>
+                        <div className='text-xs text-muted-foreground'>{opt.description}</div>
+                      </div>
+                    </HStack>
+                  )
+                })}
+              </div>
+              <p className='text-xs text-muted-foreground'>Dashboard is always included.</p>
+            </div>
+          </Stack>
+        </BaseModal>
+
+        {/* Edit invitation page access modal */}
+        <BaseModal
+          title='Edit invitation page access'
+          description={
+            editInvitation
+              ? `Choose which pages ${editInvitation.email} will have access to after accepting.`
+              : ''
+          }
+          open={Boolean(editInvitation)}
+          onOpenChange={(open) => !open && setEditInvitation(null)}
+          primaryText='Save'
+          secondaryText='Cancel'
+          primaryVariant='default'
+          secondaryVariant='outline'
+          isLoading={updateInvitationMutation.isPending}
+          onSecondaryAction={() => setEditInvitation(null)}
+          onPrimaryAction={() => {
+            if (!editInvitation || !adminTeam) return
+            updateInvitationMutation.mutate({
+              invitationId: editInvitation.id,
+              adminPages: editInvitationPages,
+            })
+          }}
+          className='max-w-2xl'>
+          <Stack spacing={4}>
+            <div className='space-y-2'>
+              <Label>Page access</Label>
+              <div className='grid gap-2 rounded-lg border border-border p-3'>
+                {ADMIN_PAGE_OPTIONS.map((opt) => {
+                  const checked = editInvitationPages.includes(opt.key)
+                  const disabled = Boolean(opt.required)
+                  return (
+                    <HStack key={opt.key} spacing={3} align='start'>
+                      <Checkbox
+                        checked={checked}
+                        disabled={disabled}
+                        onCheckedChange={(v) =>
+                          setEditInvitationPages((prev) => togglePageInSet(prev, opt.key, v === true))
+                        }
+                      />
+                      <div className='min-w-0'>
+                        <div className='text-sm font-medium'>{opt.label}</div>
+                        <div className='text-xs text-muted-foreground'>{opt.description}</div>
+                      </div>
+                    </HStack>
+                  )
+                })}
+              </div>
+              <p className='text-xs text-muted-foreground'>Dashboard is always included.</p>
+            </div>
+          </Stack>
+        </BaseModal>
       </div>
     </DashboardLayout>
   )

@@ -8,8 +8,8 @@ import type { ModelObject } from '@adonisjs/lucid/types/model'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { type Attachment, attachment } from '@jrmc/adonis-attachment'
 import type { DateTime } from 'luxon'
-// import Activity from './activity.js'
-
+import { FileStoreRoutes } from '../enum/file_store.js'
+import Activity from './activity.js'
 import Notification from './notification.js'
 import SuperBaseModel from './super_base.js'
 import Team from './team.js'
@@ -179,20 +179,20 @@ export default class User extends compose(SuperBaseModel, AuthFinder) {
     if (user.email) user.email = user.email.toLowerCase()
   }
 
-  // @afterCreate()
-  // public static async registerActivity(user: User) {
-  //   // create a default team for the user
+  @afterCreate()
+  public static async registerActivity(user: User) {
+    // create a default team for the user
 
-  //   await Activity.create(
-  //     {
-  //       userId: user.id,
-  //       orgId: user.orgId,
-  //       type: 'created',
-  //       summary: 'Account created',
-  //     },
-  //     { client: user.$trx },
-  //   )
-  // }
+    await Activity.create(
+      {
+        userId: user.id,
+        orgId: user.orgId,
+        type: 'created',
+        summary: 'Account created',
+      },
+      { client: user.$trx },
+    )
+  }
 
   static accessTokens = DbAccessTokensProvider.forModel(User, {
     expiresIn: '30d',

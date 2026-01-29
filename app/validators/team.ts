@@ -33,3 +33,14 @@ export const acceptTeamInviteAuthedValidator = vine.compile(
   }),
 )
 
+export const updateMemberValidator = vine.compile(
+  vine.object({
+    adminPages: vine.array(vine.enum(ADMIN_PAGE_KEYS)).optional(),
+  }),
+)
+
+export const updateInvitationValidator = vine.compile(
+  vine.object({
+    adminPages: vine.array(vine.enum(ADMIN_PAGE_KEYS)).optional(),
+  }),
+)

@@ -40,6 +40,7 @@ const api = new ApiClient({
   withCredentials: true,
   headers: {
     // 'X-Device-Type': 'web',
+    appEnv: localStorage.getItem('appEnv') || 'dev',
     Timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   },
 })

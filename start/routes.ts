@@ -11,7 +11,6 @@ import router from '@adonisjs/core/services/router'
 import transmit from '@adonisjs/transmit/services/main'
 import AutoSwagger from 'adonis-autoswagger'
 import swagger from '#config/swagger'
-import { GoogleService } from '#services/google_service'
 import { middleware } from './kernel.js'
 import { throttle } from './limiter.js'
 
@@ -20,7 +19,6 @@ const HealthChecksController = () => import('#controllers/health_checks_controll
 const UsersController = () => import('#controllers/users_controller')
 const TwoFactorController = () => import('#controllers/two_factor_controller')
 const SessionsController = () => import('#controllers/sessions_controller')
-const ContactController = () => import('#controllers/contact_controller')
 const NotificationsController = () => import('#controllers/notifications_controller')
 const AuditsController = () => import('#controllers/audits_controller')
 const TeamsController = () => import('#controllers/teams_controller')
@@ -84,7 +82,6 @@ router
   .use(middleware.guest())
 
 // Public routes
-router.on('/contact').renderInertia('contact')
 router.on('/verify-email').renderInertia('verify-email')
 router.on('/verify-email-change').renderInertia('verify-email-change')
 router.get('/blog', [BlogPostsController, 'index'])
@@ -119,14 +116,6 @@ router
   .prefix('api/v1/auth')
   .use(throttle)
 
-// Public API routes
-router
-  .group(() => {
-    router.post('/contact', [ContactController, 'send'])
-  })
-  .prefix('api/v1')
-  .use(throttle)
-
 router
   .group(() => {
     router.put('/profile', [UsersController, 'updateProfile'])
@@ -154,7 +143,12 @@ router
     router.get('/', [TeamsController, 'index'])
     router.post('/', [TeamsController, 'store'])
     router.get('/:teamId/members', [TeamsController, 'members'])
+    router.put('/:teamId/members/:memberId', [TeamsController, 'updateMember'])
     router.post('/:teamId/invitations', [TeamInvitationsController, 'invite'])
+    router.put('/:teamId/invitations/:invitationId', [
+      TeamInvitationsController,
+      'updateInvitation',
+    ])
   })
   .prefix('api/v1/teams')
   .use(middleware.auth())
@@ -178,9 +172,6 @@ router
   .prefix('api/v1/notifications')
   .use(middleware.auth())
 
-// Web route (kept for compatibility with non-AJAX form posts)
-router.post('/contact', [ContactController, 'send']).use(throttle)
-
 router
   .group(() => {
     router.get('/', [AuditsController, 'index'])
@@ -190,36 +181,6 @@ router
   .use(middleware.auth())
 
 router.get('/health', [HealthChecksController])
-
-router.get('/google/redirect', ({ ally }) => {
-  const google = ally.use('google')
-  return google.redirect()
-})
-
-router.get('/google/callback', async ({ ally, auth, response, session }) => {
-  const google = ally.use('google')
-
-  if (google.accessDenied()) {
-    session.flash('error', { message: 'You have cancelled the login process' })
-    return response.redirect('/login')
-  }
-
-  if (google.stateMisMatch()) {
-    session.flash('error', { message: 'We are unable to verify the request. Please try again' })
-    return response.redirect('/login')
-  }
-
-  if (google.hasError()) {
-    session.flash('error', { message: google.getError() })
-    return response.redirect('/login')
-  }
-
-  const googleUser = await google.user()
-  // @ts-expect-error - GoogleUser is the same as the type in the GoogleService
-  const user = await new GoogleService().createOrLoginWithGoogle(googleUser)
-  await auth.use('web').login(user)
-  return response.redirect('/dashboard')
-})
 
 transmit.registerRoutes()
 

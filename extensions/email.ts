@@ -21,12 +21,6 @@ declare module '@adonisjs/core/types' {
       replyTo?: string
       name?: string
     }
-    'contact-form': {
-      name: string
-      email: string
-      subject: string
-      message: string
-    }
     'verify-email': {
       email: string
       fullName: string

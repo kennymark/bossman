@@ -1,15 +1,15 @@
 import { belongsTo, column, computed, hasMany, hasOne } from '@adonisjs/lucid/orm'
 import type { ModelObject } from '@adonisjs/lucid/types/model'
 import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
+import { type Attachment, attachment } from '@jrmc/adonis-attachment'
 import type { DateTime } from 'luxon'
 import Lease from '#models/lease'
-import Listings from '#models/listings'
 import Payment from '#models/payment'
 import type { AppCountries } from '#types/extra'
 import type { TogethaCurrencies } from '#utils/currency'
 import { type PlanFeatures, plansFeatureList } from '../data/subscription.js'
+import { FileStoreRoutes } from '../enum/file_store.js'
 import SubPlansReversed from '../enum/sub_plan.js'
-import CalendarEvent from './calendar_event.js'
 import SubscriptionPlan from './subscription_plan.js'
 import SuperBaseModel from './super_base.js'
 import User from './user.js'
@@ -88,8 +88,10 @@ export default class Org extends SuperBaseModel {
   @column() declare customPaymentSchedule: 'monthly' | 'quarterly' | 'yearly'
   @column() declare customRenewalDate: DateTime
   @column() declare customExpiryDate: DateTime
-  // @attachment({ preComputeUrl: true }) companyLogo: AttachmentContract | null
-  // @attachment({ preComputeUrl: true }) companyFavicon: AttachmentContract | null
+  @attachment({ preComputeUrl: true, folder: FileStoreRoutes.COMPANY_LOGOS })
+  declare companyLogo: Attachment | null
+  @attachment({ preComputeUrl: true, folder: FileStoreRoutes.COMPANY_FAVICONS })
+  declare companyFavicon: Attachment | null
 
   @column() declare metadata: {
     hasUpdatedAccount: boolean
@@ -146,9 +148,8 @@ export default class Org extends SuperBaseModel {
   >
 
   @hasMany(() => Lease) declare leases: HasMany<typeof Lease>
-  @hasMany(() => Listings) declare listings: HasMany<typeof Listings>
+  // @hasMany(() => Listings) declare listings: HasMany<typeof Listings>
   @hasMany(() => Payment) declare payments: HasMany<typeof Payment>
-  @hasMany(() => CalendarEvent) declare events: HasMany<typeof CalendarEvent>
 
   @belongsTo(() => Org, { localKey: 'parentOrgId' }) declare parentOrg: BelongsTo<typeof Org>
 

@@ -16,7 +16,6 @@ export const API_ROUTES = {
     '/auth/forgot-password',
     '/auth/reset-password',
     '/auth/verify-email/resend',
-    '/contact',
     '/teams',
     '/teams/:teamId/invitations',
     '/team-invitations/accept',

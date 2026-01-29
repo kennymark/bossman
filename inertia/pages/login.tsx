@@ -106,13 +106,6 @@ export default function Login({ errors }: LoginProps) {
                   Login
                 </Button>
 
-                <a href='/google/redirect' target='_blank' rel='noopener'>
-                  <Button type='button' disabled={isPending} className='w-full bg-black'>
-                    <img src='/icons/google-icon.svg' alt='Google' className='w-4 h-4' />
-                    Login with Google
-                  </Button>
-                </a>
-
                 <Link
                   href='/forgot-password'
                   className='text-sm text-primary hover:underline text-center'>

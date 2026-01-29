@@ -15,6 +15,7 @@ import {
   acceptTeamInviteAuthedValidator,
   acceptTeamInviteGuestValidator,
   inviteToTeamValidator,
+  updateInvitationValidator,
 } from '#validators/team'
 
 function hashInviteToken(token: string) {
@@ -399,5 +400,49 @@ export default class TeamInvitationsController {
       await trx.rollback()
       throw error
     }
+  }
+
+  async updateInvitation({ auth, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const freshUser = await User.findByOrFail('email', user.email)
+    const teamId = request.param('teamId')
+    const invitationId = request.param('invitationId')
+
+    const team = await Team.findOrFail(teamId)
+    if (team.kind !== 'admin') {
+      return response.forbidden({ error: 'Only admin team invitations can be updated here.' })
+    }
+    if ((user as { role?: string }).role !== 'admin') {
+      return response.forbidden({ error: 'Admin access required.' })
+    }
+    const allowed = await getAdminPageAccessForUser(freshUser.id)
+    if (Array.isArray(allowed) && !allowed.includes('admin_teams')) {
+      return response.forbidden({ error: 'You do not have access to manage admin teams.' })
+    }
+
+    const invitation = await TeamInvitation.query()
+      .where('team_id', teamId)
+      .where('id', invitationId)
+      .whereNull('accepted_at')
+      .firstOrFail()
+
+    const body = await request.validateUsing(updateInvitationValidator)
+    if (body.adminPages !== undefined) {
+      const pages = Array.isArray(body.adminPages) ? body.adminPages : null
+      const resolved = pages?.length ? [...pages] : null
+      if (resolved && !resolved.includes('admin_dashboard')) {
+        resolved.unshift('admin_dashboard')
+      }
+      invitation.adminPages = resolved?.length ? resolved : null
+      await invitation.save()
+    }
+
+    return response.ok({
+      message: 'Invitation updated successfully',
+      data: {
+        id: invitation.id,
+        adminPages: invitation.adminPages ?? null,
+      },
+    })
   }
 }

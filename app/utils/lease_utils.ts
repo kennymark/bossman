@@ -1,3 +1,5 @@
+import { endOfDay, formatDuration, intervalToDuration, startOfDay } from 'date-fns'
+
 export default class LeaseUtils {
   public static makeLeaseName(tenant: string, address: string) {
     return `Agreement for ${tenant} at ${address}`
@@ -26,5 +28,16 @@ export default class LeaseUtils {
       tenantName,
       propertyAddress,
     }
+  }
+
+  public static timeRemaining(start_date: string | Date, end_date: string | Date): string {
+    if (!end_date) return 'Permanently Rolling'
+    if (!start_date || !end_date) return 'Not set'
+
+    const interval = intervalToDuration({
+      start: startOfDay(new Date(start_date)),
+      end: endOfDay(new Date(end_date)),
+    })
+    return formatDuration(interval, { format: ['years', 'months', 'days'] })
   }
 }

@@ -4,7 +4,7 @@ import TeamInvitation from '#models/team_invitation'
 import TeamMember from '#models/team_member'
 import User from '#models/user'
 import { getAdminPageAccessForUser } from '#services/admin_access_service'
-import { createTeamValidator } from '#validators/team'
+import { createTeamValidator, updateMemberValidator } from '#validators/team'
 
 export default class TeamsController {
   async index({ auth, response, request, now }: HttpContext) {
@@ -174,6 +174,49 @@ export default class TeamsController {
           invitedBy: inv.invitedBy?.fullName || inv.invitedBy?.email || null,
           adminPages: inv.adminPages ?? null,
         })),
+      },
+    })
+  }
+
+  async updateMember({ auth, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const freshUser = await User.findByOrFail('email', user.email)
+    const teamId = request.param('teamId')
+    const memberId = request.param('memberId')
+
+    const team = await Team.findOrFail(teamId)
+    if (team.kind !== 'admin') {
+      return response.forbidden({ error: 'Only admin team members can be updated here.' })
+    }
+    if ((user as { role?: string }).role !== 'admin') {
+      return response.forbidden({ error: 'Admin access required.' })
+    }
+    const allowed = await getAdminPageAccessForUser(freshUser.id)
+    if (Array.isArray(allowed) && !allowed.includes('admin_teams')) {
+      return response.forbidden({ error: 'You do not have access to manage admin teams.' })
+    }
+
+    const member = await TeamMember.query()
+      .where('team_id', teamId)
+      .where('id', memberId)
+      .firstOrFail()
+
+    const body = await request.validateUsing(updateMemberValidator)
+    if (body.adminPages !== undefined) {
+      const pages = Array.isArray(body.adminPages) ? body.adminPages : null
+      const resolved = pages?.length ? [...pages] : null
+      if (resolved && !resolved.includes('admin_dashboard')) {
+        resolved.unshift('admin_dashboard')
+      }
+      member.adminPages = resolved?.length ? resolved : null
+      await member.save()
+    }
+
+    return response.ok({
+      message: 'Member updated successfully',
+      data: {
+        id: member.id,
+        adminPages: member.adminPages ?? null,
       },
     })
   }

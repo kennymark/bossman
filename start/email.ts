@@ -89,19 +89,6 @@ mailer.on({
 })
 
 mailer.on({
-  type: 'contact-form',
-  handler: async (message, data) => {
-    const ContactForm = await import('#emails/contact-form').then((m) => m.default)
-    const html = await render(ContactForm(data))
-    message
-      .subject(`Contact Form: ${data.subject}`)
-      .to(env.get('FROM_EMAIL', 'hello@example.com'))
-      .html(html)
-      .replyTo(data.email)
-  },
-})
-
-mailer.on({
   type: 'goodbye',
   handler: async (message, data) => {
     const Goodbye = await import('#emails/goodbye').then((m) => m.default)

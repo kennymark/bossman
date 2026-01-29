@@ -36,9 +36,6 @@ function PublicNavbarActions({ extraActions }: { extraActions?: React.ReactNode 
         <Button variant='ghost' asChild>
           <Link href='/blog'>Blog</Link>
         </Button>
-        <Button variant='ghost' asChild>
-          <Link href='/contact'>Contact</Link>
-        </Button>
       </div>
 
       {/* Desktop auth CTAs + optional extra actions */}
@@ -68,7 +65,6 @@ function PublicNavbarActions({ extraActions }: { extraActions?: React.ReactNode 
           <DropdownMenuContent align='end'>
             <DropdownMenuItem onClick={() => router.visit('/')}>Home</DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.visit('/blog')}>Blog</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.visit('/contact')}>Contact</DropdownMenuItem>
             <DropdownMenuSeparator />
             {isLoggedIn ? (
               <DropdownMenuItem onClick={() => router.visit('/dashboard')}>Dashboard</DropdownMenuItem>
