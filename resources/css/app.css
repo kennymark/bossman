@@ -1,0 +1,223 @@
+@import "tailwindcss";
+@source "../../inertia/app/app.css";
+
+
+
+/* ================================
+   Tailwind v4 Theme Tokens
+   ================================ */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius: var(--radius);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Quick actions */
+  --color-quick-action-blue: var(--quick-action-blue);
+  --color-quick-action-blue-bg: var(--quick-action-blue-bg);
+  --color-quick-action-green: var(--quick-action-green);
+  --color-quick-action-green-bg: var(--quick-action-green-bg);
+  --color-quick-action-orange: var(--quick-action-orange);
+  --color-quick-action-orange-bg: var(--quick-action-orange-bg);
+  --color-quick-action-cyan: var(--quick-action-cyan);
+  --color-quick-action-cyan-bg: var(--quick-action-cyan-bg);
+  --color-quick-action-indigo: var(--quick-action-indigo);
+  --color-quick-action-indigo-bg: var(--quick-action-indigo-bg);
+  --color-quick-action-red: var(--quick-action-red);
+  --color-quick-action-red-bg: var(--quick-action-red-bg);
+
+  /* Sidebar */
+  --color-sidebar-background: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ================================
+   Base Layer
+   ================================ */
+@layer base {
+
+  html.dashboard-shell,
+  body.dashboard-shell {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* ================================
+     Light Theme
+     ================================ */
+  :root {
+    /* Core */
+    --background: #f5f5f5;
+    --foreground: #1a1a1a;
+
+    /* Surfaces */
+    --card: #ffffff;
+    --card-foreground: #1a1a1a;
+    --popover: #ffffff;
+    --popover-foreground: #1a1a1a;
+
+    /* Brand */
+    --primary: #0e584f;
+    --primary-foreground: #ffffff;
+    --accent: #8ee6c9;
+    --accent-foreground: #0e584f;
+
+    /* UI */
+    --secondary: #f1f5f9;
+    --secondary-foreground: #1a1a1a;
+    --muted: #f8f9fa;
+    --muted-foreground: #64748b;
+
+    --border: #e5e7eb;
+    --input: #e5e7eb;
+    --ring: #0e584f;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --radius: 0.5rem;
+
+    /* Charts */
+    --chart-1: #0e584f;
+    --chart-2: #10b981;
+    --chart-3: #06b6d4;
+    --chart-4: #22c55e;
+    --chart-5: #34d399;
+
+    /* Quick actions */
+    --quick-action-blue: #2563eb;
+    --quick-action-blue-bg: rgba(59, 130, 246, 0.1);
+    --quick-action-green: #16a34a;
+    --quick-action-green-bg: rgba(34, 197, 94, 0.1);
+    --quick-action-orange: #ea580c;
+    --quick-action-orange-bg: rgba(249, 115, 22, 0.1);
+    --quick-action-cyan: #0891b2;
+    --quick-action-cyan-bg: rgba(6, 182, 212, 0.1);
+    --quick-action-indigo: #4f46e5;
+    --quick-action-indigo-bg: rgba(99, 102, 241, 0.1);
+    --quick-action-red: #dc2626;
+    --quick-action-red-bg: rgba(239, 68, 68, 0.1);
+
+    /* Sidebar */
+    --sidebar-background: #fafafa;
+    --sidebar-foreground: #3f3f46;
+    --sidebar-primary: #0e584f;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f1f5f9;
+    --sidebar-accent-foreground: #1a1a1a;
+    --sidebar-border: #e4e4e7;
+    --sidebar-ring: #0e584f;
+  }
+
+  /* ================================
+     Dark Theme
+     ================================ */
+  .dark {
+    /* Core */
+    --background: #060606;
+    --foreground: #f5f5f5;
+
+    /* Surfaces */
+    --card: #0f0f0f;
+    --card-foreground: #f5f5f5;
+    --popover: #1a1a1a;
+    --popover-foreground: #f5f5f5;
+
+    /* Brand */
+    --primary: #0e584f;
+    --primary-foreground: #ffffff;
+    --accent: #0e584f;
+    --accent-foreground: #ffffff;
+
+    /* UI */
+    --secondary: #262626;
+    --secondary-foreground: #f5f5f5;
+    --muted: #1f1f1f;
+    --muted-foreground: #a3a3a3;
+
+    --border: #262626;
+    --input: #262626;
+    --ring: #0e584f;
+
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+
+    /* Charts */
+    --chart-1: #14b8a6;
+    --chart-2: #10b981;
+    --chart-3: #06b6d4;
+    --chart-4: #22c55e;
+    --chart-5: #34d399;
+
+    /* Quick actions */
+    --quick-action-blue: #60a5fa;
+    --quick-action-blue-bg: rgba(96, 165, 250, 0.12);
+    --quick-action-green: #4ade80;
+    --quick-action-green-bg: rgba(74, 222, 128, 0.12);
+    --quick-action-orange: #fb923c;
+    --quick-action-orange-bg: rgba(251, 146, 60, 0.12);
+    --quick-action-cyan: #22d3ee;
+    --quick-action-cyan-bg: rgba(34, 211, 238, 0.12);
+    --quick-action-indigo: #818cf8;
+    --quick-action-indigo-bg: rgba(129, 140, 248, 0.12);
+    --quick-action-red: #f87171;
+    --quick-action-red-bg: rgba(248, 113, 113, 0.12);
+
+    /* Sidebar */
+    --sidebar-background: #0f0f0f;
+    --sidebar-foreground: #f5f5f5;
+    --sidebar-primary: #0e584f;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #262626;
+    --sidebar-accent-foreground: #f5f5f5;
+    --sidebar-border: #404040;
+    --sidebar-ring: #0e584f;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}

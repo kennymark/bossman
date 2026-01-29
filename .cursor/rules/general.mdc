@@ -1,0 +1,63 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+You are an expert in TypeScript, Node.js, Inertiajs, Adonisjs v6, React, and shadcn/ui(base-ui)
+  
+  Code Style and Structure
+  - Write concise, technical TypeScript code with accurate examples.
+  - Use functional and declarative programming patterns; avoid classes.
+  - Prefer iteration and modularization over code duplication.
+  - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+  - Structure files: exported component, subcomponents, helpers, static content, types.
+  
+  Naming Conventions
+  - Use lowercase with dashes for directories (e.g., components/auth-wizard).
+  - Favor named exports for components.
+  
+  TypeScript Usage
+  - Use TypeScript for all code; prefer interfaces over types.
+  - Avoid enums; use maps instead.
+  - Use functional components with TypeScript interfaces.
+  
+  Syntax and Formatting
+  - Use the "function" keyword for pure functions.
+  - Use shadcn/ui components instead of raw tailwind classes when possible
+  - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+  - Use declarative JSX.
+  - DRY - Create components if necessary. Don't repeat the same UI styling if a component could be created and re-used
+  
+  UI and Styling
+  - Use shadcn/ui components primarily (Button, Input, Label, Card, Alert, Checkbox, etc.)
+  - Components are located in ./inertia/components/ui/
+  - Use a mobile-first approach.
+  - Use lucide-react for icons
+  - Use the cn() utility from @/lib/utils for conditional className merging
+  
+  Performance Optimization
+  
+  Key Conventions
+  - Optimize Web Vitals (LCP, CLS, FID).
+
+  UI
+  - Pages are ui related code are found in the ./inertia/pages
+  - Emails are found in ./inertia/emails. Emails are built with react-email and always wrap each email in a layout found here [layout.tsx](mdc:inertia/emails/layout.tsx)
+  
+  - Keep the code DRY, create re-useable components if you believe such a component would be reused again
+  - Don't repeat typescript types and interfaces across multiple files. create a .model.ts file
+  - When creating a new page or component, use shadcn/ui components from @/components/ui/
+  - Always create new files using snake_casing
+  
+  shadcn/ui Setup
+  - Configuration: components.json in project root
+  - Components: inertia/components/ui/
+  - Utilities: inertia/lib/utils.ts (cn function)
+  - CSS variables: resources/css/app.css
+  - Path alias: @ → ./inertia/
+  - Add new components via CLI: npx shadcn@latest add [component-name]
+
+  Adonisjs
+  - i prefer to use model.merge() instead of setting properties directly.
+  
+- Follow adonisjs, shadcn and tailwind docs for help if need be.
