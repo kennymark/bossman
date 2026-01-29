@@ -8,7 +8,9 @@ import {
   Moon,
   Newspaper,
   PanelLeft,
+  PanelLeftOpen,
   PanelRight,
+  PanelRightOpen,
   Settings,
   Sun,
   Users,
@@ -246,7 +248,19 @@ export function Sidebar({ children }: SidebarProps) {
           )}
         </div>
         <div className={cn('flex items-center', !isOpen && !isMobile && 'mx-auto')}>
-          {user?.id && <NotificationCenter userId={user.id} />}
+          {isMobile ? (
+            <Button variant='ghost' size='icon' onClick={closeMobileMenu} aria-label='Close menu'>
+              <PanelLeftOpen className='h-5 w-5' />
+            </Button>
+          ) : (
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={onToggle}
+              aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
+              {isOpen ? <PanelLeftOpen className='h-5 w-5' /> : <PanelRightOpen className='h-6 w-6 ' />}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -377,27 +391,22 @@ export function Sidebar({ children }: SidebarProps) {
       {/* Main content */}
       <main className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-background'>
         <CommandPalette />
-        {/* Header with notifications */}
+        {/* Header */}
         <div className='sticky top-0 z-30 border-b border-border bg-background'>
           <div className='w-full flex h-16 items-center justify-between gap-2 px-4 sm:px-6'>
             <div className='flex items-center gap-2'>
-              {isMobile ? (
+              {isMobile && (
                 <Button
                   variant='ghost'
                   size='icon'
                   onClick={openMobileMenu}
-                  className='md:hidden'>
+                  aria-label='Open menu'>
                   <Menu className='h-5 w-5' />
                 </Button>
-              ) : (
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  onClick={onToggle}
-                  className='hidden md:inline-flex'>
-                  {isOpen ? <PanelLeft className='h-5 w-5' /> : <PanelRight className='h-5 w-5' />}
-                </Button>
               )}
+            </div>
+            <div className='flex items-center'>
+              {user?.id && <NotificationCenter userId={user.id} />}
             </div>
           </div>
         </div>
