@@ -12,7 +12,7 @@ export default class OrgsController {
     const orgs = await Org.query({ connection: appEnv })
       .orderBy('name', 'asc')
       .if(params.search, (q) => {
-        q.whereILike('name', `%${params.search}%`).orWhereILike('companyName', `%${params.search}%`)
+        q.whereILike('name', `%${params.search}%`)
       })
       .sortBy(params.sortBy || 'name', params.sortOrder || 'asc')
       .paginate(params.page || 1, params.perPage || 20)

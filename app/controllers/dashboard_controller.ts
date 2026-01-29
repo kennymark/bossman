@@ -43,12 +43,23 @@ export default class DashboardController {
       tenanciesByDayResult.rows as { day: string | Date; count: number }[]
     ).map((r) => ({ date: toDateStr(r.day), count: Number(r.count) }))
 
+    const activityByWeekResult = await conn.rawQuery(
+      `SELECT date_trunc('week', created_at)::date as week_start, COUNT(*)::int as count
+       FROM activities
+       WHERE created_at >= (NOW() - INTERVAL '10 weeks')
+       GROUP BY date_trunc('week', created_at)
+       ORDER BY week_start`,
+    )
+    const activityByWeek = (
+      activityByWeekResult.rows as { week_start: string | Date; count: number }[]
+    ).map((r) => ({ date: toDateStr(r.week_start), count: Number(r.count) }))
+
     return response.ok({
       data: {
         totalUsers,
         totalTenancies,
         totalActivity,
-        growth: { usersByDay, tenanciesByDay },
+        growth: { usersByDay, tenanciesByDay, activityByWeek },
       },
     })
   }

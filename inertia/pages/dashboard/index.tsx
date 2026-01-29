@@ -8,7 +8,7 @@ import type { RawActivity } from '#types/model-types'
 import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
 import { DataTable } from '@/components/dashboard/data-table'
-import { GrowthChart } from '@/components/dashboard/growth-chart'
+import { ActivityPerWeekChart, GrowthChart } from '@/components/dashboard/growth-chart'
 import { DashboardLayout } from '@/components/dashboard/layout'
 import { PageHeader } from '@/components/dashboard/page_header'
 import { StatCard } from '@/components/dashboard/stat-card'
@@ -25,6 +25,7 @@ type DashboardStats = {
   growth: {
     usersByDay: { date: string; count: number }[]
     tenanciesByDay: { date: string; count: number }[]
+    activityByWeek: { date: string; count: number }[]
   }
 }
 
@@ -65,6 +66,10 @@ const usersChartConfig = {
 
 const tenanciesChartConfig = {
   count: { label: 'Tenancies', color: 'var(--chart-2)' },
+} satisfies ChartConfig
+
+const activityChartConfig = {
+  count: { label: 'Activity', color: 'var(--chart-3)' },
 } satisfies ChartConfig
 
 interface DashboardIndexProps extends SharedProps { }
@@ -135,6 +140,11 @@ export default function DashboardIndex(_props: DashboardIndexProps) {
             config={tenanciesChartConfig}
           />
         </SimpleGrid>
+        <ActivityPerWeekChart
+          title='Activity per week'
+          data={stats?.growth?.activityByWeek ?? []}
+          config={activityChartConfig}
+        />
 
         <Card>
           <CardHeader>

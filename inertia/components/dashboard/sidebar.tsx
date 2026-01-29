@@ -193,9 +193,7 @@ export function Sidebar({ children }: SidebarProps) {
         <div className='flex flex-1 items-center'>
           {(isOpen || isMobile) && (
             <Link href='/'>
-              <div className='flex py-1 px-2 items-center justify-center rounded-lg bg-primary/10 text-primary'>
-                logo
-              </div>
+              <img src={`/icons/togetha-${theme}.svg`} alt='Logo' className='h-20' />
             </Link>
           )}
         </div>
