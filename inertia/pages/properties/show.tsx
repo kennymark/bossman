@@ -69,20 +69,13 @@ export default function PropertyShow({ property }: PropertyShowProps) {
               </CardHeader>
               <CardContent>
                 <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-                  <DetailRow
-                    label='Type'
-                    value={
-                      property.type
-                        ? String(property.type).charAt(0).toUpperCase() +
-                        String(property.type).slice(1)
-                        : null
-                    }
-                  />
+                  <DetailRow label='Type' value={property.type} />
                   {property.subType && property.subType !== '—' && (
                     <DetailRow label='Sub type' value={property.subType} />
                   )}
                   <DetailRow label='Bedrooms' value={property.bedrooms ?? null} />
                   <DetailRow label='Bathrooms' value={property.bathrooms ?? null} />
+                  <DetailRow label='Service Type' value={property.isLetOnly ? 'Let Only' : 'Fully Managed'} />
                   <DetailRow
                     label='Status'
                     value={
@@ -91,21 +84,8 @@ export default function PropertyShow({ property }: PropertyShowProps) {
                       </Badge>
                     }
                   />
-                  {property.orgId && (
-                    <DetailRow label='Org ID' value={String(property.orgId)} />
-                  )}
-                  {property.propertyId && (
-                    <DetailRow
-                      label='Property'
-                      value={
-                        <Link
-                          href={`/properties/${property.propertyId}`}
-                          className='font-mono text-sm text-primary hover:underline'>
-                          {String(property.propertyId)}
-                        </Link>
-                      }
-                    />
-                  )}
+
+
                 </div>
               </CardContent>
             </Card>

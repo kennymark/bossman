@@ -108,6 +108,7 @@
     "react-day-picker": "^9.13.0",
     "react-dom": "^19.1.1",
     "react-email": "^5.2.5",
+    "recharts": "^2.15.4",
     "reflect-metadata": "^0.2.2",
     "sonner": "^2.0.7",
     "speakeasy": "^2.0.0",

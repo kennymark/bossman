@@ -2,19 +2,20 @@ import type { SharedProps } from '@adonisjs/inertia/types'
 import { Head } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
 import { Activity, FileText, Users } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawActivity } from '#types/model-types'
 import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
 import { DataTable } from '@/components/dashboard/data-table'
+import { GrowthChart } from '@/components/dashboard/growth-chart'
 import { DashboardLayout } from '@/components/dashboard/layout'
 import { PageHeader } from '@/components/dashboard/page_header'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import type { ChartConfig } from '@/components/ui/chart'
 import { SimpleGrid } from '@/components/ui/simplegrid'
-import { dateFormatter } from '@/lib/date'
 import api from '@/lib/http'
 
 type DashboardStats = {
@@ -58,67 +59,13 @@ const activityColumns: Column<RawActivity>[] = [
   },
 ]
 
-function last7Days(): string[] {
-  const days: string[] = []
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    days.push(d.toISOString().slice(0, 10))
-  }
-  return days
-}
+const usersChartConfig = {
+  count: { label: 'Users', color: 'var(--chart-1)' },
+} satisfies ChartConfig
 
-function GrowthChart({
-  title,
-  data,
-  colorClass = 'bg-primary',
-}: {
-  title: string
-  data: { date: string; count: number }[]
-  colorClass?: string
-}) {
-  const days = useMemo(() => last7Days(), [])
-  const byDate = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const d of data) map.set(d.date, d.count)
-    return map
-  }, [data])
-  const maxCount = useMemo(() => {
-    const values = days.map((d) => byDate.get(d) ?? 0)
-    return Math.max(1, ...values)
-  }, [days, byDate])
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className='text-sm font-medium'>{title}</CardTitle>
-        <CardDescription>Last 7 days</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className='flex items-end gap-1 h-[120px]'>
-          {days.map((day) => {
-            const count = byDate.get(day) ?? 0
-            const height = maxCount ? (count / maxCount) * 100 : 0
-            return (
-              <div
-                key={day}
-                className='flex-1 flex flex-col items-center gap-1'
-                title={`${day}: ${count}`}>
-                <div
-                  className={`w-full rounded-t transition-all ${colorClass} min-h-[4px]`}
-                  style={{ height: `${height}%` }}
-                />
-                <span className='text-[10px] text-muted-foreground truncate max-w-full'>
-                  {new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+const tenanciesChartConfig = {
+  count: { label: 'Tenancies', color: 'var(--chart-2)' },
+} satisfies ChartConfig
 
 interface DashboardIndexProps extends SharedProps { }
 
@@ -180,12 +127,12 @@ export default function DashboardIndex(_props: DashboardIndexProps) {
           <GrowthChart
             title='New users'
             data={stats?.growth?.usersByDay ?? []}
-            colorClass='bg-blue-500'
+            config={usersChartConfig}
           />
           <GrowthChart
             title='New tenancies'
             data={stats?.growth?.tenanciesByDay ?? []}
-            colorClass='bg-emerald-500'
+            config={tenanciesChartConfig}
           />
         </SimpleGrid>
 

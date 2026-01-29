@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { LogOut, Monitor, Smartphone, Tablet, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { RawSession } from '#types/model-types'
+import { timeAgo } from '#utils/date'
 import { DataTable } from '@/components/dashboard/data-table'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +10,7 @@ import { BaseDialog } from '@/components/ui/base-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingCard } from '@/components/ui/loading'
-import { dateTimeFormatter, timeAgo } from '@/lib/date'
+import { dateTimeFormatter } from '@/lib/date'
 import api from '@/lib/http'
 
 function getDeviceIcon(deviceType: string | null) {
@@ -169,9 +170,7 @@ export function SessionsTab() {
                 key: 'lastActivity',
                 header: 'Last active',
                 cell: (row: SessionRow) => (
-                  <div className='text-sm text-muted-foreground'>
-                    {timeAgo(row.lastActivity)}
-                  </div>
+                  <div className='text-sm text-muted-foreground'>{timeAgo(row.lastActivity)}</div>
                 ),
               },
               {
@@ -198,8 +197,7 @@ export function SessionsTab() {
                           variant='ghost'
                           size='icon'
                           disabled={isRevoking}
-                          className='text-destructive hover:text-destructive'
-                        >
+                          className='text-destructive hover:text-destructive'>
                           <Trash2 className='h-4 w-4' />
                         </Button>
                       }
