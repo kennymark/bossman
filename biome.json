@@ -26,6 +26,9 @@
         "noPrototypeBuiltins": "off",
         "noVar": "error"
       },
+      "style": {
+        "noNonNullAssertion": "off"
+      },
       "performance": {
         "noDelete": "off"
       },
