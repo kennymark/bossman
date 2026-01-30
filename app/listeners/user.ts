@@ -39,13 +39,21 @@ export default class UserListener {
   public async newCustomUser({
     user,
     org,
-    customPaymentSchedule,
-    featureList,
     subscriptionId,
+    session,
   }: EventsList['new:custom-user']) {
-    // console.log(user, org, customPaymentSchedule, featureList, subscriptionId)
-    logger.info('New custom user created')
-    const subscription = await StripeService.getSubscription(subscriptionId)
-    console.log('subscription', subscription)
+    logger.info(`New custom user created for ${user.name} with sub_id ${subscriptionId}`)
+    try {
+      if (subscriptionId) {
+        const subscription = await StripeService.getSubscription(subscriptionId)
+        console.log('subscription', subscription)
+      }
+      if (session) {
+        // send an email with
+        const url = session.url
+      }
+    } catch (err) {
+      console.log('error getting subscription', err)
+    }
   }
 }

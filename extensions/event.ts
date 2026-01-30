@@ -1,3 +1,4 @@
+import type Stripe from 'stripe'
 import type Org from '#models/org'
 import type TogethaUser from '#models/togetha_user'
 import type User from '#models/user'
@@ -21,7 +22,8 @@ declare module '@adonisjs/core/types' {
       org: Org
       customPaymentSchedule: CustomSubscriptionInfo
       featureList: CreateCustomUserPayload['featureList']
-      subscriptionId: string
+      subscriptionId?: string
+      session?: Stripe.Response<Stripe.Checkout.Session>
     }
     'user:deleted': {
       user: User

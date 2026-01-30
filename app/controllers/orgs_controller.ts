@@ -23,11 +23,12 @@ export default class OrgsController {
     const params = await request.paginationQs()
     const appEnv = request.appEnv()
     const orgs = await Org.query({ connection: appEnv })
-      .orderBy('name', 'asc')
+
       .if(params.search, (q) => {
         q.whereILike('name', `%${params.search}%`)
       })
-      .sortBy(params.sortBy || 'name', params.sortOrder || 'asc')
+      .sortBy(params.sortBy || 'created_at', params.sortOrder || 'desc')
+
       .paginate(params.page || 1, params.perPage || 20)
 
     return inertia.render('orgs/index', { orgs })
@@ -77,7 +78,11 @@ export default class OrgsController {
               billingFrequency: payload.customPaymentSchedule.frequency,
             })
             .first()
-      logger.info(`Subscription plan ${subPlan?.name} found`)
+      logger.info(
+        isCustomPlan
+          ? 'No subscription plan found cos custom'
+          : `Subscription plan ${subPlan?.name} found`,
+      )
       // create a new organization with the subscription plan
       const org = await Org.create(
         {
@@ -87,10 +92,10 @@ export default class OrgsController {
           planId: isCustomPlan ? undefined : subPlan?.id,
           creatorEmail: payload.email,
           country: payload.country as AppCountries,
-          pages: payload.pages,
+          pages: isCustomPlan ? payload.pages : undefined,
           isWhiteLabelEnabled: payload.isWhiteLabelEnabled,
-          customPlanFeatures: payload.featureList,
-          customPaymentSchedule: payload.customPaymentSchedule,
+          customPlanFeatures: isCustomPlan ? payload.featureList : undefined,
+          customPaymentSchedule: isCustomPlan ? payload.customPaymentSchedule : undefined,
         },
         trxCon,
       )
@@ -103,17 +108,6 @@ export default class OrgsController {
         },
       })
       logger.info(`Assigning default settings to org ${org.name}`)
-
-      const team = await TogethaTeam.create(
-        {
-          name: `${user.name} team`,
-          orgId: org.id,
-          description: `first team for ${user.name}`,
-          userId: user.id,
-        },
-        trxCon,
-      )
-      logger.info(`Team created for ${user.name} with id ${team.id}`)
 
       user.merge({
         password: payload.password,
@@ -130,6 +124,17 @@ export default class OrgsController {
         country: payload.country,
         metadata: { firstOrgId: org.id, plan: 'custom' },
       })
+
+      const team = await TogethaTeam.create(
+        {
+          name: `${user.name} team`,
+          orgId: org.id,
+          description: `first team for ${user.name}`,
+          userId: user.id,
+        },
+        trxCon,
+      )
+      logger.info(`Team created for ${user.name} with id ${team.id}`)
 
       await PermissionService.assignTogethaPermissions(user)
       logger.info(`${user.name} information saved successfully`)
@@ -171,7 +176,10 @@ export default class OrgsController {
           data: payload.customPaymentSchedule,
           featureList: payload.featureList,
         })
-        logger.info(`Custom subscription session created for ${user.name} with id ${session?.id}`)
+        logger.info(`Custom subscription session created`)
+        logger.info(`${user.name} with sub_id ${session?.subscription}`)
+        logger.info(`${user.name} with session_id ${session?.id}`)
+        console.log('session', session)
       } else {
         subscription = await StripeService.createSubscription({
           plan: payload.customPaymentSchedule.plan,
@@ -184,6 +192,7 @@ export default class OrgsController {
 
       const subscriptionId = isCustomPlan ? session?.subscription : subscription?.id
 
+      logger.info(`Subscription ID: ${subscriptionId}`)
       org.merge({ subscriptionId: subscriptionId as string })
 
       await org.save()
@@ -196,6 +205,7 @@ export default class OrgsController {
         customPaymentSchedule: payload.customPaymentSchedule,
         featureList: payload.featureList,
         subscriptionId: subscriptionId as string,
+        session: session,
       })
 
       return { user, msg: 'Account created sucessfully' }

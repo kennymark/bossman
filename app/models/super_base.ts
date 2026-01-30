@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { BaseModel, beforeCreate, beforeUpdate, column } from '@adonisjs/lucid/orm'
 import type { ModelAttributes, ModelObject } from '@adonisjs/lucid/types/model'
+import type { DateTime } from 'luxon'
 
 export default class SuperBaseModel extends BaseModel {
   /**
@@ -15,6 +16,10 @@ export default class SuperBaseModel extends BaseModel {
 
   // Optional shared JSON metadata for models that implement it
   declare metadata?: ModelObject
+
+  @column.dateTime({ autoCreate: true }) declare createdAt: DateTime
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 
   public async mergeMetadata(newMetadata: ModelObject) {
     // Get the existing metadata from the database.

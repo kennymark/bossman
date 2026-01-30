@@ -37,12 +37,8 @@ export default function PropertyShow({ property }: PropertyShowProps) {
         <PageHeader
           title={property.address}
           backHref='/properties'
-          description={`${property.type}${property.subType ? ` · ${property.subType}` : ''}`}
-          actions={
-            <Button variant='outline' asChild>
-              <Link href='/properties'>Back to properties</Link>
-            </Button>
-          }
+          description={`${startCase(property.type)} - ${startCase(property.subType) ?? ''}`}
+
         />
 
         <Tabs value={currentTab} onValueChange={handleTabChange} className='space-y-6'>

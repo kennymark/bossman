@@ -6,6 +6,7 @@ import DetailRow from '@/components/dashboard/detail-row'
 import { DashboardLayout } from '@/components/dashboard/layout'
 import { PageHeader } from '@/components/dashboard/page_header'
 import { type QuickActionOption, QuickActions } from '@/components/dashboard/quick-actions'
+import { AppCard } from '@/components/ui/app-card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -71,56 +72,74 @@ export default function OrgShow({ org }: OrgShowProps) {
           </TabsList>
 
           <TabsContent value='details' className='space-y-6'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Organisation information</CardTitle>
-                <CardDescription>Details and identifiers</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-                  <DetailRow
-                    label='Owner type'
-                    value={
-                      <Badge variant='outline' className='w-fit capitalize'>
-                        {ownerRole}
-                      </Badge>
-                    }
-                  />
-                  <DetailRow label='Country' value={country} />
-                  <DetailRow
-                    label='Subscription'
-                    value={
-                      <Badge variant={hasActiveSubscription ? 'default' : 'secondary'}>
-                        {hasActiveSubscription ? 'Active' : 'Inactive'}
-                      </Badge>
-                    }
-                  />
-                  {org.creatorEmail && (
-                    <DetailRow label='Creator email' value={String(org.creatorEmail)} />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <AppCard
+              title='User information'
+              description='Details and identifiers'
+              className='space-y-6'>
+              <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+                <DetailRow
+                  label='Owner type'
+                  value={
+                    <Badge variant='outline' className='w-fit capitalize'>
+                      {ownerRole}
+                    </Badge>
+                  }
+                />
+                <DetailRow label='Country' value={country} />
+                <DetailRow
+                  label='Subscription'
+                  value={
+                    <Badge variant={hasActiveSubscription ? 'default' : 'secondary'}>
+                      {hasActiveSubscription ? 'Active' : 'Inactive'}
+                    </Badge>
+                  }
+                />
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Settings</CardTitle>
-                <CardDescription>Configure the org's settings.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-                  <DetailRow label='Preferred currency' value={org.settings?.preferredCurrency ?? '—'} />
-                  <DetailRow label='Preferred timezone' value={org.settings?.preferredTimezone ?? '—'} />
-                  <DetailRow label='Preferred date format' value={org.settings?.preferredDateFormat ?? '—'} />
-                  <DetailRow label='Weekly digest' value={org.settings?.weeklyDigest ? 'Yes' : 'No'} />
-                  <DetailRow label='Monthly digest' value={org.settings?.monthlyDigest ? 'Yes' : 'No'} />
-                  <DetailRow label='Auto archive leases' value={org.settings?.autoArchiveLeases ? 'Yes' : 'No'} />
-                  <DetailRow label='Enable payments' value={org.settings?.enablePayments ? 'Yes' : 'No'} />
-                  <DetailRow label='Notifications' value={org.settings?.notifications ? 'Yes' : 'No'} />
+                <DetailRow label='Creator email' value={String(org.creatorEmail)} />
+                <DetailRow label='Custom Plan' value={org.isOnCustomPlan ? 'Yes' : 'No'} />
 
-                </div>
-              </CardContent>
-            </Card>
+
+              </div>
+            </AppCard>
+
+            <AppCard title='Settings' description="Configure the org's settings." className='space-y-6'>
+
+              <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+                <DetailRow
+                  label='Preferred currency'
+                  value={org.settings?.preferredCurrency ?? '—'}
+                />
+                <DetailRow
+                  label='Preferred timezone'
+                  value={org.settings?.preferredTimezone ?? '—'}
+                />
+                <DetailRow
+                  label='Preferred date format'
+                  value={org.settings?.preferredDateFormat ?? '—'}
+                />
+                <DetailRow
+                  label='Weekly digest'
+                  value={org.settings?.weeklyDigest ? 'Yes' : 'No'}
+                />
+                <DetailRow
+                  label='Monthly digest'
+                  value={org.settings?.monthlyDigest ? 'Yes' : 'No'}
+                />
+                <DetailRow
+                  label='Auto archive leases'
+                  value={org.settings?.autoArchiveLeases ? 'Yes' : 'No'}
+                />
+                <DetailRow
+                  label='Enable payments'
+                  value={org.settings?.enablePayments ? 'Yes' : 'No'}
+                />
+                <DetailRow
+                  label='Notifications'
+                  value={org.settings?.notifications ? 'Yes' : 'No'}
+                />
+              </div>
+
+            </AppCard>
           </TabsContent>
 
           <TabsContent value='leases' className='space-y-6'>

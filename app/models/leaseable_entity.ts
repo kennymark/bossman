@@ -18,8 +18,10 @@ import Org from '#models/org'
 // import Room from '#models/room'
 // import Unit from '#models/unit'
 import meiliSearchClient from '#services/meilisearch_service'
+import Document from './document.js'
 // import Document from './document.js'
 import Lease from './lease.js'
+import Property from './property.js'
 // import Photo from './photo.js'
 // import Sale from './sale.js'
 import SuperBaseModel from './super_base.js'
@@ -53,16 +55,15 @@ export default class LeaseableEntity extends SuperBaseModel {
   @column() declare summary: string
   @column() declare isPublished: boolean
   @column() declare publishedAt: DateTime | null
-  @column.dateTime({ autoCreate: true }) declare createdAt: DateTime | null
-  @column.dateTime({ autoUpdate: true }) declare updatedAt: DateTime | null
-  // @belongsTo(() => Property) declare property: BelongsTo<typeof Property>
-  // @belongsTo(() => Property) declare parentProperty: BelongsTo<typeof Property>
+
+  @belongsTo(() => Property) declare property: BelongsTo<typeof Property>
+  @belongsTo(() => Property) declare parentProperty: BelongsTo<typeof Property>
 
   @belongsTo(() => Org) declare org: BelongsTo<typeof Org>
   // @hasMany(() => Photo) declare photos: HasMany<typeof Photo>
 
-  // @hasMany(() => Document)
-  // declare documents: HasMany<typeof Document>
+  @hasMany(() => Document)
+  declare documents: HasMany<typeof Document>
 
   @computed()
   get isUnit() {

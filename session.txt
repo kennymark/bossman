@@ -1,0 +1,99 @@
+session {
+  id: 'cs_test_a1cw6KufjQlMQCBpAsv4Dum6T75wrmIOhbaNqsenU26DmGSwLx14bIRLSk',
+  object: 'checkout.session',
+  adaptive_pricing: { enabled: true
+  },
+  after_expiration: null,
+  allow_promotion_codes: null,
+  amount_subtotal: 2000,
+  amount_total: 2000,
+  automatic_tax: { enabled: false, liability: null, provider: null, status: null
+  },
+  billing_address_collection: null,
+  branding_settings: {
+    background_color: '#ffffff',
+    border_style: 'rounded',
+    button_color: '#0074d4',
+    display_name: 'Moradia Ltd',
+    font_family: 'default',
+    icon: null,
+    logo: null
+  },
+  cancel_url: 'https: //togetha.co.uk/stripe?cancelled=true&customerId=cus_Tt9BTGy1AyPgCE',
+  client_reference_id: null,
+  client_secret: null,
+  collected_information: {
+    business_name: null,
+    individual_name: null,
+    shipping_details: null
+  },
+  consent: null,
+  consent_collection: null,
+  created: 1769799496,
+  currency: 'gbp',
+  currency_conversion: null,
+  custom_fields: [],
+  custom_text: {
+    after_submit: null,
+    shipping_address: null,
+    submit: null,
+    terms_of_service_acceptance: null
+  },
+  customer: 'cus_Tt9BTGy1AyPgCE',
+  customer_account: null,
+  customer_creation: null,
+  customer_details: {
+    address: null,
+    business_name: null,
+    email: 'arcosin@gmail.com',
+    individual_name: null,
+    name: null,
+    phone: null,
+    tax_exempt: 'none',
+    tax_ids: null
+  },
+  customer_email: null,
+  discounts: [],
+  expires_at: 1769885896,
+  invoice: null,
+  invoice_creation: null,
+  livemode: false,
+  locale: null,
+  metadata: {},
+  mode: 'subscription',
+  origin_context: null,
+  payment_intent: null,
+  payment_link: null,
+  payment_method_collection: 'always',
+  payment_method_configuration_details: { id: 'pmc_1Om6pmHhNEQ5MjrcyxS4zW8M', parent: null
+  },
+  payment_method_options: { card: { request_three_d_secure: 'automatic'
+    }
+  },
+  payment_method_types: [ 'card', 'link'
+  ],
+  payment_status: 'unpaid',
+  permissions: null,
+  phone_number_collection: { enabled: false
+  },
+  recovered_from: null,
+  saved_payment_method_options: {
+    allow_redisplay_filters: [ 'always'
+    ],
+    payment_method_remove: 'disabled',
+    payment_method_save: null
+  },
+  setup_intent: null,
+  shipping_address_collection: null,
+  shipping_cost: null,
+  shipping_options: [],
+  status: 'open',
+  submit_type: null,
+  subscription: null,
+  success_url: 'https: //togetha.co.uk/stripe?success=true&customerId=cus_Tt9BTGy1AyPgCE&plan=metered',
+  total_details: { amount_discount: 0, amount_shipping: 0, amount_tax: 0
+  },
+  ui_mode: 'hosted',
+  url: 'https: //checkout.stripe.com/c/pay/cs_test_a1cw6KufjQlMQCBpAsv4Dum6T75wrmIOhbaNqsenU26DmGSwLx14bIRLSk#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSd2cGd2ZndsdXFsamtQa2x0cGBrYHZ2QGtkZ2lgYSc%2FY2RpdmApJ2R1bE5gfCc%2FJ3VuWnFgdnFaMDRLZjI9QE1tS0BUMEhvd2YzV3QzblFwXWA2c2N3ZmBUNlVAXWlXcEtBb2lUSF03UXZCR3J0UnQyakIyX0I3bDBzVGh3QX9sXVFBfUJNXWtARHV8Uj19ST01NXNCVnF1ck5kJyknY3dqaFZgd3Ngdyc%2FcXdwYCknZ2RmbmJ3anBrYUZqaWp3Jz8nJmNjY2NjYycpJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl',
+  wallet_options: null
+}
