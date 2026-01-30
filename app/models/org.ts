@@ -26,10 +26,10 @@ export default class Org extends SuperBaseModel {
     monthlyDigest: boolean
     autoArchiveLeases: boolean
     enablePayments: boolean
+    languagePreferences: ModelObject
     notifications: {
       leaseExpiry: boolean
       rentPaymentReminder: boolean
-      complianceDocExpiration: boolean
     }
   }>
   @column() declare planId: number
@@ -44,6 +44,9 @@ export default class Org extends SuperBaseModel {
   @column() declare parentOrgId: string
   @column() declare hasActiveSubscription: boolean
   @column() declare isSalesOrg: boolean
+  @column() declare pages: {
+    orgPages: ModelObject
+  }
 
   @computed() get cleanName() {
     if (!this?.name) return ''
@@ -81,11 +84,11 @@ export default class Org extends SuperBaseModel {
   @column() declare companyWebsite: string
   @column() declare companyEmail: string
   @column() declare country: AppCountries
-  @column() declare isWhiteLabelEnabled: string
+  @column() declare isWhiteLabelEnabled: boolean
   @column() declare whiteLabelDetails: ModelObject
   @column() declare stripeConnectId: string
 
-  @column() declare customPaymentSchedule: 'monthly' | 'quarterly' | 'yearly'
+  @column() declare customPaymentSchedule: ModelObject
   @column() declare customRenewalDate: DateTime
   @column() declare customExpiryDate: DateTime
   @attachment({ preComputeUrl: true, folder: FileStoreRoutes.COMPANY_LOGOS })

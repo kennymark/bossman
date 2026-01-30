@@ -50,6 +50,8 @@ router
     router.get('/properties', [LeaseableEntitiesController, 'index'])
     router.get('/properties/:id', [LeaseableEntitiesController, 'show'])
     router.get('/orgs', [OrgsController, 'index'])
+    router.get('/orgs/create', [OrgsController, 'create'])
+    router.post('/orgs', [OrgsController, 'store'])
     router.get('/orgs/:id', [OrgsController, 'show'])
 
     router

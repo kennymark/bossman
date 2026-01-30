@@ -1,9 +1,21 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import emitter from '@adonisjs/core/services/emitter'
 import db from '@adonisjs/lucid/services/db'
 import Activity from '#models/activity'
+import Agency from '#models/agency'
+import Landlord from '#models/landlord'
 import Lease from '#models/lease'
 import Org from '#models/org'
 import Property from '#models/property'
+import SubscriptionPlan from '#models/subscription_plan'
+import Team from '#models/team'
+import TogethaTeam from '#models/togetha_teams'
+import TogethaUser from '#models/togetha_user'
+import OrgService from '#services/org_service'
+import PermissionService from '#services/permission_service'
+import StripeService from '#services/stripe_service'
+import type { AppCountries } from '#types/extra'
+import { createCustomerUserValidator } from '#validators/org'
 
 export default class OrgsController {
   async index({ request, inertia }: HttpContext) {
@@ -33,7 +45,152 @@ export default class OrgsController {
     return response.ok(data)
   }
 
-  async show({ params, inertia, request, response }: HttpContext) {
+  async create({ inertia }: HttpContext) {
+    return inertia.render('orgs/create')
+  }
+
+  async store({ request, response, logger }: HttpContext) {
+    const appEnv = request.appEnv()
+    const payload = await request.validateUsing(createCustomerUserValidator)
+    const trx = await db.connection(appEnv).transaction()
+
+    const user = new TogethaUser().useTransaction(trx).useConnection(appEnv)
+    const existingUser = await TogethaUser.query({ connection: appEnv })
+      .where('email', payload.email)
+      .orWhere('contactNumber', payload.contactNumber)
+      .first()
+
+    if (existingUser) {
+      return response.badRequest({
+        error: 'A user with this email or phone number already exists',
+      })
+    }
+
+    try {
+      const subPlan = await SubscriptionPlan.query({ client: trx })
+        .where({
+          name: payload.customPaymentSchedule.plan,
+          billingFrequency: payload.customPaymentSchedule.frequency,
+        })
+        .firstOrFail()
+      logger.info(`Subscription plan ${subPlan.name} found`)
+      // create a new organization with the subscription plan
+      const org = await Org.create(
+        {
+          name: `${payload.name}_org`,
+          ownerRole: payload.accountType,
+          isMainOrg: true,
+          planId: subPlan.id,
+          creatorEmail: payload.email,
+          country: payload.country as AppCountries,
+          pages: payload.pages,
+          isWhiteLabelEnabled: payload.isWhiteLabelEnabled,
+          customPlanFeatures: payload.featureList,
+          customPaymentSchedule: payload.customPaymentSchedule,
+        },
+        { client: trx, connection: appEnv },
+      )
+
+      logger.info(`Org ${org.name} created successfully`)
+      org.merge({
+        settings: {
+          ...OrgService.getDefaultSettings(org.country),
+          languagePreferences: payload.languagePreferences,
+        },
+      })
+      logger.info(`Assigning default settings to org ${org.name}`)
+
+      await TogethaTeam.create(
+        {
+          name: `${user.name} team`,
+          orgId: org.id,
+          description: `first team for ${user.name}`,
+          userId: user.id,
+        },
+        { client: trx, connection: appEnv },
+      ).then((team) => console.log('Team created', team.name))
+
+      user.merge({
+        password: payload.password,
+        name: payload.name,
+        email: payload.email,
+        contactNumber: payload.contactNumber,
+        addressLineOne: payload.addressLineOne,
+        addressLineTwo: payload.addressLineTwo,
+        sortCode: payload.sortCode,
+        accountNumber: payload.accountNumber,
+        city: payload.city,
+        postCode: payload.postCode,
+        role: 'owner',
+        country: payload.country,
+        metadata: { firstOrgId: org.id, plan: 'custom' },
+      })
+
+      await PermissionService.assignTogethaPermissions(user)
+      logger.info(`${user.name} information saved successfully`)
+      // create a stripe customer for the user
+      const customer = await StripeService.createCustomer({
+        email: user.email,
+        name: user.name,
+        togethaUserId: user.id,
+      })
+
+      await org.merge({ paymentCustomerId: customer?.id }).save()
+      await user.save()
+
+      if (payload.accountType === 'landlord') {
+        logger.info('Creating landlord account')
+        const landlord = await Landlord.create(
+          { email: payload.email, name: payload.name },
+          { client: trx, connection: appEnv },
+        )
+        await landlord.merge({ orgId: org.id }).save()
+        await user.merge({ landlordId: landlord.id }).save()
+      } else {
+        logger.info('Creating agency account')
+        const agency = await Agency.create(
+          { email: payload.email, name: payload.name },
+          { client: trx, connection: appEnv },
+        )
+        await user.merge({ agencyId: agency.id }).save()
+        await agency.merge({ orgId: org.id }).save()
+      }
+
+      const subscription = await StripeService.createCustomSubscription({
+        customerId: customer!.id,
+        data: payload.customPaymentSchedule,
+        featureList: payload.featureList,
+      })
+
+      logger.info('Subscription created successfully')
+      logger.info(`Team created for ${user.name}`)
+
+      org.merge({ subscriptionId: subscription.id })
+
+      await org.save()
+      await trx.commit()
+      logger.info('Transaction fully committed')
+
+      await emitter.emit('new:custom-user', {
+        user,
+        org,
+        customPaymentSchedule: payload.customPaymentSchedule,
+        featureList: payload.featureList,
+        subscription,
+      })
+
+      return { user, msg: 'Account created sucessfully' }
+    } catch (err) {
+      console.log('Error creating account', err)
+      await trx.rollback()
+      return response.badRequest({
+        error: err.message || 'Error creating account',
+        err,
+      })
+    }
+  }
+
+  async show({ params, inertia, request }: HttpContext) {
     const appEnv = request.appEnv()
     const org = await Org.query({ connection: appEnv }).where('id', params.id).firstOrFail()
 

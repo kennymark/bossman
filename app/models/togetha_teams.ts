@@ -5,7 +5,8 @@ import User from '#models/user'
 import SuperBaseModel from './super_base.js'
 import TeamMember from './team_member.js'
 
-export default class Team extends SuperBaseModel {
+export default class TogethaTeam extends SuperBaseModel {
+  static table = 'teams'
   @column({ isPrimary: true })
   declare id: string
 
@@ -28,7 +29,7 @@ export default class Team extends SuperBaseModel {
   declare members: HasMany<typeof TeamMember>
 
   @afterCreate()
-  public static async createDefaultTeam(team: Team) {
+  public static async createDefaultTeam(team: TogethaTeam) {
     logger.info(`${team.name} created`)
   }
 }

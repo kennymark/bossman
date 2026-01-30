@@ -64,4 +64,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   ONESIGNAL_APP_ID: Env.schema.string(),
   ONESIGNAL_API_ENDPOINT: Env.schema.string(),
   ONESIGNAL_API_KEY: Env.schema.string(),
+
+  STRIPE_SECRET: Env.schema.string(),
+  STRIPE_TEST_KEY: Env.schema.string(),
 })

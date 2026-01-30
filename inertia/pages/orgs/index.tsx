@@ -1,7 +1,7 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
 import { Head, Link } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
-import { Briefcase, Building2, User } from 'lucide-react'
+import { Briefcase, Building2, Plus, User } from 'lucide-react'
 import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawOrg } from '#types/model-types'
 import { formatNumber } from '#utils/functions'
@@ -10,6 +10,7 @@ import { DashboardLayout } from '@/components/dashboard/layout'
 import { PageHeader } from '@/components/dashboard/page_header'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleGrid } from '@/components/ui/simplegrid'
 import { useInertiaParams } from '@/hooks/use-inertia-params'
@@ -84,7 +85,14 @@ export default function OrgsIndex({ orgs }: OrgsIndexProps) {
         <PageHeader
           title='Customers'
           description='View and manage customers.'
-
+          actions={
+            <Button asChild>
+              <Link href='/orgs/create'>
+                <Plus className='mr-2 h-4 w-4' />
+                Create
+              </Link>
+            </Button>
+          }
         />
 
         <SimpleGrid cols={{ base: 1, md: 3 }} spacing={4}>
