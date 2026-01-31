@@ -1,6 +1,6 @@
-# Boss Man
+# Togetha Admin
 
-A full-stack application built with AdonisJS and Inertia.js, featuring React, TypeScript, and Tailwind CSS. Includes dashboard analytics, customer (org) management with multi-step creation, leases, properties, teams, blog management, and full authentication.
+The admin app for [Togetha](https://togetha.co.uk) — property and tenancy management for landlords, agencies, and tenants. Built with AdonisJS and Inertia.js, featuring React, TypeScript, and Tailwind CSS. Includes dashboard analytics, customer (org) management with multi-step creation, leases, properties, teams, push notifications, backups, blog management, and full authentication.
 
 ## What's Included
 
@@ -29,6 +29,8 @@ A full-stack application built with AdonisJS and Inertia.js, featuring React, Ty
 - **Leases** – List and detail with tabs (payments, activity, status)
 - **Properties** – List and detail with tabs (leases, activity)
 - **Teams** – Team management and invitations
+- **Push notifications** – OneSignal integration; send to all users, landlords, tenants, or agencies; schedule or send now (title, description, image, URL)
+- **Backups** – Database backup list and create
 - **Blog** – Public blog and manage (posts, categories, tags, authors)
 - **Settings** – Profile, password, notifications, sessions, two-factor auth, delete account
 
@@ -36,18 +38,18 @@ A full-stack application built with AdonisJS and Inertia.js, featuring React, Ty
 
 ```
 app/
-├── controllers/          # HTTP handlers (auth, dashboard, orgs, leases, etc.)
+├── controllers/          # HTTP handlers (auth, dashboard, orgs, leases, push notifications, db backups, etc.)
 ├── middleware/
-├── models/               # Lucid models (User, Org, Lease, Activity, etc.)
-├── services/             # OrgService, StripeService, etc.
-├── validators/           # Vine validators (auth, org, blog, team, user)
+├── models/               # Lucid models (User, Org, Lease, PushNotification, DbBackup, etc.)
+├── services/             # OrgService, StripeService, OneSignalService, etc.
+├── validators/           # Vine validators (auth, org, blog, team, user, push notification)
 ├── utils/
 └── types/
 
 inertia/
 ├── app/                  # Inertia + React app entry
 ├── components/           # Shared UI (dashboard layout, data-table, stepper, radio-group, etc.)
-├── pages/                # Route pages (dashboard, orgs, leases, properties, teams, blog, settings)
+├── pages/                # Route pages (dashboard, orgs, leases, properties, teams, push-notifications, db-backups, blog, settings)
 ├── emails/               # React Email templates
 ├── hooks/
 ├── lib/
@@ -117,6 +119,14 @@ Default: SQLite (`config/database.ts`). To use PostgreSQL (or another driver):
 1. Install the driver (e.g. `pg`).
 2. Update `config/database.ts` and `.env`.
 
+## Push Notifications (OneSignal)
+
+Set `ONESIGNAL_APP_ID`, `ONESIGNAL_API_ENDPOINT`, and `ONESIGNAL_API_KEY` in `.env`. To send scheduled push notifications, run the scheduler every minute, e.g.:
+
+```bash
+* * * * * cd /path/to/app && node ace push:send-scheduled
+```
+
 ## Testing
 
 - **Unit**: `tests/unit/` (e.g. user model)
@@ -147,10 +157,3 @@ npm test
 2. Set production env vars
 3. `node ace migration:run`
 4. `npm start`
-
-
-
-# TODO
-- [ ] Implement one signal push notifications [API](https://documentation.onesignal.com/reference/push-notification)
-- [ ] Backup view
-- 

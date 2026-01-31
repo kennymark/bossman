@@ -4,7 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import type Stripe from 'stripe'
 import Activity from '#models/activity'
 import Agency from '#models/agency'
-import Earth from '#models/earth'
+
 import Landlord from '#models/landlord'
 import Lease from '#models/lease'
 import Org from '#models/org'
@@ -73,11 +73,11 @@ export default class OrgsController {
       const subPlan = isCustomPlan
         ? undefined
         : await SubscriptionPlan.query(trxCon)
-            .where({
-              name: payload.customPaymentSchedule.plan,
-              billingFrequency: payload.customPaymentSchedule.frequency,
-            })
-            .first()
+          .where({
+            name: payload.customPaymentSchedule.plan,
+            billingFrequency: payload.customPaymentSchedule.frequency,
+          })
+          .first()
       logger.info(
         isCustomPlan
           ? 'No subscription plan found cos custom'
