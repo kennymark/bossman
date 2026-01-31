@@ -157,12 +157,48 @@ class StripeService {
 
   public async viewInvoices(orgId: string, env: string) {
     const org = await Org.query({ connection: env }).where('id', orgId).firstOrFail()
-    const invoices = await stripe.invoices.list({
+    if (!org.paymentCustomerId) {
+      return { data: [] }
+    }
+    const result = await stripe.invoices.list({
       customer: org.paymentCustomerId,
       limit: 100,
-      status: 'paid',
     })
-    return invoices
+    return result
+  }
+
+  /**
+   * Create a draft invoice for a Stripe customer (see https://docs.stripe.com/api/invoices/create).
+   * The invoice stays in draft until finalized in Stripe.
+   */
+  public static async createDraftInvoice(
+    customerId: string,
+    options?: { description?: string }
+  ): Promise<Stripe.Invoice> {
+    const invoice = await stripe.invoices.create({
+      customer: customerId,
+      ...(options?.description ? { description: options.description } : {}),
+    })
+    return invoice
+  }
+
+  /**
+   * Add a line item to an existing draft invoice (see https://docs.stripe.com/api/invoiceitems/create).
+   * Amount is in cents; currency in lowercase (e.g. gbp).
+   */
+  public static async createInvoiceItem(
+    customerId: string,
+    invoiceId: string,
+    params: { amount: number; currency: string; description: string }
+  ): Promise<Stripe.InvoiceItem> {
+    const item = await stripe.invoiceItems.create({
+      customer: customerId,
+      invoice: invoiceId,
+      amount: params.amount,
+      currency: params.currency.toLowerCase(),
+      description: params.description || undefined,
+    })
+    return item
   }
 }
 

@@ -16,6 +16,7 @@ export const queryParamsSchema = vine.compile(
 
     id: vine.string().optional(),
     email: vine.string().optional(),
+    tab: vine.string().optional(),
   }),
 )
 

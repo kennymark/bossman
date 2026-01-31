@@ -12,6 +12,7 @@ export const API_ROUTES = {
     '/orgs/:id/leases',
     '/orgs/:id/properties',
     '/orgs/:id/activities',
+    '/orgs/:id/invoices',
     '/auth/verify-email',
     '/auth/verify-email-change',
     '/user/sessions',

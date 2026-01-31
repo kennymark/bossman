@@ -22,6 +22,7 @@ router
     router.get('/orgs/:id/leases', [OrgsController, 'leases'])
     router.get('/orgs/:id/properties', [OrgsController, 'properties'])
     router.get('/orgs/:id/activities', [OrgsController, 'activities'])
+    router.get('/orgs/:id/invoices', [OrgsController, 'invoices'])
     router.get('/push-notifications/users', [PushNotificationsController, 'users'])
   })
   .prefix('api/v1')

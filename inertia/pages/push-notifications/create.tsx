@@ -88,7 +88,7 @@ export default function PushNotificationsCreate(_props: PushNotificationsCreateP
         <PageHeader
           backHref='/push-notifications'
           title='Send push notification'
-          description='Target Togetha users (landlords, agencies, tenants) via OneSignal.'
+          description='Target Togetha users (landlords, agencies, tenants).'
         />
 
         <form onSubmit={handleSubmit} className='space-y-6'>

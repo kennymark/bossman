@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/dashboard/page_header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useInertiaParams } from '@/hooks/use-inertia-params'
 
 export type RawPushNotification = {
@@ -23,6 +24,7 @@ export type RawPushNotification = {
   scheduledAt: string | null
   sentAt: string | null
   status: string
+  errorMessage: string | null
   createdAt: string
 }
 
@@ -68,12 +70,37 @@ export default function PushNotificationsIndex({ notifications }: PushNotificati
     {
       key: 'status',
       header: 'Status',
-      width: 100,
-      cell: (row) => (
-        <Badge variant={statusVariant[row.status] ?? 'secondary'} className='capitalize'>
-          {row.status}
-        </Badge>
-      ),
+      width: 120,
+      cell: (row) => {
+        const badge = (
+          <Badge variant={statusVariant[row.status] ?? 'secondary'} className='capitalize'>
+            {row.status}
+          </Badge>
+        )
+        const errorText =
+          row.status === 'failed' && row.errorMessage
+            ? (() => {
+              try {
+                const parsed = JSON.parse(row.errorMessage) as Record<string, string>
+                return typeof parsed.request === 'string'
+                  ? parsed.request
+                  : (Object.values(parsed)[0] ?? row.errorMessage)
+              } catch {
+                return row.errorMessage
+              }
+            })()
+            : null
+        return errorText ? (
+          <Tooltip>
+            <TooltipTrigger>{badge}</TooltipTrigger>
+            <TooltipContent side='top' className='max-w-sm'>
+              <p className='text-sm'>{errorText}</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          badge
+        )
+      },
     },
     {
       key: 'sentAt',
@@ -107,10 +134,14 @@ export default function PushNotificationsIndex({ notifications }: PushNotificati
             disabled={resendingId === row.id}
             onClick={() => {
               setResendingId(row.id)
-              router.post(`/push-notifications/${row.id}/resend`, {}, {
-                preserveScroll: true,
-                onFinish: () => setResendingId(null),
-              })
+              router.post(
+                `/push-notifications/${row.id}/resend`,
+                {},
+                {
+                  preserveScroll: true,
+                  onFinish: () => setResendingId(null),
+                },
+              )
             }}>
             Resend
           </Button>
@@ -126,7 +157,7 @@ export default function PushNotificationsIndex({ notifications }: PushNotificati
       <div className='space-y-6'>
         <PageHeader
           title='Push notifications'
-          description='Send push notifications to Togetha users via OneSignal.'
+          description='Send push notifications to Togetha users.'
           actions={
             <Button asChild>
               <Link href='/push-notifications/create'>

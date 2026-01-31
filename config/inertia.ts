@@ -1,8 +1,8 @@
 import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/inertia'
 import type { InferSharedProps } from '@adonisjs/inertia/types'
-import env from '#start/env'
 import { getPageAccessForUser } from '#services/page_access_service'
+import env from '#start/env'
 
 const inertiaConfig = defineConfig({
   /**

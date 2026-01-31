@@ -1,17 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
-import db from '@adonisjs/lucid/services/db'
-
+import { DateTime } from 'luxon'
 import PushNotification from '#models/push_notification'
 import TogethaUser from '#models/togetha_user'
-import { sendOneSignalPush } from '#services/one_signal_service'
+import { resolveUserIds, sendToRecipients } from '#services/push_notification_service'
 import { storePushNotificationValidator } from '#validators/push_notification'
 
 export default class PushNotificationsController {
   async users({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
     const search = request.qs().search as string | undefined
-    const users = TogethaUser.query({ connection: appEnv })
+    const users = await TogethaUser.query({ connection: appEnv })
       .select('id', 'name', 'email', 'landlordId', 'agencyId', 'tenantId')
       .orderBy('name', 'asc')
       .if(search, (q) => q.whereILike('name', `%${search}%`).orWhereILike('email', `%${search}%`))
@@ -33,42 +32,7 @@ export default class PushNotificationsController {
     return inertia.render('push-notifications/create')
   }
 
-  /**
-   * Resolve TogethaUser ids by target type (uses users table: landlord_id, agency_id, tenant_id).
-   */
-  async resolveUserIds(
-    targetType: string,
-    targetUserIds: string[] | undefined,
-    appEnv: string,
-  ): Promise<string[]> {
-    if (targetType === 'specific' && targetUserIds?.length) {
-      return targetUserIds
-    }
-    const conn = db.connection(appEnv)
-    const column =
-      targetType === 'all_landlords'
-        ? 'landlord_id'
-        : targetType === 'all_tenants'
-          ? 'tenant_id'
-          : targetType === 'all_agencies'
-            ? 'agency_id'
-            : null
-    if (targetType === 'all') {
-      const result = await conn.rawQuery('SELECT id FROM users')
-      const rows = result.rows as { id: string }[]
-      return rows.map((r) => r.id)
-    }
-    if (column) {
-      const result = await conn.rawQuery(
-        `SELECT id FROM users WHERE ${column} IS NOT NULL AND ${column} != ''`,
-      )
-      const rows = result.rows as { id: string }[]
-      return rows.map((r) => r.id)
-    }
-    return []
-  }
-
-  async resend({ request, response, now }: HttpContext) {
+  async resend({ request, response }: HttpContext) {
     const id = request.param('id')
     logger.info({ id }, 'push-notifications/resend: start')
     const notification = await PushNotification.find(id)
@@ -81,7 +45,7 @@ export default class PushNotificationsController {
       return response.badRequest({ error: 'Only failed notifications can be resent.' })
     }
     const appEnv = request.appEnv()
-    const userIds = await this.resolveUserIds(
+    const userIds = await resolveUserIds(
       notification.targetType,
       notification.targetUserIds ?? undefined,
       appEnv,
@@ -92,39 +56,14 @@ export default class PushNotificationsController {
       return response.redirect().back()
     }
     try {
-      logger.info({ id, userIdCount: userIds.length }, 'push-notifications/resend: sending')
-      const result = await sendOneSignalPush({
-        externalIds: userIds,
-        heading: notification.title,
-        content: notification.description,
-        imageUrl: notification.imageUrl ?? undefined,
-        url: notification.url ?? undefined,
-      })
-      await notification
-        .merge({
-          status: result.errors ? 'failed' : 'sent',
-          sentAt: result.errors ? null : now,
-          oneSignalResponse: result as Record<string, unknown>,
-          errorMessage: result.errors ? JSON.stringify(result.errors) : null,
-        })
-        .save()
-      logger.info(
-        { id, status: result.errors ? 'failed' : 'sent' },
-        'push-notifications/resend: done',
-      )
-    } catch (err) {
-      logger.error({ id, err }, 'push-notifications/resend: error')
-      console.log('error resending push notification', err)
-      await notification
-        .merge({
-          errorMessage: err instanceof Error ? err.message : String(err),
-        })
-        .save()
+      await sendToRecipients(notification, userIds)
+    } catch {
+      // Service already updated notification status and errorMessage
     }
     return response.redirect().back()
   }
 
-  async store({ request, response, now }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
     const payload = await request.validateUsing(storePushNotificationValidator)
 
@@ -132,7 +71,7 @@ export default class PushNotificationsController {
       return response.badRequest({ errors: { targetUserIds: ['Select at least one user'] } })
     }
     try {
-      const userIds = await this.resolveUserIds(payload.targetType, payload.targetUserIds, appEnv)
+      const userIds = await resolveUserIds(payload.targetType, payload.targetUserIds, appEnv)
       const sendNow = !payload.sendAt
 
       const notification = await PushNotification.create({
@@ -142,37 +81,22 @@ export default class PushNotificationsController {
         description: payload.description,
         imageUrl: payload.imageUrl ?? null,
         url: payload.url ?? null,
-        scheduledAt: payload.sendAt,
+        scheduledAt: payload.sendAt ? DateTime.fromISO(payload.sendAt) : null,
         sentAt: null,
         status: 'pending',
       })
 
       if (sendNow && userIds.length > 0) {
         try {
-          const result = await sendOneSignalPush({
-            externalIds: userIds,
-            heading: payload.title,
-            content: payload.description,
-            imageUrl: payload.imageUrl,
-            url: payload.url,
-          })
-          await notification
-            .merge({
-              status: result.errors ? 'failed' : 'sent',
-              sentAt: result.errors ? null : now,
-              oneSignalResponse: result as Record<string, unknown>,
-              errorMessage: result.errors ? JSON.stringify(result.errors) : null,
-            })
-            .save()
-        } catch (err) {
-          console.log('error sending push notification', err)
-          await notification.merge({ status: 'failed', errorMessage: err.message }).save()
+          await sendToRecipients(notification, userIds)
+        } catch {
+          // Service already updated notification status and errorMessage
         }
       }
       return response.redirect('/push-notifications')
     } catch (err) {
-      console.log(err)
-      return response.badRequest({ error: err.message })
+      logger.error({ err }, 'push-notifications/store: error')
+      return response.badRequest({ error: err instanceof Error ? err.message : String(err) })
     }
   }
 }

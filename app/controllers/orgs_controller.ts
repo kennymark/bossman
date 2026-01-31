@@ -259,4 +259,120 @@ export default class OrgsController {
       .paginate(paginationParams.page ?? 1, paginationParams.perPage ?? 10)
     return response.ok(activities)
   }
+
+  async invoices({ params, response, request }: HttpContext) {
+    const appEnv = request.appEnv()
+    const stripeService = new StripeService()
+    const result = await stripeService.viewInvoices(params.id, appEnv)
+    const data = (result.data ?? []).map((inv: Stripe.Invoice) => ({
+      id: inv.id,
+      number: inv.number ?? inv.id,
+      status: inv.status ?? 'unknown',
+      amountPaid: inv.amount_paid ?? 0,
+      amountDue: inv.amount_due ?? 0,
+      total: inv.total ?? 0,
+      currency: (inv.currency ?? 'gbp').toUpperCase(),
+      createdAt: inv.created ? new Date(inv.created * 1000).toISOString() : null,
+      hostedInvoiceUrl: inv.hosted_invoice_url ?? null,
+      invoicePdf: inv.invoice_pdf ?? null,
+    }))
+    return response.ok({ data })
+  }
+
+  async createInvoice({ params, inertia, request }: HttpContext) {
+    const appEnv = request.appEnv()
+    const org = await Org.query({ connection: appEnv }).where('id', params.id).firstOrFail()
+    const { total: activeLeasesCount } = await Lease.query({ connection: appEnv })
+      .where('org_id', params.id)
+      .where('status', 'active')
+      .getCount()
+    return inertia.render('orgs/invoices/create', { org, activeLeasesCount })
+  }
+
+  async storeInvoice({ params, request, response, session }: HttpContext) {
+    const appEnv = request.appEnv()
+    const org = await Org.query({ connection: appEnv }).where('id', params.id).firstOrFail()
+    if (!org.paymentCustomerId) {
+      session.flash('errors', { error: 'This organisation has no Stripe customer and cannot receive invoices.' })
+      return response.redirect().back()
+    }
+    const description = request.input('description')?.trim() || undefined
+    const rawLineItems = request.input('lineItems') as Array<{ description?: string; amount?: string; currency?: string }> | undefined
+    const lineItems = Array.isArray(rawLineItems)
+      ? rawLineItems
+        .map((row) => {
+          const desc = (row?.description ?? '').toString().trim()
+          const amt = typeof row?.amount === 'string' ? parseFloat(row.amount) : Number(row?.amount)
+          const curr = (row?.currency ?? 'gbp').toString().trim().toLowerCase() || 'gbp'
+          if (!desc || Number.isNaN(amt) || amt < 0) return null
+          return { description: desc, amountCents: Math.round(amt * 100), currency: curr }
+        })
+        .filter(Boolean) as Array<{ description: string; amountCents: number; currency: string }>
+      : []
+
+    try {
+      const invoice = await StripeService.createDraftInvoice(org.paymentCustomerId, { description })
+      for (const item of lineItems) {
+        await StripeService.createInvoiceItem(org.paymentCustomerId, invoice.id, {
+          amount: item.amountCents,
+          currency: item.currency,
+          description: item.description,
+        })
+      }
+      session.flash(
+        'success',
+        lineItems.length > 0
+          ? 'Draft invoice created with line items. Finalize it in Stripe when ready.'
+          : 'Draft invoice created. You can add line items and finalize it in Stripe.'
+      )
+      return response.redirect(`/orgs/${params.id}?tab=invoices`)
+    } catch (err: unknown) {
+      const message = err && typeof err === 'object' && 'message' in err ? String((err as Error).message) : 'Failed to create draft invoice.'
+      session.flash('errors', { error: message })
+      return response.redirect().back()
+    }
+  }
+
+  async createInvoiceLineItem({ params, inertia, request, response }: HttpContext) {
+    const appEnv = request.appEnv()
+    const org = await Org.query({ connection: appEnv }).where('id', params.id).firstOrFail()
+    if (!org.paymentCustomerId) {
+      return response.notFound()
+    }
+    return inertia.render('orgs/invoices/line-items/create', {
+      org,
+      invoiceId: params.invoiceId,
+    })
+  }
+
+  async storeInvoiceLineItem({ params, request, response, session }: HttpContext) {
+    const appEnv = request.appEnv()
+    const org = await Org.query({ connection: appEnv }).where('id', params.id).firstOrFail()
+    if (!org.paymentCustomerId) {
+      session.flash('errors', { error: 'This organisation has no Stripe customer.' })
+      return response.redirect().back()
+    }
+    const invoiceId = params.invoiceId as string
+    const description = request.input('description')?.trim()
+    const amountInput = request.input('amount')
+    const amount = typeof amountInput === 'string' ? parseFloat(amountInput) : Number(amountInput)
+    const currency = (request.input('currency') ?? 'gbp').toString().trim().toLowerCase() || 'gbp'
+    if (!description || Number.isNaN(amount) || amount < 0) {
+      session.flash('errors', { error: 'Description and a valid amount are required.' })
+      return response.redirect().back()
+    }
+    try {
+      await StripeService.createInvoiceItem(org.paymentCustomerId, invoiceId, {
+        amount: Math.round(amount * 100),
+        currency,
+        description,
+      })
+      session.flash('success', 'Line item added to the draft invoice.')
+      return response.redirect(`/orgs/${params.id}?tab=invoices`)
+    } catch (err: unknown) {
+      const message = err && typeof err === 'object' && 'message' in err ? String((err as Error).message) : 'Failed to add line item.'
+      session.flash('errors', { error: message })
+      return response.redirect().back()
+    }
+  }
 }

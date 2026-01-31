@@ -111,7 +111,7 @@ export default class Org extends SuperBaseModel {
   }
 
   @computed() hasUpdatedAccount() {
-    return this.metadata.hasUpdatedAccount
+    return this.metadata?.hasUpdatedAccount ?? false
   }
 
   @column() public get isSubscribedToAPlan() {
