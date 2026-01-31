@@ -1,6 +1,7 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
-import { Head, Link } from '@inertiajs/react'
-import { Bell, Plus } from 'lucide-react'
+import { Head, Link, router } from '@inertiajs/react'
+import { Bell, Plus, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
 import type { Column, PaginatedResponse } from '#types/extra'
 import { timeAgo } from '#utils/date'
 import { DataTable } from '@/components/dashboard/data-table'
@@ -44,53 +45,80 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
   cancelled: 'outline',
 }
 
-const columns: Column<RawPushNotification>[] = [
-  {
-    key: 'title',
-    header: 'Title',
-    cell: (row) => <span className='font-medium'>{row.title}</span>,
-  },
-  {
-    key: 'targetType',
-    header: 'Target',
-    width: 140,
-    cell: (row) => (
-      <Badge variant='outline' className='capitalize'>
-        {targetTypeLabel[row.targetType] ?? row.targetType}
-      </Badge>
-    ),
-  },
-  {
-    key: 'status',
-    header: 'Status',
-    width: 100,
-    cell: (row) => (
-      <Badge variant={statusVariant[row.status] ?? 'secondary'} className='capitalize'>
-        {row.status}
-      </Badge>
-    ),
-  },
-  {
-    key: 'sentAt',
-    header: 'Sent / Scheduled',
-    width: 160,
-    cell: (row) =>
-      row.sentAt
-        ? timeAgo(row.sentAt)
-        : row.scheduledAt
-          ? `Scheduled ${timeAgo(row.scheduledAt)}`
-          : '—',
-  },
-  {
-    key: 'createdAt',
-    header: 'Created',
-    width: 120,
-    cell: (row) => timeAgo(row.createdAt ?? ''),
-  },
-]
-
 export default function PushNotificationsIndex({ notifications }: PushNotificationsIndexProps) {
   const { changePage, changeRows } = useInertiaParams({ page: 1, perPage: 20 })
+  const [resendingId, setResendingId] = useState<string | null>(null)
+
+  const columns: Column<RawPushNotification>[] = [
+    {
+      key: 'title',
+      header: 'Title',
+      cell: (row) => <span className='font-medium'>{row.title}</span>,
+    },
+    {
+      key: 'targetType',
+      header: 'Target',
+      width: 140,
+      cell: (row) => (
+        <Badge variant='outline' className='capitalize'>
+          {targetTypeLabel[row.targetType] ?? row.targetType}
+        </Badge>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: 100,
+      cell: (row) => (
+        <Badge variant={statusVariant[row.status] ?? 'secondary'} className='capitalize'>
+          {row.status}
+        </Badge>
+      ),
+    },
+    {
+      key: 'sentAt',
+      header: 'Sent / Scheduled',
+      width: 160,
+      cell: (row) =>
+        row.sentAt
+          ? timeAgo(row.sentAt)
+          : row.scheduledAt
+            ? `Scheduled ${timeAgo(row.scheduledAt)}`
+            : '—',
+    },
+    {
+      key: 'createdAt',
+      header: 'Created',
+
+      cell: (row) => timeAgo(row.createdAt ?? ''),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: 140,
+      cell: (row) =>
+        row.status === 'failed' ? (
+          <Button
+            variant='outline'
+            size='sm'
+            leftIcon={<RefreshCw className='h-4 w-4' />}
+            isLoading={resendingId === row.id}
+            loadingText='Sending…'
+            disabled={resendingId === row.id}
+            onClick={() => {
+              setResendingId(row.id)
+              router.post(`/push-notifications/${row.id}/resend`, {}, {
+                preserveScroll: true,
+                onFinish: () => setResendingId(null),
+              })
+            }}>
+            Resend
+          </Button>
+        ) : (
+          '—'
+        ),
+    },
+  ]
 
   return (
     <DashboardLayout>

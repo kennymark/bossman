@@ -57,6 +57,7 @@ router
     router.get('/push-notifications', [PushNotificationsController, 'index'])
     router.get('/push-notifications/create', [PushNotificationsController, 'create'])
     router.post('/push-notifications', [PushNotificationsController, 'store'])
+    router.post('/push-notifications/:id/resend', [PushNotificationsController, 'resend'])
     router.get('/db-backups', [DbBackupsController, 'index'])
 
     router

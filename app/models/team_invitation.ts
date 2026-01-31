@@ -22,7 +22,7 @@ export default class TeamInvitation extends SuperBaseModel {
   declare role: TeamRole
 
   @column()
-  declare invitedUserRole: 'admin' | 'normal_user'
+  declare invitedUserRole: 'admin'
 
   /**
    * Allowed admin page keys for this invite (only used for admin teams).

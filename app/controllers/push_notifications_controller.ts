@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 import db from '@adonisjs/lucid/services/db'
 
 import PushNotification from '#models/push_notification'
@@ -65,6 +66,62 @@ export default class PushNotificationsController {
       return rows.map((r) => r.id)
     }
     return []
+  }
+
+  async resend({ request, response, now }: HttpContext) {
+    const id = request.param('id')
+    logger.info({ id }, 'push-notifications/resend: start')
+    const notification = await PushNotification.find(id)
+    if (!notification) {
+      logger.warn({ id }, 'push-notifications/resend: notification not found')
+      return response.notFound()
+    }
+    if (notification.status !== 'failed') {
+      logger.warn({ id, status: notification.status }, 'push-notifications/resend: not failed')
+      return response.badRequest({ error: 'Only failed notifications can be resent.' })
+    }
+    const appEnv = request.appEnv()
+    const userIds = await this.resolveUserIds(
+      notification.targetType,
+      notification.targetUserIds ?? undefined,
+      appEnv,
+    )
+    if (userIds.length === 0) {
+      logger.warn({ id }, 'push-notifications/resend: no recipients')
+      await notification.merge({ errorMessage: 'No recipients' }).save()
+      return response.redirect().back()
+    }
+    try {
+      logger.info({ id, userIdCount: userIds.length }, 'push-notifications/resend: sending')
+      const result = await sendOneSignalPush({
+        externalIds: userIds,
+        heading: notification.title,
+        content: notification.description,
+        imageUrl: notification.imageUrl ?? undefined,
+        url: notification.url ?? undefined,
+      })
+      await notification
+        .merge({
+          status: result.errors ? 'failed' : 'sent',
+          sentAt: result.errors ? null : now,
+          oneSignalResponse: result as Record<string, unknown>,
+          errorMessage: result.errors ? JSON.stringify(result.errors) : null,
+        })
+        .save()
+      logger.info(
+        { id, status: result.errors ? 'failed' : 'sent' },
+        'push-notifications/resend: done',
+      )
+    } catch (err) {
+      logger.error({ id, err }, 'push-notifications/resend: error')
+      console.log('error resending push notification', err)
+      await notification
+        .merge({
+          errorMessage: err instanceof Error ? err.message : String(err),
+        })
+        .save()
+    }
+    return response.redirect().back()
   }
 
   async store({ request, response, now }: HttpContext) {

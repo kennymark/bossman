@@ -6,6 +6,7 @@ import DetailRow from '@/components/dashboard/detail-row'
 import { DashboardLayout } from '@/components/dashboard/layout'
 import { PageHeader } from '@/components/dashboard/page_header'
 import { type QuickActionOption, QuickActions } from '@/components/dashboard/quick-actions'
+import { OnlyShowIf, SimpleGrid } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -97,14 +98,61 @@ export default function OrgShow({ org }: OrgShowProps) {
 
                 <DetailRow label='Creator email' value={String(org.creatorEmail)} />
                 <DetailRow label='Custom Plan' value={org.isOnCustomPlan ? 'Yes' : 'No'} />
-
-
               </div>
             </AppCard>
 
-            <AppCard title='Settings' description="Configure the org's settings." className='space-y-6'>
+            <OnlyShowIf condition={org.isOnCustomPlan}>
+              <AppCard title='Custom Plan' description='Custom plan features'>
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={3}>
+                  <DetailRow
+                    label='Tenant limit'
+                    value={org.customPlanFeatures?.tenantLimit ?? '—'}
+                  />
+                  <DetailRow
+                    label='Team member limit'
+                    value={org.customPlanFeatures?.teamMemberLimit ?? '—'}
+                  />
+                  <DetailRow
+                    label='Storage limit'
+                    value={org.customPlanFeatures?.storageLimit ?? '—'}
+                  />
+                  <DetailRow
+                    label='Property limit'
+                    value={org.customPlanFeatures?.propertyLimit ?? '—'}
+                  />
+                  <DetailRow
+                    label='Activity log retention'
+                    value={org.customPlanFeatures?.activityLogRetention ?? '—'}
+                  />
+                  <DetailRow
+                    label='Deposit protection'
+                    value={org.customPlanFeatures?.depositProtection ?? '—'}
+                  />
+                  <DetailRow
+                    label='Advanced reporting'
+                    value={org.customPlanFeatures?.advancedReporting ?? '—'}
+                  />
+                  <DetailRow
+                    label='E-sign docs limit'
+                    value={org.customPlanFeatures?.eSignDocsLimit ?? '—'}
+                  />
+                  <DetailRow
+                    label='AI invocation limit'
+                    value={org.customPlanFeatures?.aiInvocationLimit ?? '—'}
+                  />
+                  <DetailRow
+                    label='Custom templates limit'
+                    value={org.customPlanFeatures?.customTemplatesLimit ?? '—'}
+                  />
+                </SimpleGrid>
+              </AppCard>
+            </OnlyShowIf>
 
-              <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+            <AppCard
+              title='Settings'
+              description="Configure the org's settings."
+              className='space-y-6'>
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={3}>
                 <DetailRow
                   label='Preferred currency'
                   value={org.settings?.preferredCurrency ?? '—'}
@@ -137,8 +185,7 @@ export default function OrgShow({ org }: OrgShowProps) {
                   label='Notifications'
                   value={org.settings?.notifications ? 'Yes' : 'No'}
                 />
-              </div>
-
+              </SimpleGrid>
             </AppCard>
           </TabsContent>
 
