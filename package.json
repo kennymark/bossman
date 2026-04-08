@@ -54,7 +54,6 @@
     "@adonisjs/lucid-slugify": "^3.0.0",
     "@adonisjs/mail": "^10.0.0",
     "@adonisjs/otel": "^1.2.1",
-    "@adonisjs/queue": "^0.4.1",
     "@adonisjs/session": "^8.0.0",
     "@adonisjs/shield": "^9.0.0",
     "@adonisjs/static": "^2.0.0",

@@ -34,7 +34,6 @@ export default defineConfig({
     () => import('@adonisjs/mail/commands'),
     () => import('@jrmc/adonis-attachment/commands'),
     () => import('@adonisjs/cache/commands'),
-    () => import('@adonisjs/queue/commands'),
   ],
 
   /*
@@ -78,7 +77,6 @@ export default defineConfig({
     () => import('@adonisjs/limiter/limiter_provider'),
     () => import('@stouder-io/adonis-auditing/auditing_provider'),
     () => import('@adonisjs/otel/otel_provider'),
-    () => import('@adonisjs/queue/queue_provider'),
   ],
 
   /*
