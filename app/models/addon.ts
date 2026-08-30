@@ -2,6 +2,8 @@ import { slugify } from '@adonisjs/lucid-slugify'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import type { DateTime } from 'luxon'
 
+import { consumeJsonArray, prepareJson } from '#utils/json_column'
+
 export default class Addon extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -32,8 +34,13 @@ export default class Addon extends BaseModel {
   declare stripePriceId: string | null
 
   @column({
-    prepare: (value: string[] | null) => (value ? JSON.stringify(value) : null),
-    // consume: (value: string | null) => (value ? (JSON.parse(value) as string[]) : null),
+    prepare: prepareJson,
+    /**
+     * The consume was previously commented out to dodge the double-parse crash. The
+     * helper handles both an already-parsed json column and a JSON string, so the
+     * column no longer depends on which of the two the driver returns.
+     */
+    consume: (value: unknown) => consumeJsonArray<string>(value),
   })
   declare features: string[] | null
 

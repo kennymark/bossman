@@ -1,6 +1,8 @@
 import { column } from '@adonisjs/lucid/orm'
 import type { DateTime } from 'luxon'
 
+import { consumeJsonArray, consumeJsonObject, prepareJson } from '#utils/json_column'
+
 import SuperBaseModel from './super_base.js'
 import type User from './user.js'
 
@@ -34,14 +36,14 @@ export default class Notification extends SuperBaseModel {
   declare readAt: DateTime | null
 
   @column({
-    prepare: (value: NotificationAction[] | null) => (value ? JSON.stringify(value) : null),
-    consume: (value: string | null) => (value ? JSON.parse(value) : null),
+    prepare: prepareJson,
+    consume: (value: unknown) => consumeJsonArray<NotificationAction>(value),
   })
   declare actions: NotificationAction[] | null
 
   @column({
-    prepare: (value: Record<string, unknown> | null) => (value ? JSON.stringify(value) : null),
-    consume: (value: string | null) => (value ? JSON.parse(value) : null),
+    prepare: prepareJson,
+    consume: consumeJsonObject,
   })
   declare data: Record<string, unknown> | null
 

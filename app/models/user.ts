@@ -8,6 +8,8 @@ import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { type Attachment, attachment } from '@jrmc/adonis-attachment'
 import type { DateTime } from 'luxon'
 
+import { consumeJsonObject, prepareJson } from '#utils/json_column'
+
 import Session from './session.js'
 import SuperBaseModel from './super_base.js'
 
@@ -67,9 +69,8 @@ export default class User extends compose(SuperBaseModel, AuthFinder) {
   declare token: string | null
 
   @column({
-    prepare: (value: Record<string, unknown> | null) => (value ? JSON.stringify(value) : null),
-    consume: (value: string | null) =>
-      value ? (JSON.parse(value) as Record<string, unknown>) : null,
+    prepare: prepareJson,
+    consume: consumeJsonObject,
   })
   declare settings: Record<string, unknown> | null
 

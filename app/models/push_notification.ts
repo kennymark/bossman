@@ -3,6 +3,8 @@ import { column } from '@adonisjs/lucid/orm'
 import { Auditable } from '@stouder-io/adonis-auditing'
 import type { DateTime } from 'luxon'
 
+import { consumeJsonArray, consumeJsonObject, prepareJson } from '#utils/json_column'
+
 import SuperBaseModel from './super_base.js'
 
 export type PushNotificationTargetType =
@@ -22,8 +24,8 @@ export default class PushNotification extends compose(SuperBaseModel, Auditable)
   declare targetType: PushNotificationTargetType
 
   @column({
-    prepare: (value: string[] | null) => (value ? JSON.stringify(value) : null),
-    consume: (value: string | null) => (value ? JSON.parse(value) : null),
+    prepare: prepareJson,
+    consume: (value: unknown) => consumeJsonArray<string>(value),
   })
   declare targetUserIds: string[] | null
 
@@ -49,8 +51,8 @@ export default class PushNotification extends compose(SuperBaseModel, Auditable)
   declare status: PushNotificationStatus
 
   @column({
-    prepare: (value: Record<string, unknown> | null) => (value ? JSON.stringify(value) : null),
-    consume: (value: string | null) => (value ? JSON.parse(value) : null),
+    prepare: prepareJson,
+    consume: consumeJsonObject,
   })
   declare oneSignalResponse: Record<string, unknown> | null
 
