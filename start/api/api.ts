@@ -1,6 +1,7 @@
 import router from '@adonisjs/core/services/router'
 import vine from '@vinejs/vine'
 
+import { canSwitchEnv } from '#services/app_env_service'
 import { middleware } from '#start/kernel'
 
 const AnalyticsController = () => import('#controllers/analytics_controller')
@@ -86,9 +87,8 @@ router
     router.post('/railway/deployments/:id/redeploy', [RailwayController, 'deploymentRedeploy'])
     router.post('/railway/services/:serviceId/deploy', [RailwayController, 'serviceDeploy'])
 
-    router.get('update-env', ({ session, response }) => {
-      const appEnv = (session.get('appEnv') as 'dev' | 'prod' | undefined) ?? 'dev'
-      return response.ok({ appEnv })
+    router.get('update-env', ({ request, response }) => {
+      return response.ok({ appEnv: request.appEnv() })
     })
     router.put('update-env', async ({ request, session, response, auth }) => {
       const updateEnvValidator = vine.create(
@@ -98,12 +98,28 @@ router
       )
       const { appEnv: requestedEnv } = await request.validateUsing(updateEnvValidator)
       const user = auth.getUserOrFail()
-      // Prod-only users (invited with prod access) cannot switch; keep them on prod
-      const isProdOnly = user.enableProdAccess && !user.isGodAdmin
-      const appEnv = isProdOnly ? ('prod' as const) : requestedEnv
-      session.put('appEnv', appEnv)
-      return response.ok({ message: 'Environment updated successfully', appEnv })
+
+      /**
+       * Only god admins may switch. Everyone else is pinned to the environment their
+       * record allows, so asking for one they cannot use is rejected rather than
+       * silently downgraded — a silent downgrade previously hid the fact that any
+       * user could put 'prod' into their own session.
+       */
+      if (!canSwitchEnv(user)) {
+        return response.forbidden({
+          error: 'You are not allowed to change environments.',
+          appEnv: request.appEnv(),
+        })
+      }
+
+      session.put('appEnv', requestedEnv)
+      return response.ok({ message: 'Environment updated successfully', appEnv: requestedEnv })
     })
   })
   .prefix('api/v1')
-  .use(middleware.auth())
+  /**
+   * Same gate as the pages these endpoints back. Previously this group was guarded by
+   * `auth()` alone, so any signed-in user could call endpoints for pages they had no
+   * grant for — including creating and restoring database backups.
+   */
+  .use([middleware.auth(), middleware.appRole(), middleware.pageAccess()])

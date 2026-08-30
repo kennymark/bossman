@@ -86,7 +86,7 @@ class EmailService {
 
       logger.info(`Email queued successfully: ${type}`, commonLogInfo)
     } catch (error) {
-      console.log('Failed to queue email', error)
+      logger.error({ err: error }, 'Failed to queue email')
       logger.error(`Failed to queue email: ${type}`, { ...commonLogInfo, error })
       throw error
     }

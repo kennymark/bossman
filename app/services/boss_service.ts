@@ -1,3 +1,4 @@
+import logger from '@adonisjs/core/services/logger'
 import { PgBoss } from 'pg-boss'
 
 import config from '#config/boss'
@@ -61,6 +62,7 @@ async function start(): Promise<PgBoss> {
         opts.retryDelayMax = reg.queueOptions.retryDelayMax
       }
       if (reg.queueOptions.deadLetter !== undefined) opts.deadLetter = reg.queueOptions.deadLetter
+      logger.debug(`Registering worker for queue: ${reg.queueName}`)
       await boss.createQueue(reg.queueName, opts)
       await boss.work(reg.queueName, reg.handler)
     }
@@ -123,6 +125,10 @@ const bossService = {
   send,
   sendAfter,
   schedule,
+  cancel: async (name: string, id: string) => {
+    await start()
+    await getBoss().cancel(name, id)
+  },
 }
 
 export default bossService

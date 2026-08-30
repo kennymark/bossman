@@ -88,10 +88,20 @@ export default defineConfig({
   |
   */
   preloads: [
+    /** Must come first: later preloads and controllers rely on these macros. */
+    () => import('#start/extensions'),
     () => import('#start/routes'),
     () => import('#start/kernel'),
     () => import('#start/events'),
-    () => import('#start/boss'),
+    /**
+     * Only the web process runs the job queue. Preloaded everywhere, pg-boss started
+     * workers and registered cron schedules inside every ace command and the test
+     * runner, whose polling connections then kept those processes alive forever.
+     */
+    {
+      file: () => import('#start/boss'),
+      environment: ['web'],
+    },
     () => import('#start/email'),
     () => import('#start/mail'),
     () => import('#start/scheduler'),

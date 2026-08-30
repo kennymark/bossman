@@ -17,6 +17,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   APP_KEY: Env.schema.string(),
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.string(),
+  /** Shared secret that lets a monitoring system read the full /health report. */
+  HEALTH_CHECK_SECRET: Env.schema.string.optional(),
 
   /*
   |----------------------------------------------------------
@@ -58,8 +60,25 @@ export default await Env.create(new URL('../', import.meta.url), {
   MEILISEARCH_HOST: Env.schema.string(),
   MEILISEARCH_API_KEY: Env.schema.string(),
 
+  /**
+   * Database connections. These were read by config/database.ts and the OTel/mail config
+   * without being declared here, so a missing value surfaced as a runtime failure on the
+   * first query instead of a clear error at boot.
+   */
+  ADMIN_DB: Env.schema.string(),
   DEV_DB: Env.schema.string(),
   PROD_DB: Env.schema.string(),
+
+  /** Base URL used to build links in invitation and account emails. */
+  APP_URL: Env.schema.string(),
+  NO_REPLY_EMAIL: Env.schema.string.optional(),
+
+  /** Axiom telemetry export; optional so the app runs without an observability backend. */
+  AXIOM_TOKEN: Env.schema.string.optional(),
+  AXIOM_DATASET: Env.schema.string.optional(),
+
+  /** Only used by the one-off Strapi migration commands. */
+  STRAPI_API: Env.schema.string.optional(),
   /*
   |----------------------------------------------------------
   | Variables for configuring OneSignal

@@ -10,9 +10,12 @@ export interface BlogStatusBadgeProps {
 }
 
 export function BlogStatusBadge({ post, className }: BlogStatusBadgeProps) {
+  const isScheduled = Boolean(post.scheduledAt)
+  const isPublished = Boolean(post.publishedAt)
+
   return (
-    <Badge variant={post.isPublished ? 'default' : 'secondary'} className={className}>
-      {post.isPublished ? 'Published' : 'Draft'}
+    <Badge variant={isPublished ? 'default' : isScheduled ? 'outline' : 'secondary'} className={className}>
+      {isPublished ? 'Published' : isScheduled ? 'Scheduled' : 'Draft'}
     </Badge>
   )
 }
@@ -26,7 +29,7 @@ export interface BlogMetaLineProps {
 
 /** Inline meta: optional status badge + date + read time (for show page header) */
 export function BlogMetaLine({ post, showStatus, className }: BlogMetaLineProps) {
-  const dateLabel = post.publishedAt ? formatBlogDate(post.publishedAt) : null
+  const dateLabel = post.publishedAt ? formatBlogDate(post.publishedAt) : post.scheduledAt ? formatBlogDate(post.scheduledAt) : null
   const minutes = getReadingMinutes(post.excerpt || '')
 
   return (

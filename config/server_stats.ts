@@ -7,7 +7,7 @@ export default defineConfig({
     const user = ctx.auth.user
     return Boolean(user?.isGodAdmin)
   },
-  intervalMs: 10_000,
+  pollInterval: 10_000,
   dashboard: true,
 
   toolbar: {

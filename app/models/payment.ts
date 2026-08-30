@@ -1,3 +1,4 @@
+import logger from '@adonisjs/core/services/logger'
 import { afterDelete, afterSave, belongsTo, column, computed } from '@adonisjs/lucid/orm'
 import type { ModelObject } from '@adonisjs/lucid/types/model'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
@@ -91,11 +92,14 @@ export default class Payment extends SuperBaseModel {
           org_id: payment.orgId,
         },
       ])
-      .catch(console.error)
+      .catch((err) => logger.error({ err }, 'Failed to index payments'))
   }
 
   @afterDelete()
   public static async deleteFromSearchIndex(payment: Payment) {
-    meiliSearchClient.index('payments').deleteDocument(payment.id).catch(console.error)
+    meiliSearchClient
+      .index('payments')
+      .deleteDocument(payment.id)
+      .catch((err) => logger.error({ err }, 'Failed to remove from payments index'))
   }
 }

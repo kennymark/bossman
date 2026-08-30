@@ -36,9 +36,7 @@ const makeData = (channelId: number, threadId: number, msg: string) => {
 }
 
 export class SnitchService {
-  constructor() {
-    console.log('ReportingService initialized')
-  }
+  constructor() {}
 
   static report = {
     general: async (msg: string, _info?: ModelObject) => {
@@ -48,7 +46,7 @@ export class SnitchService {
         const response = await twistApi.post('/comments/add', data)
         logger.info('Server notification sent', { response })
       } catch (err) {
-        console.error('error', err.response)
+        logger.error({ err }, 'Snitch request failed')
         logger.error(err)
       }
     },
@@ -60,7 +58,7 @@ export class SnitchService {
         await twistApi.post('/comments/add', data)
         logger.info('Job reported')
       } catch (err) {
-        console.error('error', err.response)
+        logger.error({ err }, 'Snitch request failed')
         logger.error('Job reporting failed')
       }
     },
@@ -72,7 +70,7 @@ export class SnitchService {
         await twistApi.post('/comments/add', data)
         logger.info('Plaid notification sent')
       } catch (err) {
-        console.error('error', err.response)
+        logger.error({ err }, 'Snitch request failed')
         logger.error(err)
       }
     },
@@ -83,7 +81,7 @@ export class SnitchService {
         await twistApi.post('/comments/add', data)
         logger.info('Stripe notification sent')
       } catch (err) {
-        console.error('error', err.response)
+        logger.error({ err }, 'Snitch request failed')
         logger.error(err)
       }
     },
@@ -96,7 +94,7 @@ export class SnitchService {
         await twistApi.post('/comments/add', data)
         logger.info('Critical notification sent')
       } catch (err) {
-        console.error('error', err.response)
+        logger.error({ err }, 'Snitch request failed')
         logger.error(err)
       }
     },

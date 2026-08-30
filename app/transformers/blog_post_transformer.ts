@@ -13,6 +13,7 @@ export default class BlogPostTransformer extends BaseTransformer<BlogPost> {
       'coverImage',
       'coverImageAltUrl',
       'publishedAt',
+      'scheduledAt',
       'createdAt',
       'updatedAt',
     ])

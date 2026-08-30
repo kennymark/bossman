@@ -115,7 +115,7 @@ export default class LeaseableEntity extends SuperBaseModel {
         logger.info(`Updated search index for leaseable entity ${entity.id}`)
       })
       .catch((e) => {
-        console.error('Error updating search index', e)
+        logger.error({ err: e }, 'Error updating search index')
       })
   }
 

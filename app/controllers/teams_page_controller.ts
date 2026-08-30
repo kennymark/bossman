@@ -1,24 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
 import TeamMember from '#models/team_member'
-import User from '#models/user'
-import { getPageAccessForUser } from '#services/page_access_service'
 import TeamMemberTransformer from '#transformers/team_member_transformer'
 
+/** Admin role and the `teams` page grant are enforced by the route group. */
 export default class TeamsPageController {
-  async index({ auth, request, inertia, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
+  async index({ request, inertia }: HttpContext) {
     const params = await request.paginationQs()
-
-    const isAdmin = user.isAdminOrSuperAdmin
-    if (!isAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to teams.' })
-    }
 
     const members = await TeamMember.query()
       .if(params.search, (q) => {
@@ -41,19 +29,7 @@ export default class TeamsPageController {
     })
   }
 
-  async show({ auth, params, inertia, request, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
-
-    const isAdmin = user.isAdminOrSuperAdmin
-    if (!isAdmin) {
-      return response.forbidden()
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden()
-    }
-
+  async show({ params, inertia }: HttpContext) {
     const member = await TeamMember.query().where('id', params.id).preload('user').firstOrFail()
 
     return inertia.render('teams/member-show', {

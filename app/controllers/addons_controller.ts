@@ -9,8 +9,6 @@ import { createAddonValidator, updateAddonValidator } from '#validators/addon'
 export default class AddonsController {
   async index({ inertia, request }: HttpContext) {
     const env = request.appEnv()
-
-    console.log({ env })
     const addons = await Addon.query({ connection: env })
       .orderBy('sort_order', 'asc')
       .orderBy('name', 'asc')

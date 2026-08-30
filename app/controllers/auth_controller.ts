@@ -51,8 +51,14 @@ export default class AuthController {
     const expiresAt = DateTime.now().plus({ hours: 1 }) // Set the expiration date to 1 hour from now
     const user = await User.findBy('email', email)
 
+    /**
+     * Always answer the same way. Distinguishing a missing account here turned this
+     * endpoint into a user-enumeration oracle: anyone could probe which addresses hold
+     * an account by watching for the 400.
+     */
     if (!user) {
-      return response.badRequest({ error: "There's no account with this email" })
+      logger.info({ email }, 'Password reset requested for unknown email')
+      return response.ok({ message: 'Password reset email sent.' })
     }
 
     // Save the token to the password_resets table

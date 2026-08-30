@@ -1,22 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 
-import User from '#models/user'
-import { getPageAccessForUser } from '#services/page_access_service'
-
+/** Admin role and the `logs` page grant are enforced by the route group. */
 export default class LogsPageController {
-  async index({ auth, request, inertia, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden()
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('logs')) {
-      return response.forbidden()
-    }
-
+  async index({ request, inertia }: HttpContext) {
     const params = await request.paginationQs()
     const event = request.qs().event as string | undefined
     const auditableType = request.qs().auditableType as string | undefined

@@ -85,7 +85,7 @@ router
       })
       .prefix('blog/manage')
   })
-  .use([middleware.auth(), middleware.pageAccess(), middleware.appRole()])
+  .use([middleware.auth(), middleware.appRole(), middleware.pageAccess()])
 
 // Guest routes (web login uses server redirect so session cookie is set in same navigation)
 router
@@ -125,7 +125,7 @@ router
 
 router
   .group(() => {
-    router.post('/login', [controllers.Auth, 'login']).use(throttle)
+    router.post('/login', [controllers.Auth, 'login']).use(loginThrottle)
     router.post('/forgot-password', [controllers.Auth, 'forgotPassword'])
     router.post('/reset-password', [controllers.Auth, 'resetPassword'])
     router.get('/verify-email', [controllers.Auth, 'verifyEmail'])
@@ -168,7 +168,7 @@ router
     router.delete('/:memberId', [controllers.Members, 'destroy'])
   })
   .prefix('api/v1/members')
-  .use(middleware.auth())
+  .use([middleware.auth(), middleware.appRole(), middleware.pageAccess({ page: 'teams' })])
 
 router
   .group(() => {
@@ -178,7 +178,7 @@ router
     router.post('/:invitationId/invite-link', [controllers.TeamInvitations, 'inviteLink'])
   })
   .prefix('api/v1/invitations')
-  .use(middleware.auth())
+  .use([middleware.auth(), middleware.appRole(), middleware.pageAccess({ page: 'teams' })])
 
 // Public team invitation routes
 router
@@ -209,22 +209,30 @@ router
 
 router.get('/health', [controllers.HealthChecks])
 
-router.get('/swagger', async () => {
-  return AutoSwagger.default.docs(router.toJSON(), swagger)
-})
+/**
+ * API documentation. Behind auth + admin role: these routes describe the whole internal
+ * API surface and were previously reachable by anyone.
+ */
+router
+  .group(() => {
+    router.get('/swagger', async () => {
+      return AutoSwagger.default.docs(router.toJSON(), swagger)
+    })
 
-// Renders Swagger-UI and passes YAML-output of /swagger
-router.get('/docs/:id?', async ({ params }) => {
-  const id = params.id
+    // Renders Swagger-UI and passes YAML-output of /swagger
+    router.get('/docs/:id?', async ({ params }) => {
+      /** Route params arrive as strings, so compare as strings. */
+      const id = String(params.id ?? '')
 
-  if (id === 1) {
-    return AutoSwagger.default.rapidoc('/swagger')
-  }
-  if (id === 2) {
-    return AutoSwagger.default.ui('/swagger')
-  }
-  return AutoSwagger.default.scalar('/swagger')
-  // return AutoSwagger.default.rapidoc('/swagger', 'read')
-})
+      if (id === '1') {
+        return AutoSwagger.default.rapidoc('/swagger')
+      }
+      if (id === '2') {
+        return AutoSwagger.default.ui('/swagger')
+      }
+      return AutoSwagger.default.scalar('/swagger')
+    })
+  })
+  .use([middleware.auth(), middleware.appRole()])
 router.attachments()
 transmit.registerRoutes()

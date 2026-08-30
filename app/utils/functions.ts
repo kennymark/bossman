@@ -1,4 +1,5 @@
 import app from '@adonisjs/core/services/app'
+import logger from '@adonisjs/core/services/logger'
 
 // convert bytes to mb
 export function convertBytesToMb(bytes: number) {
@@ -120,17 +121,15 @@ export async function runInProdOnly(fn: () => Promise<void> | void, rationale = 
   if (app.inProduction) {
     await fn()
   } else {
-    console.log(`Skipping ${rationale} because NODE_ENV is not production`)
+    logger.debug(`Skipping ${rationale} because NODE_ENV is not production`)
   }
 }
 
 export async function runInDevOnly(fn: () => Promise<void> | void, rationale = '') {
   if (app.inDev) {
-    console.log('🧰 ~ runInDevOnly ~ development:')
     await fn()
-    console.log('🧰 ~ runInDevOnly ~ complete:')
   } else {
-    console.log(`Skipping ${rationale} because NODE_ENV is not development`)
+    logger.debug(`Skipping ${rationale} because NODE_ENV is not development`)
   }
 }
 
@@ -142,7 +141,7 @@ export async function runIfTrue(
   if (condition) {
     await fn()
   } else {
-    console.log(`Skipping ${rationale} because condition is false`)
+    logger.debug(`Skipping ${rationale} because condition is false`)
   }
 }
 
@@ -154,7 +153,7 @@ export async function runIfFalse(
   if (!condition) {
     await fn()
   } else {
-    console.log(`Skipping ${rationale} because condition is true`)
+    logger.debug(`Skipping ${rationale} because condition is true`)
   }
 }
 

@@ -6,12 +6,17 @@ import { validateQueryParams } from '#utils/vine'
 
 type AppEnv = 'dev' | 'prod'
 
+/**
+ * The environment resolved by `AppEnvMiddleware` from the authenticated user.
+ *
+ * There is deliberately no header fallback: trusting an `App-Env` header let any
+ * authenticated user point their queries at the production database. When the value
+ * is missing (a request that never passed through the middleware) we fail closed to
+ * `dev` rather than guessing from client input.
+ */
 HttpRequest.macro('appEnv', function (this: HttpRequest): AppEnv {
-  const fromSession = (this as HttpRequest & { _appEnv?: string })._appEnv
-  if (fromSession === 'dev' || fromSession === 'prod') return fromSession
-  const headers = this.headers()
-  const appEnv = headers['app-env'] || headers['appenv'] || 'dev'
-  return appEnv as AppEnv
+  const resolved = (this as HttpRequest & { _appEnv?: string })._appEnv
+  return resolved === 'prod' ? 'prod' : 'dev'
 })
 
 HttpRequest.macro('timeZone', function (this: HttpRequest): string {

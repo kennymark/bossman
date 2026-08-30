@@ -38,11 +38,15 @@ router.use([
   () => import('@adonisjs/otel/otel_middleware'),
   () => import('@adonisjs/core/bodyparser_middleware'),
   () => import('@adonisjs/session/session_middleware'),
-  () => import('#middleware/app_env_middleware'),
   () => import('@adonisjs/shield/shield_middleware'),
   () => import('@adonisjs/auth/initialize_auth_middleware'),
   () => import('#middleware/silent_auth_middleware'),
   // () => import('#middleware/session_activity_middleware'),
+  /**
+   * Must run after silent_auth: the environment a request may use is derived from the
+   * authenticated user, not from anything the client sends.
+   */
+  () => import('#middleware/app_env_middleware'),
   () => import('#middleware/enable_prod_access_middleware'),
 ])
 

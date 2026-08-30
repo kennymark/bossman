@@ -29,8 +29,8 @@ export const queryParamsSchema = vine.create(
     email: vine.string().optional(),
     tab: vine.string().optional(),
 
-    /** Blog manage: 'all' | 'published' | 'draft' */
-    status: vine.enum(['all', 'published', 'draft']).optional(),
+    /** Blog manage: 'all' | 'published' | 'scheduled' | 'draft' */
+    status: vine.enum(['all', 'published', 'scheduled', 'draft']).optional(),
   }),
 )
 

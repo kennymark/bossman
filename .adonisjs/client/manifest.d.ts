@@ -15,7 +15,6 @@
 /// <reference path="../../config/logger.ts" />
 /// <reference path="../../config/mail.ts" />
 /// <reference path="../../config/otel.ts" />
-/// <reference path="../../config/queue.ts" />
 /// <reference path="../../config/server_stats.ts" />
 /// <reference path="../../config/swagger.ts" />
 /// <reference path="../../config/transmit.ts" />

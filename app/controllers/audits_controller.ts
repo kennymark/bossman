@@ -4,8 +4,9 @@ import db from '@adonisjs/lucid/services/db'
 export default class AuditsController {
   async index({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const page = Number(request.qs().page) || 1
-    const perPage = Number(request.qs().perPage) || 20
+    const page = Math.max(Number(request.qs().page) || 1, 1)
+    /** Clamped so a caller cannot ask for an unbounded result set. */
+    const perPage = Math.min(Math.max(Number(request.qs().perPage) || 20, 1), 100)
     const event = request.qs().event
     const auditableType = request.qs().auditableType
 

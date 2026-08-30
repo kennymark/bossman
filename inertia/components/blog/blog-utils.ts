@@ -21,6 +21,20 @@ export function formatBlogDate(value: string): string {
     return value
   }
 }
+// locale is the uk
+export function formatBlogDateTime(value: string): string {
+  try {
+    return new Date(value).toLocaleString('en-GB', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+  } catch {
+    return value
+  }
+}
 
 export function getReadingMinutes(text: string): number | null {
   const trimmed = String(text || '').trim()

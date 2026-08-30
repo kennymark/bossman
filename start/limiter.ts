@@ -30,10 +30,14 @@ export const apiThrottle = limiter.define('api', (ctx) => {
   return limiter.allowRequests(10).every('1 minute').usingKey(`ip_${ctx.request.ip()}`)
 })
 
+/**
+ * Brute-force protection for the login endpoint. Tighter than the generic throttle
+ * because each request here is a password guess.
+ */
 export const loginThrottle = limiter.define('login', (ctx) => {
   return limiter
-    .allowRequests(100)
+    .allowRequests(10)
     .every('1 minute')
     .usingKey(`login_${ctx.request.ip()}`)
-    .blockFor('1 minute')
+    .blockFor('5 mins')
 })

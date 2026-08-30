@@ -59,7 +59,7 @@ export default class BackupService {
 
       logger.info('Backup completed')
     } catch (err) {
-      console.log('🚀 ~ DbBackup ~ run ~ err:', err)
+      logger.error({ err }, 'Backup run failed')
       logger.error(err)
     }
   }

@@ -27,3 +27,6 @@ yarn-error.log
 # Backups
 backups
 .adonisjs/server-stats/
+
+# Compiled config artifact: adonisrc.ts is the source of truth and would be shadowed by this.
+adonisrc.js

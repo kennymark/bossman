@@ -8,6 +8,7 @@ export const createBlogPostValidator = vine.create(
     isUploadedPhotoLink: vine.boolean().optional(),
     coverImageAltUrl: vine.string().trim().maxLength(2048).optional(),
     publish: vine.boolean().optional(),
+    publishedAt: vine.string().optional(),
   }),
 )
 
@@ -19,6 +20,7 @@ export const updateBlogPostValidator = vine.create(
     isUploadedPhotoLink: vine.boolean().optional(),
     coverImageAltUrl: vine.string().trim().maxLength(2048).optional(),
     publish: vine.boolean().optional(),
+    publishedAt: vine.string().optional(),
   }),
 )
 

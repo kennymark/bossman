@@ -92,7 +92,6 @@ export default class OrgsController {
 
   async store({ request, response, logger }: HttpContext) {
     const appEnv = request.appEnv()
-    console.log('🚀 ~ OrgsController ~ store ~ appEnv:', appEnv)
     const payload = await request.validateUsing(createCustomerUserValidator)
     const trx = await db.connection(appEnv).transaction()
     const isCustomPlan = payload.customPaymentSchedule.planType === 'custom'
@@ -223,7 +222,6 @@ export default class OrgsController {
           logger.info(`Custom subscription session created`)
           logger.info(`${user.name} with sub_id ${session?.subscription}`)
           logger.info(`${user.name} with session_id ${session?.id}`)
-          console.log('session', session)
         } else {
           logger.info('Bank transfer payment method selected')
         }
@@ -258,7 +256,7 @@ export default class OrgsController {
 
       return { user, msg: 'Account created sucessfully' }
     } catch (err) {
-      console.log('Error creating account', err)
+      logger.error({ err }, 'Error creating org account')
       await trx.rollback()
       // remove stripe customer
 
@@ -269,7 +267,7 @@ export default class OrgsController {
     }
   }
 
-  async show({ params, inertia, request }: HttpContext) {
+  async show({ params, inertia, request, logger }: HttpContext) {
     const appEnv = request.appEnv()
     const org = await Org.query({ connection: appEnv }).where('id', params.id).firstOrFail()
 
@@ -281,7 +279,8 @@ export default class OrgsController {
       const loopUser = await loopService.findUser(creatorEmail)
       isLoopsUser = Boolean(loopUser)
     } catch (error) {
-      console.log('error', error.response.data)
+      /** Loops is non-essential here; a lookup failure must not break the page. */
+      logger.error({ err: error }, 'Loops user lookup failed')
     }
 
     return inertia.render('orgs/show', {

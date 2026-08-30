@@ -46,9 +46,9 @@ export default class HttpExceptionHandler extends ExceptionHandler {
     if (ctx.inertia) {
       // Handle database errors
       if (error.code === '23502') {
-        session.flash('error', {
-          message: `The ${error.column} field is required and can not be null`,
-        })
+        /** Inertia also serves public pages, so the column name is logged, not flashed. */
+        ctx.logger.error({ err: error }, 'not-null violation')
+        session.flash('error', { message: 'A required field was missing.' })
         return response.redirect().back()
       }
 
@@ -81,10 +81,9 @@ export default class HttpExceptionHandler extends ExceptionHandler {
     }
 
     if (error.code === '23502') {
-      return response.internalServerError({
-        error: `The ${error.column} field is required and can not be null`,
-        table: error.table,
-      })
+      /** The column name is logged, not returned: it discloses the schema. */
+      ctx.logger.error({ err: error }, 'not-null violation')
+      return response.internalServerError({ error: 'A required field was missing.' })
     }
 
     if (error.code === '23505') {
@@ -111,11 +110,17 @@ export default class HttpExceptionHandler extends ExceptionHandler {
 
 // Key (email)=(agency@yourgaff.co.uk) already exists.
 // convert this string to a more readable format
+/**
+ * Turns a Postgres uniqueness detail into a message safe to show a user.
+ *
+ * Falls back to a generic string rather than the raw driver detail, which would leak
+ * constraint and column names for any format this does not recognise.
+ */
 function convertToReadableFormat(error: string) {
   const regex = /Key \((.*?)\)=\((.*?)\) already exists./
   const match = error.match(regex)
   if (match) {
     return `The ${match[1]} ${match[2]} already exists.`
   }
-  return error
+  return 'That value is already taken.'
 }

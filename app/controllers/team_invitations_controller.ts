@@ -10,7 +10,6 @@ import User from '#models/user'
 import { generateShortId } from '#services/app.functions'
 import mailer from '#services/email_service'
 import notificationService from '#services/notification_service'
-import { getPageAccessForUser } from '#services/page_access_service'
 import env from '#start/env'
 import {
   acceptTeamInviteGuestValidator,
@@ -129,17 +128,8 @@ export default class TeamInvitationsController {
 
   async invite({ auth, request, response, now, logger }: HttpContext) {
     const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
     const { email, role, allowedPages, enableProdAccess } =
       await request.validateUsing(inviteToTeamValidator)
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden({ error: 'Access required to invite users.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to manage teams.' })
-    }
 
     const normalizedEmail = email.toLowerCase().trim()
 
@@ -184,7 +174,7 @@ export default class TeamInvitationsController {
           allowedPages: resolvedAllowedPages,
           enableProdAccess: enableProdAccess ?? true,
           tokenHash,
-          invitedByUserId: freshUser.id,
+          invitedByUserId: user.id,
           expiresAt,
           acceptedAt: null,
           acceptedByUserId: null,
@@ -201,7 +191,7 @@ export default class TeamInvitationsController {
         type: 'team-invite',
         data: {
           email: normalizedEmail,
-          inviterName: freshUser.fullName || freshUser.email,
+          inviterName: user.fullName || user.email,
           teamName: 'the dashboard',
           url: joinUrl,
         },
@@ -295,16 +285,7 @@ export default class TeamInvitationsController {
 
   async updateInvitation({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
     const invitationId = request.param('invitationId')
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to manage teams.' })
-    }
 
     const invitation = await TeamInvitation.query()
       .where('id', invitationId)
@@ -334,16 +315,7 @@ export default class TeamInvitationsController {
    */
   async inviteLink({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
     const invitationId = request.param('invitationId')
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to manage teams.' })
-    }
 
     const invitation = await TeamInvitation.query()
       .where('id', invitationId)
@@ -360,16 +332,7 @@ export default class TeamInvitationsController {
 
   async destroy({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
     const invitationId = request.param('invitationId')
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to manage teams.' })
-    }
 
     const invitation = await TeamInvitation.query()
       .where('id', invitationId)

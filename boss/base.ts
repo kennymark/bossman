@@ -37,6 +37,7 @@ export interface TypedBuilder<Schema extends VineSchema> {
   ): TypedBuilder<Schema>
   schedule(data: Infer<Schema>, when?: ScheduleWhen): Promise<string | null>
   scheduleCron(cron: string, data: Infer<Schema>): Promise<void>
+  cancel(jobId: string): Promise<void>
 }
 
 const jobDefinitions: JobDefinition[] = []
@@ -69,12 +70,27 @@ function createJob(name: string) {
             queueName: definition.name,
             queueOptions,
             handler: async (jobs) => {
-              for (const job of jobs) {
-                const data = definition.inputSchema
-                  ? await vine.validate({ schema: definition.inputSchema, data: job.data })
-                  : (job.data as object)
-                await definition.workHandler?.({ ...data, id: job.id })
+              /**
+               * Each job in the batch is isolated. Without this, one job throwing (a
+               * validation failure, say) aborted the rest of the batch, so unrelated
+               * jobs were silently skipped rather than retried on their own terms.
+               */
+              const results = await Promise.allSettled(
+                jobs.map(async (job) => {
+                  const data = definition.inputSchema
+                    ? await vine.validate({ schema: definition.inputSchema, data: job.data })
+                    : (job.data as object)
+                  await definition.workHandler?.({ ...data, id: job.id })
+                }),
+              )
+
+              const failures = results.filter((r) => r.status === 'rejected')
+              for (const failure of failures) {
+                logger.error({ err: failure.reason, queue: definition.name }, 'Job failed')
               }
+
+              /** Rethrow so pg-boss still retries the batch's failed jobs. */
+              if (failures.length) throw failures[0].reason
             },
           })
           return typed
@@ -98,6 +114,9 @@ function createJob(name: string) {
             ? await vine.validate({ schema: definition.inputSchema, data })
             : data
           await boss.schedule(definition.name, cron, validated)
+        },
+        async cancel(jobId: string) {
+          await boss.cancel(definition.name, jobId)
         },
       }
       return typed

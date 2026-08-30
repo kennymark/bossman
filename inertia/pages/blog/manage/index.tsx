@@ -6,6 +6,7 @@ import { useState } from 'react'
 import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawBlogPost } from '#types/model-types'
 import { BlogStatusBadge } from '@/components/blog'
+import { formatBlogDateTime } from '@/components/blog/blog-utils'
 import { DataTable } from '@/components/dashboard/data-table'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { LoadingSkeleton } from '@/components/ui'
@@ -14,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { useInertiaParams } from '@/hooks/use-inertia-params'
 import { tablePagination } from '@/lib/pagination'
 
-type StatusFilter = 'all' | 'published' | 'draft'
+type StatusFilter = 'all' | 'published' | 'scheduled' | 'draft'
 
 interface BlogAdminIndexProps extends SharedProps {
   posts?: PaginatedResponse<RawBlogPost>
@@ -23,6 +24,7 @@ interface BlogAdminIndexProps extends SharedProps {
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'published', label: 'Published' },
+  { value: 'scheduled', label: 'Scheduled' },
   { value: 'draft', label: 'Draft' },
 ]
 
@@ -57,9 +59,9 @@ export default function BlogAdminIndex({ posts }: BlogAdminIndexProps) {
     },
     {
       key: 'publishedAt',
-      header: 'Published',
-      width: 110,
-      cell: (row) => (row.publishedAt ? new Date(row.publishedAt).toLocaleDateString() : '—'),
+      header: 'Published / Scheduled',
+      width: 200,
+      cell: (row) => (row.publishedAt ? formatBlogDateTime(row.publishedAt) : row.scheduledAt ? formatBlogDateTime(row.scheduledAt) : '—'),
     },
     {
       key: 'actions',

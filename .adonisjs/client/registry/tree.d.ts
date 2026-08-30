@@ -10,6 +10,7 @@ export interface ApiDefinition {
       queries: typeof routes['server-stats.debug.queries']
       events: typeof routes['server-stats.debug.events']
       routes: typeof routes['server-stats.debug.routes']
+      queryExplain: typeof routes['server-stats.debug.queryExplain']
       logs: typeof routes['server-stats.debug.logs']
       emails: typeof routes['server-stats.debug.emails']
       emailPreview: typeof routes['server-stats.debug.emailPreview']

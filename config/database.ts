@@ -2,6 +2,12 @@ import { defineConfig } from '@adonisjs/lucid'
 
 import env from '#start/env'
 
+/**
+ * Query logging is verbose and echoes bound values (including production row data)
+ * into the logs, so it is limited to development.
+ */
+const debug = env.get('NODE_ENV') === 'development'
+
 const dbConfig = defineConfig({
   connection: 'default',
 
@@ -9,19 +15,19 @@ const dbConfig = defineConfig({
     dev: {
       client: 'pg',
       connection: env.get('DEV_DB'),
-      debug: true,
+      debug,
     },
     prod: {
       client: 'pg',
       connection: env.get('PROD_DB'),
-      debug: true,
+      debug,
     },
 
     default: {
       client: 'pg',
       connection: env.get('ADMIN_DB'),
       useNullAsDefault: true,
-      debug: true,
+      debug,
       migrations: {
         naturalSort: true,
         paths: ['database/migrations'],

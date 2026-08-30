@@ -1,6 +1,7 @@
 // write a stripe service that will handle all stripe related operations,
 
 import app from '@adonisjs/core/services/app'
+import logger from '@adonisjs/core/services/logger'
 import Stripe from 'stripe'
 
 import type { CustomSubscriptionInfo } from '#extensions/event'
@@ -50,10 +51,10 @@ class StripeService {
         metadata: { togethaUserId },
       })
 
-      console.log('created_stripe_customer', customer.id)
+      logger.info({ customerId: customer.id }, 'Created Stripe customer')
       return customer
     } catch (error) {
-      console.log('error creating stripe customer', error)
+      logger.error({ err: error }, 'Error creating Stripe customer')
     }
   }
 

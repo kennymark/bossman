@@ -1,4 +1,5 @@
 import { compose } from '@adonisjs/core/helpers'
+import logger from '@adonisjs/core/services/logger'
 import { beforeDelete, beforeSave, belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
 import { Auditable } from '@stouder-io/adonis-auditing'
@@ -61,11 +62,14 @@ export default class FileUpload extends compose(SuperBaseModel, Auditable) {
           org_id: upload.orgId,
         },
       ])
-      .catch(console.log)
+      .catch((err) => logger.error({ err }, 'Failed to index file_uploads'))
   }
 
   @beforeDelete()
   public static async deleteFromSearchIndex(upload: FileUpload) {
-    meiliSearchClient.index('file_uploads').deleteDocument(upload.id).catch(console.log)
+    meiliSearchClient
+      .index('file_uploads')
+      .deleteDocument(upload.id)
+      .catch((err) => logger.error({ err }, 'Failed to remove from file_uploads index'))
   }
 }

@@ -36,6 +36,12 @@ export default class BlogPost extends BaseModel {
   @column.dateTime()
   declare publishedAt: DateTime | null
 
+  @column.dateTime()
+  declare scheduledAt: DateTime | null
+
+  @column()
+  declare scheduleJobId: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

@@ -42,6 +42,12 @@ const routes = {
     tokens: [{"old":"/admin/api/debug/routes","type":0,"val":"admin","end":""},{"old":"/admin/api/debug/routes","type":0,"val":"api","end":""},{"old":"/admin/api/debug/routes","type":0,"val":"debug","end":""},{"old":"/admin/api/debug/routes","type":0,"val":"routes","end":""}],
     types: placeholder as Registry['server-stats.debug.routes']['types'],
   },
+  'server-stats.debug.queryExplain': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/api/debug/queries/:id/explain',
+    tokens: [{"old":"/admin/api/debug/queries/:id/explain","type":0,"val":"admin","end":""},{"old":"/admin/api/debug/queries/:id/explain","type":0,"val":"api","end":""},{"old":"/admin/api/debug/queries/:id/explain","type":0,"val":"debug","end":""},{"old":"/admin/api/debug/queries/:id/explain","type":0,"val":"queries","end":""},{"old":"/admin/api/debug/queries/:id/explain","type":1,"val":"id","end":""},{"old":"/admin/api/debug/queries/:id/explain","type":0,"val":"explain","end":""}],
+    types: placeholder as Registry['server-stats.debug.queryExplain']['types'],
+  },
   'server-stats.debug.logs': {
     methods: ["GET","HEAD"],
     pattern: '/admin/api/debug/logs',

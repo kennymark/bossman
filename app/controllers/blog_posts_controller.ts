@@ -1,8 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 import db from '@adonisjs/lucid/services/db'
 import { attachmentManager } from '@jrmc/adonis-attachment'
 import { DateTime } from 'luxon'
 
+import { publishBlogPostJob } from '#boss/jobs/publish_blog_post'
 import BlogPost from '#models/blog_post'
 import BlogPostTransformer from '#transformers/blog_post_transformer'
 import { createBlogPostValidator, updateBlogPostValidator } from '#validators/blog'
@@ -47,8 +49,9 @@ export default class BlogPostsController {
     const status = params.status ?? 'all'
     const posts = await BlogPost.query({ connection: env })
       .if(status === 'published', (q) => q.whereNotNull('publishedAt'))
-      .if(status === 'draft', (q) => q.whereNull('publishedAt'))
-      .orderByRaw('published_at DESC NULLS LAST')
+      .if(status === 'scheduled', (q) => q.whereNotNull('scheduledAt'))
+      .if(status === 'draft', (q) => q.whereNull('publishedAt').whereNull('scheduledAt'))
+      .orderByRaw('COALESCE(published_at, scheduled_at) DESC NULLS LAST')
       .orderBy('createdAt', 'desc')
       .if(params.search, (q) => {
         const term = `%${params.search}%`
@@ -81,7 +84,7 @@ export default class BlogPostsController {
   }
 
   async store({ request, response, logger }: HttpContext) {
-    const { publish, isUploadedPhotoLink, coverImageAltUrl, ...body } =
+    const { publish, publishedAt, isUploadedPhotoLink, coverImageAltUrl, ...body } =
       await request.validateUsing(createBlogPostValidator)
     const coverFile = request.file('coverImage', {
       size: '5mb',
@@ -92,8 +95,19 @@ export default class BlogPostsController {
     const env = request.appEnv()
 
     try {
+      const isScheduled = publish && publishedAt && DateTime.fromISO(publishedAt) > DateTime.now()
+
       const post = await BlogPost.create(
-        { ...body, publishedAt: publish ? DateTime.now() : null },
+        {
+          ...body,
+          publishedAt:
+            publish && !isScheduled
+              ? publishedAt
+                ? DateTime.fromISO(publishedAt)
+                : DateTime.now()
+              : null,
+          scheduledAt: isScheduled ? DateTime.fromISO(publishedAt) : null,
+        },
         { connection: env },
       )
 
@@ -102,6 +116,11 @@ export default class BlogPostsController {
           ? ((await attachmentManager.createFromFile(coverFile)) as BlogPost['coverImage'])
           : null
       post.coverImageAltUrl = coverImageAltUrl ?? null
+
+      if (isScheduled && post.scheduledAt) {
+        const jobId = await publishBlogPostJob.schedule({ postId: post.id, env }, post.scheduledAt)
+        post.scheduleJobId = jobId
+      }
 
       await post.save()
       // if (isUploadedPhotoLink && coverImageAltUrl) {
@@ -114,13 +133,13 @@ export default class BlogPostsController {
 
       return response.redirect('/blog/manage')
     } catch (error) {
-      console.error(error)
+      logger.error({ err: error }, 'Blog post operation failed')
       return response.badRequest({ error: 'Failed to update post' })
     }
   }
 
   async update({ params, request, response }: HttpContext) {
-    const { publish, isUploadedPhotoLink, coverImageAltUrl, ...body } =
+    const { publish, publishedAt, isUploadedPhotoLink, coverImageAltUrl, ...body } =
       await request.validateUsing(updateBlogPostValidator)
     const trx = await db.transaction()
     const env = request.appEnv()
@@ -132,6 +151,8 @@ export default class BlogPostsController {
     })
 
     try {
+      const isScheduled = publish && publishedAt && DateTime.fromISO(publishedAt) > DateTime.now()
+
       post.merge(body)
 
       if (isUploadedPhotoLink !== undefined) {
@@ -150,7 +171,23 @@ export default class BlogPostsController {
         post.coverImageAltUrl = coverImageAltUrl ?? null
       }
 
-      post.publishedAt = publish ? (post.publishedAt ?? DateTime.now()) : null
+      if (post.scheduleJobId && post.scheduleJobId.length > 0) {
+        await publishBlogPostJob.cancel(post.scheduleJobId)
+        post.scheduleJobId = null
+      }
+
+      post.publishedAt =
+        publish && !isScheduled
+          ? publishedAt
+            ? DateTime.fromISO(publishedAt)
+            : (post.publishedAt ?? DateTime.now())
+          : null
+      post.scheduledAt = isScheduled ? DateTime.fromISO(publishedAt) : null
+
+      if (isScheduled && post.scheduledAt) {
+        const jobId = await publishBlogPostJob.schedule({ postId: post.id, env }, post.scheduledAt)
+        post.scheduleJobId = jobId
+      }
 
       await post.save()
 

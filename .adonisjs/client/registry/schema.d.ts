@@ -73,6 +73,17 @@ export interface Registry {
       response: unknown
     }
   }
+  'server-stats.debug.queryExplain': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/api/debug/queries/:id/explain'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+    }
+  }
   'server-stats.debug.logs': {
     methods: ["GET","HEAD"]
     pattern: '/admin/api/debug/logs'

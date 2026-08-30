@@ -1,3 +1,4 @@
+import logger from '@adonisjs/core/services/logger'
 import { afterDelete, afterSave, beforeSave, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import type { DateTime } from 'luxon'
@@ -65,11 +66,14 @@ export default class MaintenanceRequest extends SuperBaseModel {
           org_id: request.orgId,
         },
       ])
-      .catch(console.log)
+      .catch((err) => logger.error({ err }, 'Failed to index maintenance_requests'))
   }
 
   @afterDelete()
   public static async deleteFromSearchIndex(request: MaintenanceRequest) {
-    meiliSearchClient.index('maintenance_requests').deleteDocument(request.id).catch(console.log)
+    meiliSearchClient
+      .index('maintenance_requests')
+      .deleteDocument(request.id)
+      .catch((err) => logger.error({ err }, 'Failed to remove from maintenance_requests index'))
   }
 }

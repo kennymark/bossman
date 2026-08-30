@@ -7,39 +7,6 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
-export class AddOnSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'shortDescription', 'longDescription', 'priceAmount', 'priceCurrency', 'billingType', 'stripePriceId', 'features', 'isActive', 'sortOrder', 'createdAt', 'updatedAt'] as const
-  $columns = AddOnSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare slug: string
-  @column()
-  declare shortDescription: string | null
-  @column()
-  declare longDescription: string | null
-  @column()
-  declare priceAmount: string | null
-  @column()
-  declare priceCurrency: string | null
-  @column()
-  declare billingType: string
-  @column()
-  declare stripePriceId: string | null
-  @column()
-  declare features: any | null
-  @column()
-  declare isActive: boolean
-  @column()
-  declare sortOrder: number
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
-}
-
 export class AuditSchema extends BaseModel {
   static $columns = ['id', 'userType', 'userId', 'event', 'auditableType', 'auditableId', 'oldValues', 'newValues', 'metadata', 'createdAt', 'updatedAt'] as const
   $columns = AuditSchema.$columns
@@ -90,88 +57,6 @@ export class AuthAccessTokenSchema extends BaseModel {
   declare lastUsedAt: DateTime | null
   @column.dateTime()
   declare expiresAt: DateTime | null
-}
-
-export class BlogAuthorSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'email', 'avatarUrl', 'bio', 'createdAt', 'updatedAt'] as const
-  $columns = BlogAuthorSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare slug: string
-  @column()
-  declare email: string | null
-  @column()
-  declare avatarUrl: string | null
-  @column()
-  declare bio: string | null
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
-}
-
-export class BlogCategorySchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'description', 'createdAt', 'updatedAt'] as const
-  $columns = BlogCategorySchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare slug: string
-  @column()
-  declare description: string | null
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
-}
-
-export class BlogPostSchema extends BaseModel {
-  static $columns = ['id', 'title', 'slug', 'summary', 'body', 'thumbnailUrl', 'coverImageUrl', 'categoryId', 'publishedAt', 'createdAt', 'updatedAt'] as const
-  $columns = BlogPostSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare title: string
-  @column()
-  declare slug: string
-  @column()
-  declare summary: string | null
-  @column()
-  declare body: string | null
-  @column()
-  declare thumbnailUrl: string | null
-  @column()
-  declare coverImageUrl: string | null
-  @column()
-  declare categoryId: string | null
-  @column.dateTime()
-  declare publishedAt: DateTime | null
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
-}
-
-export class DeleteAccountRequestSchema extends BaseModel {
-  static $columns = ['id', 'orgId', 'tokenHash', 'expiresAt', 'createdAt', 'updatedAt'] as const
-  $columns = DeleteAccountRequestSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare orgId: string
-  @column()
-  declare tokenHash: string
-  @column.dateTime()
-  declare expiresAt: DateTime
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
 }
 
 export class NotificationSchema extends BaseModel {
@@ -255,64 +140,6 @@ export class PushNotificationSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
-export class QueueJobSchema extends BaseModel {
-  static $columns = ['id', 'queue', 'status', 'data', 'score', 'workerId', 'acquiredAt', 'executeAt', 'finishedAt', 'error'] as const
-  $columns = QueueJobSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare queue: string
-  @column()
-  declare status: string
-  @column()
-  declare data: string
-  @column()
-  declare score: bigint | number | null
-  @column()
-  declare workerId: string | null
-  @column()
-  declare acquiredAt: bigint | number | null
-  @column()
-  declare executeAt: bigint | number | null
-  @column()
-  declare finishedAt: bigint | number | null
-  @column()
-  declare error: string | null
-}
-
-export class QueueScheduleSchema extends BaseModel {
-  static $columns = ['id', 'status', 'name', 'payload', 'cronExpression', 'everyMs', 'timezone', 'fromDate', 'toDate', 'runLimit', 'runCount', 'nextRunAt', 'lastRunAt', 'createdAt'] as const
-  $columns = QueueScheduleSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare status: string
-  @column()
-  declare name: string
-  @column()
-  declare payload: string
-  @column()
-  declare cronExpression: string | null
-  @column()
-  declare everyMs: bigint | number | null
-  @column()
-  declare timezone: string
-  @column.dateTime()
-  declare fromDate: DateTime | null
-  @column.dateTime()
-  declare toDate: DateTime | null
-  @column()
-  declare runLimit: number | null
-  @column()
-  declare runCount: number
-  @column.dateTime()
-  declare nextRunAt: DateTime | null
-  @column.dateTime()
-  declare lastRunAt: DateTime | null
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-}
-
 export class RateLimitSchema extends BaseModel {
   static $columns = ['key', 'points', 'expire'] as const
   $columns = RateLimitSchema.$columns
@@ -371,7 +198,7 @@ export class SessionSchema extends BaseModel {
 }
 
 export class TeamInvitationSchema extends BaseModel {
-  static $columns = ['id', 'email', 'role', 'tokenHash', 'invitedByUserId', 'expiresAt', 'acceptedAt', 'acceptedByUserId', 'invitedUserRole', 'allowedPages', 'createdAt', 'updatedAt', 'enableProdAccess'] as const
+  static $columns = ['id', 'email', 'role', 'tokenHash', 'invitedByUserId', 'expiresAt', 'acceptedAt', 'acceptedByUserId', 'invitedUserRole', 'enableProdAccess', 'allowedPages', 'createdAt', 'updatedAt'] as const
   $columns = TeamInvitationSchema.$columns
   @column({ isPrimary: true })
   declare id: string
@@ -392,13 +219,13 @@ export class TeamInvitationSchema extends BaseModel {
   @column()
   declare invitedUserRole: string
   @column()
+  declare enableProdAccess: boolean | null
+  @column()
   declare allowedPages: any | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
-  @column()
-  declare enableProdAccess: boolean | null
 }
 
 export class TeamMemberSchema extends BaseModel {
@@ -433,7 +260,7 @@ export class TeamMemberSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['id', 'fullName', 'email', 'password', 'role', 'avatar', 'googleData', 'token', 'pendingEmail', 'emailVerified', 'emailVerifiedAt', 'emailChangeToken', 'settings', 'twoFactorEnabled', 'twoFactorSecret', 'twoFactorRecoveryCodes', 'lastLoginAt', 'createdAt', 'updatedAt', 'isGodAdmin', 'enableProdAccess'] as const
+  static $columns = ['id', 'fullName', 'email', 'password', 'role', 'isGodAdmin', 'avatar', 'googleData', 'token', 'pendingEmail', 'emailVerified', 'emailVerifiedAt', 'emailChangeToken', 'settings', 'twoFactorEnabled', 'twoFactorSecret', 'twoFactorRecoveryCodes', 'lastLoginAt', 'createdAt', 'updatedAt', 'enableProdAccess'] as const
   $columns = UserSchema.$columns
   @column({ isPrimary: true })
   declare id: string
@@ -445,6 +272,8 @@ export class UserSchema extends BaseModel {
   declare password: string | null
   @column()
   declare role: string
+  @column()
+  declare isGodAdmin: boolean
   @column()
   declare avatar: any | null
   @column()
@@ -473,8 +302,6 @@ export class UserSchema extends BaseModel {
   declare createdAt: DateTime | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
-  @column()
-  declare isGodAdmin: boolean | null
   @column()
   declare enableProdAccess: boolean
 }

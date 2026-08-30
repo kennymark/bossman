@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { SimpleGrid } from '@/components/ui'
 
 
@@ -27,6 +28,7 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
     coverImageAltUrl: string
     coverImage: File | null
     publish: boolean
+    publishedAt: string | null
   }>({
     title: '',
     body: '',
@@ -35,6 +37,7 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
     coverImageAltUrl: '',
     coverImage: null,
     publish: false,
+    publishedAt: null,
   })
 
   const submit = () => {
@@ -172,17 +175,37 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
                 )}
               </div>
 
-              <div className='space-y-2'>
+              <div className='md:col-span-2 space-y-4'>
                 <Label>Publish</Label>
-                <div className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={data.publish}
-                    onCheckedChange={(checked) => setData('publish', Boolean(checked))}
-                    id='publish'
-                  />
-                  <Label htmlFor='publish' className='font-normal'>
-                    Publish now
-                  </Label>
+                <div className='grid gap-4 md:grid-cols-2 items-start'>
+                  <div className='flex items-center gap-2 h-10'>
+                    <Checkbox
+                      checked={data.publish}
+                      onCheckedChange={(checked) => {
+                        const isChecked = Boolean(checked)
+                        setData((prev) => ({
+                          ...prev,
+                          publish: isChecked,
+                          publishedAt: isChecked && !prev.publishedAt ? new Date().toISOString() : prev.publishedAt
+                        }))
+                      }}
+                      id='publish'
+                    />
+                    <Label htmlFor='publish' className='font-normal'>
+                      Publish
+                    </Label>
+                  </div>
+                  
+                  {data.publish && (
+                    <div>
+                      <DateTimePicker
+                        value={data.publishedAt}
+                        onChange={(val) => setData('publishedAt', val)}
+                        clearable
+                        placeholder="Now"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

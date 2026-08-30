@@ -1,6 +1,7 @@
 import { authApiClient } from '@adonisjs/auth/plugins/api_client'
 import app from '@adonisjs/core/services/app'
 import testUtils from '@adonisjs/core/services/test_utils'
+import limiter from '@adonisjs/limiter/services/main'
 import { sessionApiClient } from '@adonisjs/session/plugins/api_client'
 import { shieldApiClient } from '@adonisjs/shield/plugins/api_client'
 import { apiClient } from '@japa/api-client'
@@ -37,7 +38,8 @@ export const plugins: Config['plugins'] = [
  * The teardown functions are executed after all the tests
  */
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
-  setup: [],
+  /** Migrate the test database once per run and roll it back afterwards. */
+  setup: [() => testUtils.db().migrate()],
   teardown: [],
 }
 
@@ -47,6 +49,14 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
  */
 export const configureSuite: Config['configureSuite'] = (suite) => {
   if (['browser', 'functional', 'e2e'].includes(suite.name)) {
+    suite.onGroup((group) => {
+      /**
+       * Throttled routes share one in-memory store across the run, so without this a
+       * test fails with a 429 purely because earlier tests used up the budget.
+       */
+      group.each.setup(() => limiter.clear())
+    })
+
     return suite.setup(() => testUtils.httpServer().start())
   }
 }

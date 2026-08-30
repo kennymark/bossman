@@ -129,7 +129,7 @@ test.group('Auth', (group) => {
     }
   })
 
-  test('should not send forgot password email for non-existent user', async ({ client }) => {
+  test('should not reveal whether an account exists', async ({ client, assert }) => {
     const response = await client
       .post('/api/v1/auth/forgot-password')
       .json({
@@ -137,7 +137,9 @@ test.group('Auth', (group) => {
       })
       .withCsrfToken()
 
-    response.assertStatus(404)
+    /** Must be indistinguishable from the success case, or it leaks which emails exist. */
+    response.assertStatus(200)
+    assert.equal(response.body().message, 'Password reset email sent.')
   })
 
   test('should validate email on forgot password', async ({ client }) => {

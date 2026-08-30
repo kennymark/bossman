@@ -29,12 +29,12 @@ const DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm"
 
 function parseDateTimeValue(value: string | null | undefined): Date | undefined {
   if (!value) return undefined
-  const parsed = parse(value, DATE_TIME_FORMAT, new Date())
+  const parsed = new Date(value)
   return isValid(parsed) ? parsed : undefined
 }
 
 function formatDateTimeValue(date: Date): string {
-  return format(date, DATE_TIME_FORMAT)
+  return date.toISOString()
 }
 
 function clampDateTime(value: string, minDateTime?: string, maxDateTime?: string): string {

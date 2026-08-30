@@ -10,7 +10,7 @@ export interface BlogMetaDateReadTimeProps {
 }
 
 export function BlogMetaDateReadTime({ post, className }: BlogMetaDateReadTimeProps) {
-  const dateLabel = post.publishedAt ? formatBlogDate(post.publishedAt) : null
+  const dateLabel = post.publishedAt ? formatBlogDate(post.publishedAt) : post.scheduledAt ? formatBlogDate(post.scheduledAt) : null
   const minutes = getReadingMinutes(post.excerpt || '')
 
   return (

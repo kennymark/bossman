@@ -142,9 +142,17 @@ function EmailDetailContent({ email }: { email: ResendEmail }) {
           <p className='text-muted-foreground text-xs px-3 py-2 border-b border-border bg-muted/50'>
             HTML body
           </p>
-          <div
-            className='p-4 max-h-[60vh] overflow-auto prose prose-sm dark:prose-invert max-w-none'
-            dangerouslySetInnerHTML={{ __html: email.html }}
+          {/*
+            Rendered in a sandboxed iframe rather than injected into the page: this is
+            third-party email markup, so any script or form it carries stays isolated
+            from the admin session.
+          */}
+          <iframe
+            title='Email HTML body'
+            srcDoc={email.html}
+            sandbox=''
+            referrerPolicy='no-referrer'
+            className='w-full h-[60vh] bg-white'
           />
         </div>
       ) : email.text ? (
@@ -233,87 +241,86 @@ export default function EmailsIndex({ emailId: initialEmailId }: EmailsIndexProp
   return (
     <DashboardPage
       title='Emails'
-      description='Sent emails from Resend. Open an email to view details and share the link.'
-    >
+      description='Sent emails from Resend. Open an email to view details and share the link.'>
       <BaseSheet
-          open={viewSheetOpen}
-          onOpenChange={(open) => !open && closeSheet()}
-          title='Email details'
-          description={
-            selectedEmailId ? (
-              <span className='font-mono text-xs break-all'>{selectedEmailId}</span>
-            ) : undefined
-          }
-          side='right'
-          className='w-full sm:max-w-2xl'
-          showFooter={false}>
-          {emailDetailQuery.isPending && selectedEmailId ? (
-            <LoadingSkeleton type='list' />
-          ) : emailDetailQuery.data ? (
-            <EmailDetailContent email={emailDetailQuery.data} />
-          ) : emailDetailQuery.isError ? (
-            <p className='text-destructive text-sm'>Failed to load email.</p>
-          ) : null}
-        </BaseSheet>
+        open={viewSheetOpen}
+        onOpenChange={(open) => !open && closeSheet()}
+        title='Email details'
+        description={
+          selectedEmailId ? (
+            <span className='font-mono text-xs break-all'>{selectedEmailId}</span>
+          ) : undefined
+        }
+        side='right'
+        className='w-full sm:max-w-2xl'
+        showFooter={false}>
+        {emailDetailQuery.isPending && selectedEmailId ? (
+          <LoadingSkeleton type='list' />
+        ) : emailDetailQuery.data ? (
+          <EmailDetailContent email={emailDetailQuery.data} />
+        ) : emailDetailQuery.isError ? (
+          <p className='text-destructive text-sm'>Failed to load email.</p>
+        ) : null}
+      </BaseSheet>
 
-        <AppCard title='Sent emails' description='Browse sent emails.'>
-          <div className='space-y-4'>
-            {emailsListLoading ? (
-              <LoadingSkeleton type='table' />
-            ) : (
-              <>
-                <Table>
-                  <TableHeader>
+      <AppCard title='Sent emails' description='Browse sent emails.'>
+        <div className='space-y-4'>
+          {emailsListLoading ? (
+            <LoadingSkeleton type='table' />
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columnsWithClick.map((col) => (
+                      <TableHead key={col.key} style={{ width: col.width }}>
+                        {col.header}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.length === 0 ? (
                     <TableRow>
-                      {columnsWithClick.map((col) => (
-                        <TableHead key={col.key} style={{ width: col.width }}>
-                          {col.header}
-                        </TableHead>
-                      ))}
+                      <TableCell colSpan={columnsWithClick.length} className='text-center'>
+                        <EmptyState
+                          icon={IconMail}
+                          title='No emails found'
+                          description='Emails sent via Resend will appear here.'
+                          className='py-12'
+                        />
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={columnsWithClick.length} className='text-center'>
-                          <EmptyState
-                            icon={IconMail}
-                            title='No emails found'
-                            description='Emails sent via Resend will appear here.'
-                            className='py-12'
-                          />
-                        </TableCell>
+                  ) : (
+                    data.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        className='cursor-pointer hover:bg-muted/50'
+                        onClick={() => openEmail(row.id)}>
+                        {columnsWithClick.map((col) => (
+                          <TableCell key={col.key}>{col.cell ? col.cell(row) : null}</TableCell>
+                        ))}
                       </TableRow>
-                    ) : (
-                      data.map((row) => (
-                        <TableRow
-                          key={row.id}
-                          className='cursor-pointer hover:bg-muted/50'
-                          onClick={() => openEmail(row.id)}>
-                          {columnsWithClick.map((col) => (
-                            <TableCell key={col.key}>{col.cell ? col.cell(row) : null}</TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-                {(hasMore || canGoPrev) && (
-                  <div className='flex items-center justify-between border-t border-border pt-4'>
-                    <Button variant='outline' size='sm' disabled={!canGoPrev} onClick={goPrev}>
-                      <IconChevronLeft className='h-4 w-4' />
-                      Previous
-                    </Button>
-                    <Button variant='outline' size='sm' disabled={!hasMore} onClick={goNext}>
-                      Next
-                      <IconChevronRight className='h-4 w-4' />
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </AppCard>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+              {(hasMore || canGoPrev) && (
+                <div className='flex items-center justify-between border-t border-border pt-4'>
+                  <Button variant='outline' size='sm' disabled={!canGoPrev} onClick={goPrev}>
+                    <IconChevronLeft className='h-4 w-4' />
+                    Previous
+                  </Button>
+                  <Button variant='outline' size='sm' disabled={!hasMore} onClick={goNext}>
+                    Next
+                    <IconChevronRight className='h-4 w-4' />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </AppCard>
     </DashboardPage>
   )
 }

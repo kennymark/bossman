@@ -21,7 +21,7 @@ emitter.on('db:connection:connect', (connectionName) => {
 })
 
 emitter.on('db:connection:disconnect', (connectionName) => {
-  console.log(`Database connection "${connectionName.clientName}" has been closed.`)
+  logger.info(`Database connection "${connectionName.clientName}" has been closed.`)
 })
 
 // emitter.on('http:request_completed', (event) => {
@@ -45,7 +45,7 @@ emitter.on('mail:sent', async (event) => {
     url: testMessageUrl,
   }
 
-  console.log('Mail sent:', msg)
+  logger.debug({ msg }, 'Mail sent')
 })
 
 const getTestMessageUrl = (info: string) => {

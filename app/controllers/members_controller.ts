@@ -6,23 +6,11 @@ import LeaseableEntity from '#models/leaseable_entity'
 import TeamInvitation from '#models/team_invitation'
 import TeamMember from '#models/team_member'
 import User from '#models/user'
-import { getPageAccessForUser } from '#services/page_access_service'
 import { updateMemberValidator } from '#validators/team'
 
 export default class MembersController {
-  async index({ auth, request, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
+  async index({ request, response }: HttpContext) {
     const params = await request.paginationQs()
-
-    const isAdmin = user.isAdminOrSuperAdmin
-    if (!isAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to teams.' })
-    }
 
     const members = await TeamMember.query()
       .if(params.search, (q) => {
@@ -50,19 +38,7 @@ export default class MembersController {
    * @responseHeader 200 - @use(paginated)
    * @responseHeader 200 - X-pages - A description of the header - @example(test)
    */
-  async invitations({ auth, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
-
-    const isAdmin = user.isAdminOrSuperAdmin
-    if (!isAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to teams.' })
-    }
-
+  async invitations({ response }: HttpContext) {
     const pendingInvitations = await TeamInvitation.query()
       .whereNull('acceptedAt')
       .preload('invitedBy')
@@ -75,18 +51,7 @@ export default class MembersController {
     })
   }
 
-  async dataAccessOptions({ auth, request, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to manage teams.' })
-    }
-
+  async dataAccessOptions({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
     const [leaseableEntities, leases] = await Promise.all([
       LeaseableEntity.query({ connection: appEnv })
@@ -104,19 +69,8 @@ export default class MembersController {
     })
   }
 
-  async updateMember({ auth, request, response }: HttpContext) {
-    const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
+  async updateMember({ request, response }: HttpContext) {
     const memberId = request.param('memberId')
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to manage teams.' })
-    }
-
     const member = await TeamMember.query().where('id', memberId).firstOrFail()
     const body = await request.validateUsing(updateMemberValidator)
 
@@ -172,21 +126,11 @@ export default class MembersController {
 
   async destroy({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const freshUser = await User.findByOrFail('email', user.email)
     const memberId = request.param('memberId')
-
-    if (!user.isAdminOrSuperAdmin) {
-      return response.forbidden({ error: 'Access required.' })
-    }
-    const allowed = await getPageAccessForUser(freshUser.id)
-    if (Array.isArray(allowed) && !allowed.includes('teams')) {
-      return response.forbidden({ error: 'You do not have access to manage teams.' })
-    }
-
     const member = await TeamMember.query().where('id', memberId).firstOrFail()
 
     // Prevent removing yourself
-    if (member.userId === freshUser.id) {
+    if (member.userId === user.id) {
       return response.badRequest({ error: 'You cannot remove yourself from the team.' })
     }
 

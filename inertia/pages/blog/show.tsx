@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head, Link, usePage } from '@inertiajs/react'
 import { IconArrowLeft, IconPencil } from '@tabler/icons-react'
 
 import type { RawBlogPost } from '#types/model-types'
@@ -18,6 +18,8 @@ interface BlogShowProps {
 
 export default function BlogShow({ post }: BlogShowProps) {
   const coverUrl = getCoverImageUrl(post)
+  /** This page is public, so the management link is only for admins who can use it. */
+  const canManage = Boolean(usePage().props.user?.isAdminOrSuperAdmin)
 
   return (
     <PublicLayout>
@@ -31,9 +33,15 @@ export default function BlogShow({ post }: BlogShowProps) {
               <Button variant='ghost' asChild leftIcon={<IconArrowLeft className='h-4 w-4' />}>
                 <Link href='/blog'>Back to blog</Link>
               </Button>
-              <Button variant='outline' size='sm' asChild leftIcon={<IconPencil className='h-4 w-4' />}>
-                <Link href={`/blog/manage/${post.id}/edit`}>Edit</Link>
-              </Button>
+              {canManage && (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  asChild
+                  leftIcon={<IconPencil className='h-4 w-4' />}>
+                  <Link href={`/blog/manage/${post.id}/edit`}>Edit</Link>
+                </Button>
+              )}
             </div>
           </div>
 

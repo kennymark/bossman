@@ -15,9 +15,7 @@ export default class DbBackupsController {
       inertia,
       'backups',
       (page, perPage) =>
-        DbBackup.query({ connection: appEnv })
-          .orderBy('createdAt', 'desc')
-          .paginate(page, perPage),
+        DbBackup.query({ connection: appEnv }).orderBy('createdAt', 'desc').paginate(page, perPage),
       DbBackupTransformer,
       { defaultPerPage: 20 },
     )
@@ -89,22 +87,21 @@ export default class DbBackupsController {
     }
   }
 
-  async destroy({ params, response, request }: HttpContext) {
+  async destroy({ params, response, request, session }: HttpContext) {
     const appEnv = request.appEnv()
     const backup = await DbBackup.query({ connection: appEnv }).where('id', params.id).firstOrFail()
     const fileName = backup.fileName!
-    console.log('🚀 ~ DbBackupsController ~ destroy ~ fileName:', fileName)
 
     try {
       const r2 = drive.use('backup')
-      const exists = await r2.exists(fileName)
-      console.log('🚀 ~ DbBackupsController ~ destroy ~ exists:', exists)
-
       await r2.delete(fileName)
       await backup.delete()
       logger.info(`Deleted backup file from R2: ${fileName}`)
+      session.flash('success', { message: 'Backup deleted.' })
     } catch (err) {
-      console.log('🚀 ~ DbBackupsController ~ destroy ~ err:', err)
+      /** Previously swallowed, so a failed delete still redirected as if it had worked. */
+      logger.error({ err, fileName }, 'Failed to delete backup')
+      session.flash('error', { message: 'Could not delete the backup. Please try again.' })
     }
 
     return response.redirect('/db-backups')

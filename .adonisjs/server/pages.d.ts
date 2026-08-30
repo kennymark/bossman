@@ -17,6 +17,7 @@ declare module '@adonisjs/inertia/types' {
     'addons/edit': ExtractProps<(typeof import('../../inertia/pages/addons/edit.tsx'))['default']>
     'addons/index': ExtractProps<(typeof import('../../inertia/pages/addons/index.tsx'))['default']>
     'analytics/index': ExtractProps<(typeof import('../../inertia/pages/analytics/index.tsx'))['default']>
+    'api-access/index': ExtractProps<(typeof import('../../inertia/pages/api-access/index.tsx'))['default']>
     'blog/index': ExtractProps<(typeof import('../../inertia/pages/blog/index.tsx'))['default']>
     'blog/manage/categories': ExtractProps<(typeof import('../../inertia/pages/blog/manage/categories.tsx'))['default']>
     'blog/manage/create': ExtractProps<(typeof import('../../inertia/pages/blog/manage/create.tsx'))['default']>
