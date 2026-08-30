@@ -12,12 +12,11 @@ import {
   generateTogethaReference,
   ordinalize,
   rentBreakdown,
-  runIfFalse,
-  runIfTrue,
   startCase,
   trimSymbols,
   waitFor,
 } from './functions.js'
+import { runIfFalse, runIfTrue } from './run_conditionally.js'
 
 test.group('Utility Functions', () => {
   test('convertBytesToMb', ({ assert }) => {

@@ -1,6 +1,8 @@
-import app from '@adonisjs/core/services/app'
-import logger from '@adonisjs/core/services/logger'
-
+/**
+ * Isomorphic helpers: imported by Inertia pages as well as server code, so this
+ * module must stay free of AdonisJS services. Server-only conditional runners live
+ * in `#utils/run_conditionally`.
+ */
 // convert bytes to mb
 export function convertBytesToMb(bytes: number) {
   return (bytes / 1024 / 1024).toFixed(2)
@@ -115,46 +117,6 @@ export function trimSymbols(str: string): string {
 //given a number, generate an array of numbers from 1 to that number
 export function generateArrayFromNumber(num: number) {
   return Array.from(Array(num).keys()).map((i) => i + 1)
-}
-
-export async function runInProdOnly(fn: () => Promise<void> | void, rationale = '') {
-  if (app.inProduction) {
-    await fn()
-  } else {
-    logger.debug(`Skipping ${rationale} because NODE_ENV is not production`)
-  }
-}
-
-export async function runInDevOnly(fn: () => Promise<void> | void, rationale = '') {
-  if (app.inDev) {
-    await fn()
-  } else {
-    logger.debug(`Skipping ${rationale} because NODE_ENV is not development`)
-  }
-}
-
-export async function runIfTrue(
-  condition: boolean,
-  fn: () => Promise<void> | void,
-  rationale = '',
-) {
-  if (condition) {
-    await fn()
-  } else {
-    logger.debug(`Skipping ${rationale} because condition is false`)
-  }
-}
-
-export async function runIfFalse(
-  condition: boolean,
-  fn: () => Promise<void> | void,
-  rationale = '',
-) {
-  if (!condition) {
-    await fn()
-  } else {
-    logger.debug(`Skipping ${rationale} because condition is true`)
-  }
 }
 
 export function generateOTP(length = 6): string {
