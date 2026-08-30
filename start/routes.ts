@@ -54,6 +54,7 @@ router
     router.post('/push-notifications', [controllers.PushNotifications, 'store'])
     router.post('/push-notifications/:id/resend', [controllers.PushNotifications, 'resend'])
     router.get('/analytics', [controllers.Analytics, 'index'])
+    router.get('/api-access', [controllers.ApiAccess, 'index'])
     router.get('/db-backups', [controllers.DbBackups, 'index'])
     router.get('/db-backups/:id/download', [controllers.DbBackups, 'download'])
     router.get('/logs', [controllers.LogsPage, 'index'])

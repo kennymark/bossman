@@ -6,6 +6,7 @@
 export const controllers = {
   Addons: () => import('#controllers/addons_controller'),
   Analytics: () => import('#controllers/analytics_controller'),
+  ApiAccess: () => import('#controllers/api_access_controller'),
   Audits: () => import('#controllers/audits_controller'),
   Auth: () => import('#controllers/auth_controller'),
   BlogCategories: () => import('#controllers/blog_categories_controller'),

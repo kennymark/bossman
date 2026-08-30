@@ -4,6 +4,7 @@ import vine from '@vinejs/vine'
 import { middleware } from '#start/kernel'
 
 const AnalyticsController = () => import('#controllers/analytics_controller')
+const ApiAccessController = () => import('#controllers/api_access_controller')
 const DashboardController = () => import('#controllers/dashboard_controller')
 const DbBackupsController = () => import('#controllers/db_backups_controller')
 const EmailsController = () => import('#controllers/emails_controller')
@@ -16,6 +17,7 @@ const RailwayController = () => import('#controllers/railway_controller')
 
 router
   .group(() => {
+    router.get('/api-access/stats', [ApiAccessController, 'stats'])
     router.get('/analytics/orgs/stats', [AnalyticsController, 'orgsStats'])
     router.get('/analytics/orgs/entities', [AnalyticsController, 'orgsEntities'])
     router.get('/analytics/users/stats', [AnalyticsController, 'usersStats'])

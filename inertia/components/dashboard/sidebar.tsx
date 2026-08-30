@@ -17,6 +17,7 @@ import {
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
   IconLogs,
+  IconPlugConnected,
   IconServer,
   IconSettings,
   IconStack,
@@ -104,6 +105,7 @@ const developerNavSections: NavSection[] = [
     items: [
       { title: 'Servers', href: '/servers', icon: <IconServer className='h-4 w-4' /> },
       { title: 'Backups', href: '/db-backups', icon: <IconDatabase className='h-4 w-4' /> },
+      { title: 'API & MCP', href: '/api-access', icon: <IconPlugConnected className='h-4 w-4' /> },
     ],
   },
 ]
@@ -137,6 +139,7 @@ export function Sidebar({ children }: SidebarProps) {
       .replace(/^\/+/, '')
       .replace(/\/+$/, '')}`
     if (path === '/analytics') return 'analytics'
+    if (path.startsWith('/api-access')) return 'apiAccess'
     if (path === '/dashboard') return 'dashboard'
     if (path.startsWith('/teams')) return 'teams'
     if (path.startsWith('/blog/manage')) return 'blog'
