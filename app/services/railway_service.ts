@@ -1,8 +1,46 @@
+import cache from '@adonisjs/cache/services/main'
+import logger from '@adonisjs/core/services/logger'
 import axios, { type AxiosInstance } from 'axios'
 
 import env from '#start/env'
 
 const RAILWAY_GRAPHQL = 'https://backboard.railway.app/graphql/v2'
+
+/**
+ * How long each kind of Railway data stays fresh.
+ *
+ * Every read used to call the Railway GraphQL API directly, so opening `/servers`,
+ * sorting it, or reloading the page issued a fresh round trip — and the project detail
+ * page did it server-side, before the response was even sent. These are shaped by how
+ * fast the underlying thing actually changes.
+ */
+const TTL = {
+  /** Projects are created and renamed rarely. */
+  projects: '5m',
+  /** A project's services and environments change about as rarely. */
+  project: '5m',
+  /**
+   * Deployments move on their own, so this is short. It exists to absorb bursts — a
+   * sheet being opened and closed repeatedly — not to hide state.
+   */
+  deployments: '20s',
+} as const
+
+/**
+ * Serve stale data rather than an error when Railway is unreachable.
+ *
+ * A read-only console page showing a five-minute-old project list is far more useful
+ * than one showing "Failed to fetch Railway projects" because the upstream API
+ * hiccupped.
+ */
+const GRACE = '30m'
+
+/** Cache tags, so a mutation can drop exactly what it invalidated. */
+const TAGS = {
+  all: 'railway',
+  project: (projectId: string) => `railway:project:${projectId}`,
+  service: (serviceId: string) => `railway:service:${serviceId}`,
+}
 
 export interface RailwayProject {
   id: string
@@ -43,6 +81,26 @@ export interface RailwayRuntimeLog {
   level?: string
 }
 
+/** Per-call cache control for the read methods. */
+export interface ReadOptions {
+  /** Bypass the cache and refill it. Drives the Refresh button on the servers pages. */
+  forceFresh?: boolean
+}
+
+/**
+ * Drops cache entries by tag.
+ *
+ * Never throws: failing to clear a cache entry must not turn a successful redeploy into
+ * an error response. The worst case is one stale read for the remaining TTL.
+ */
+async function invalidate(tags: string[]): Promise<void> {
+  try {
+    await cache.deleteByTag({ tags })
+  } catch (err) {
+    logger.warn({ err, tags }, 'Could not invalidate Railway cache')
+  }
+}
+
 function createClient(): AxiosInstance {
   const token = env.get('RAILWAY_API_KEY')
   return axios.create({
@@ -71,7 +129,18 @@ export class RailwayApiService {
     return data.data
   }
 
-  async listProjects(): Promise<RailwayProject[]> {
+  async listProjects(options: ReadOptions = {}): Promise<RailwayProject[]> {
+    return cache.getOrSet({
+      key: 'railway:projects',
+      ttl: TTL.projects,
+      grace: GRACE,
+      tags: [TAGS.all],
+      forceFresh: options.forceFresh,
+      factory: () => this.fetchProjects(),
+    })
+  }
+
+  private async fetchProjects(): Promise<RailwayProject[]> {
     const data = await this.graphql<{
       projects: { edges: Array<{ node: RailwayProject }> }
     }>(`
@@ -92,7 +161,21 @@ export class RailwayApiService {
     return data.projects.edges.map((e) => e.node)
   }
 
-  async getProject(projectId: string): Promise<RailwayProjectDetail | null> {
+  async getProject(
+    projectId: string,
+    options: ReadOptions = {},
+  ): Promise<RailwayProjectDetail | null> {
+    return cache.getOrSet({
+      key: `railway:project:${projectId}`,
+      ttl: TTL.project,
+      grace: GRACE,
+      tags: [TAGS.all, TAGS.project(projectId)],
+      forceFresh: options.forceFresh,
+      factory: () => this.fetchProject(projectId),
+    })
+  }
+
+  private async fetchProject(projectId: string): Promise<RailwayProjectDetail | null> {
     const data = await this.graphql<{
       project: {
         id: string
@@ -152,6 +235,23 @@ export class RailwayApiService {
     serviceId: string,
     environmentId: string,
     limit: number = 5,
+    options: ReadOptions = {},
+  ): Promise<RailwayDeployment[]> {
+    return cache.getOrSet({
+      key: `railway:deployments:${projectId}:${serviceId}:${environmentId}:${limit}`,
+      ttl: TTL.deployments,
+      grace: GRACE,
+      tags: [TAGS.all, TAGS.project(projectId), TAGS.service(serviceId)],
+      forceFresh: options.forceFresh,
+      factory: () => this.fetchDeployments(projectId, serviceId, environmentId, limit),
+    })
+  }
+
+  private async fetchDeployments(
+    projectId: string,
+    serviceId: string,
+    environmentId: string,
+    limit: number,
   ): Promise<RailwayDeployment[]> {
     const data = await this.graphql<{
       deployments: { edges: Array<{ node: RailwayDeployment }> }
@@ -244,6 +344,12 @@ export class RailwayApiService {
     `,
       { id: deploymentId },
     )
+    /**
+     * The deployment list this came from is now wrong. Dropping it here means the very
+     * next read shows the new state rather than a cached "before" for up to the TTL —
+     * which on an action page would look like the button did nothing.
+     */
+    await invalidate([TAGS.all])
     return data.deploymentRestart === true
   }
 
@@ -256,6 +362,7 @@ export class RailwayApiService {
     `,
       { id: deploymentId },
     )
+    await invalidate([TAGS.all])
     return data.deploymentRedeploy
   }
 
@@ -272,6 +379,12 @@ export class RailwayApiService {
     `,
       { serviceId, environmentId },
     )
+    await invalidate([TAGS.service(serviceId)])
     return data.serviceInstanceRedeploy === true
+  }
+
+  /** Drops every cached Railway read. Backs the Refresh control. */
+  async invalidateAll(): Promise<void> {
+    await invalidate([TAGS.all])
   }
 }

@@ -28,9 +28,16 @@ export default class ServersController {
     return renderInertia(inertia, 'servers/index', { sort })
   }
 
-  async show({ params, inertia }: HttpContext) {
+  /**
+   * Rendered server-side, so this call happens before the response is sent — it was the
+   * slowest thing on the page. It is now cached, with `?refresh=1` as the escape hatch.
+   */
+  async show({ params, request, inertia }: HttpContext) {
+    const refresh = request.input('refresh')
     const railway = new RailwayApiService()
-    const project = await railway.getProject(params.projectId)
+    const project = await railway.getProject(params.projectId, {
+      forceFresh: refresh === '1' || refresh === 'true',
+    })
     return renderInertia(inertia, 'servers/project-show', {
       projectName: project?.name ?? null,
       project,
