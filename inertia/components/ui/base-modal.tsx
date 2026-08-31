@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 
+import type { BaseOverlayProps } from '@/components/ui/base-overlay-types'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,7 +14,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { HStack } from '@/components/ui/hstack'
-import type { BaseOverlayProps } from '@/components/ui/base-overlay-types'
 
 export type BaseModalProps = BaseOverlayProps
 

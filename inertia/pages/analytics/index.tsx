@@ -17,8 +17,8 @@ import type { PaginatedResponse } from '#types/extra'
 import type { RawActivity, RawLease, RawOrg } from '#types/model-types'
 import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
-import { AnalyticsGrowthChart } from '@/components/dashboard/growth-chart'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { AnalyticsGrowthChart } from '@/components/dashboard/growth-chart'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { AppCard } from '@/components/ui/app-card'
 import { Badge } from '@/components/ui/badge'
@@ -366,195 +366,194 @@ export default function AnalyticsIndex(_props: AnalyticsIndexProps) {
           buttonClassName='min-w-[200px]'
           buttonSize='sm'
         />
-      }
-    >
+      }>
       <Tabs defaultValue='orgs' className='space-y-6'>
-          <TabsList className='w-fit h-auto flex-wrap gap-1'>
-            <TabsTrigger value='orgs' className='gap-2 rounded-md'>
-              <IconBuilding className='h-4 w-4' />
-              Orgs
-            </TabsTrigger>
-            <TabsTrigger value='togetha_users' className='gap-2 rounded-md'>
-              <IconUser className='h-4 w-4' />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value='leases' className='gap-2 rounded-md'>
-              <IconBriefcase className='h-4 w-4' />
-              Leases
-            </TabsTrigger>
-            <TabsTrigger value='maintenance' className='gap-2 rounded-md'>
-              <IconTool className='h-4 w-4' />
-              Maintenance
-            </TabsTrigger>
-            <TabsTrigger value='activity' className='gap-2 rounded-md'>
-              <IconActivity className='h-4 w-4' />
-              Activity
-            </TabsTrigger>
-          </TabsList>
+        <TabsList className='w-fit h-auto flex-wrap gap-1'>
+          <TabsTrigger value='orgs' className='gap-2 rounded-md'>
+            <IconBuilding className='h-4 w-4' />
+            Orgs
+          </TabsTrigger>
+          <TabsTrigger value='togetha_users' className='gap-2 rounded-md'>
+            <IconUser className='h-4 w-4' />
+            Users
+          </TabsTrigger>
+          <TabsTrigger value='leases' className='gap-2 rounded-md'>
+            <IconBriefcase className='h-4 w-4' />
+            Leases
+          </TabsTrigger>
+          <TabsTrigger value='maintenance' className='gap-2 rounded-md'>
+            <IconTool className='h-4 w-4' />
+            Maintenance
+          </TabsTrigger>
+          <TabsTrigger value='activity' className='gap-2 rounded-md'>
+            <IconActivity className='h-4 w-4' />
+            Activity
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value='orgs' className='space-y-6 mt-0'>
-            <SimpleGrid cols={{ base: 1, md: 3 }} spacing={4}>
-              <StatCard
-                title='Total'
-                description='Orgs created in period'
-                value={formatNumber(orgsStats?.total)}
-                icon={IconBuilding}
-              />
-              <StatCard
-                title='Landlords'
-                description='Landlord orgs'
-                value={formatNumber(orgsStats?.landlords)}
-                icon={IconUser}
-              />
-              <StatCard
-                title='Agencies'
-                description='Agency orgs'
-                value={formatNumber(orgsStats?.agencies)}
-                icon={IconBriefcase}
-              />
-            </SimpleGrid>
-            {orgsStatsLoading ? (
-              <AppCard title='Growth' description='Loading…'>
-                <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
-                  Loading…
-                </div>
-              </AppCard>
-            ) : (
-              <AnalyticsGrowthChart
-                title='Orgs created'
-                startDate={startDate}
-                endDate={endDate}
-                data={orgsStats?.growth ?? []}
-                config={CHART_CONFIGS.orgs}
-                onBarClick={handleBarClick('orgs')}
-              />
-            )}
-          </TabsContent>
+        <TabsContent value='orgs' className='space-y-6 mt-0'>
+          <SimpleGrid cols={{ base: 1, md: 3 }} spacing={4}>
+            <StatCard
+              title='Total'
+              description='Orgs created in period'
+              value={formatNumber(orgsStats?.total)}
+              icon={IconBuilding}
+            />
+            <StatCard
+              title='Landlords'
+              description='Landlord orgs'
+              value={formatNumber(orgsStats?.landlords)}
+              icon={IconUser}
+            />
+            <StatCard
+              title='Agencies'
+              description='Agency orgs'
+              value={formatNumber(orgsStats?.agencies)}
+              icon={IconBriefcase}
+            />
+          </SimpleGrid>
+          {orgsStatsLoading ? (
+            <AppCard title='Growth' description='Loading…'>
+              <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
+                Loading…
+              </div>
+            </AppCard>
+          ) : (
+            <AnalyticsGrowthChart
+              title='Orgs created'
+              startDate={startDate}
+              endDate={endDate}
+              data={orgsStats?.growth ?? []}
+              config={CHART_CONFIGS.orgs}
+              onBarClick={handleBarClick('orgs')}
+            />
+          )}
+        </TabsContent>
 
-          <TabsContent value='togetha_users' className='space-y-6 mt-0'>
-            <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
-              <StatCard
-                title='Total'
-                description='Users created in period'
-                value={formatNumber(usersStats?.total)}
-                icon={IconUser}
-              />
-            </SimpleGrid>
-            {usersStatsLoading ? (
-              <AppCard title='Growth' description='Loading…'>
-                <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
-                  Loading…
-                </div>
-              </AppCard>
-            ) : (
-              <AnalyticsGrowthChart
-                title='Users created'
-                startDate={startDate}
-                endDate={endDate}
-                data={usersStats?.growth ?? []}
-                config={CHART_CONFIGS.users}
-                onBarClick={handleBarClick('users')}
-              />
-            )}
-          </TabsContent>
+        <TabsContent value='togetha_users' className='space-y-6 mt-0'>
+          <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
+            <StatCard
+              title='Total'
+              description='Users created in period'
+              value={formatNumber(usersStats?.total)}
+              icon={IconUser}
+            />
+          </SimpleGrid>
+          {usersStatsLoading ? (
+            <AppCard title='Growth' description='Loading…'>
+              <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
+                Loading…
+              </div>
+            </AppCard>
+          ) : (
+            <AnalyticsGrowthChart
+              title='Users created'
+              startDate={startDate}
+              endDate={endDate}
+              data={usersStats?.growth ?? []}
+              config={CHART_CONFIGS.users}
+              onBarClick={handleBarClick('users')}
+            />
+          )}
+        </TabsContent>
 
-          <TabsContent value='leases' className='space-y-6 mt-0'>
-            <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
-              <StatCard
-                title='Total'
-                description='Leases created in period'
-                value={formatNumber(leasesStats?.total)}
-                icon={IconBriefcase}
-              />
-            </SimpleGrid>
-            {leasesStatsLoading ? (
-              <AppCard title='Growth' description='Loading…'>
-                <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
-                  Loading…
-                </div>
-              </AppCard>
-            ) : (
-              <AnalyticsGrowthChart
-                title='Leases created'
-                startDate={startDate}
-                endDate={endDate}
-                data={leasesStats?.growth ?? []}
-                config={CHART_CONFIGS.leases}
-                onBarClick={handleBarClick('leases')}
-              />
-            )}
-          </TabsContent>
+        <TabsContent value='leases' className='space-y-6 mt-0'>
+          <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
+            <StatCard
+              title='Total'
+              description='Leases created in period'
+              value={formatNumber(leasesStats?.total)}
+              icon={IconBriefcase}
+            />
+          </SimpleGrid>
+          {leasesStatsLoading ? (
+            <AppCard title='Growth' description='Loading…'>
+              <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
+                Loading…
+              </div>
+            </AppCard>
+          ) : (
+            <AnalyticsGrowthChart
+              title='Leases created'
+              startDate={startDate}
+              endDate={endDate}
+              data={leasesStats?.growth ?? []}
+              config={CHART_CONFIGS.leases}
+              onBarClick={handleBarClick('leases')}
+            />
+          )}
+        </TabsContent>
 
-          <TabsContent value='maintenance' className='space-y-6 mt-0'>
-            <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
-              <StatCard
-                title='Total'
-                description='Maintenance requests in period'
-                value={formatNumber(maintenanceStats?.total)}
-                icon={IconTool}
-              />
-            </SimpleGrid>
-            {maintenanceStatsLoading ? (
-              <AppCard title='Growth' description='Loading…'>
-                <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
-                  Loading…
-                </div>
-              </AppCard>
-            ) : (
-              <AnalyticsGrowthChart
-                title='Maintenance requests'
-                startDate={startDate}
-                endDate={endDate}
-                data={maintenanceStats?.growth ?? []}
-                config={CHART_CONFIGS.maintenance}
-                onBarClick={handleBarClick('maintenance')}
-              />
-            )}
-          </TabsContent>
+        <TabsContent value='maintenance' className='space-y-6 mt-0'>
+          <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
+            <StatCard
+              title='Total'
+              description='Maintenance requests in period'
+              value={formatNumber(maintenanceStats?.total)}
+              icon={IconTool}
+            />
+          </SimpleGrid>
+          {maintenanceStatsLoading ? (
+            <AppCard title='Growth' description='Loading…'>
+              <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
+                Loading…
+              </div>
+            </AppCard>
+          ) : (
+            <AnalyticsGrowthChart
+              title='Maintenance requests'
+              startDate={startDate}
+              endDate={endDate}
+              data={maintenanceStats?.growth ?? []}
+              config={CHART_CONFIGS.maintenance}
+              onBarClick={handleBarClick('maintenance')}
+            />
+          )}
+        </TabsContent>
 
-          <TabsContent value='activity' className='space-y-6 mt-0'>
-            <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
-              <StatCard
-                title='Total'
-                description='Activity in period'
-                value={formatNumber(activityStats?.total)}
-                icon={IconActivity}
-              />
-            </SimpleGrid>
-            {activityStatsLoading ? (
-              <AppCard title='Growth' description='Loading…'>
-                <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
-                  Loading…
-                </div>
-              </AppCard>
-            ) : (
-              <AnalyticsGrowthChart
-                title='Activity'
-                startDate={startDate}
-                endDate={endDate}
-                data={activityStats?.growth ?? []}
-                config={CHART_CONFIGS.activity}
-                onBarClick={handleBarClick('activity')}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+        <TabsContent value='activity' className='space-y-6 mt-0'>
+          <SimpleGrid cols={{ base: 1, md: 1 }} spacing={4}>
+            <StatCard
+              title='Total'
+              description='Activity in period'
+              value={formatNumber(activityStats?.total)}
+              icon={IconActivity}
+            />
+          </SimpleGrid>
+          {activityStatsLoading ? (
+            <AppCard title='Growth' description='Loading…'>
+              <div className='h-[240px] flex items-center justify-center text-muted-foreground text-sm'>
+                Loading…
+              </div>
+            </AppCard>
+          ) : (
+            <AnalyticsGrowthChart
+              title='Activity'
+              startDate={startDate}
+              endDate={endDate}
+              data={activityStats?.growth ?? []}
+              config={CHART_CONFIGS.activity}
+              onBarClick={handleBarClick('activity')}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
 
-        <BaseSheet
-          title={
-            entitiesPeriod
-              ? `${sheetTitles[entityType]} — ${entitiesPeriod.label}`
-              : sheetTitles[entityType]
-          }
-          description={
-            entitiesPeriod ? `${entitiesPeriod.startDate} – ${entitiesPeriod.endDate}` : undefined
-          }
-          open={entitiesSheetOpen}
-          onOpenChange={(open) => !open && closeEntitiesSheet()}
-          side='right'
-          showFooter={false}>
-          {renderEntitiesList()}
-        </BaseSheet>
+      <BaseSheet
+        title={
+          entitiesPeriod
+            ? `${sheetTitles[entityType]} — ${entitiesPeriod.label}`
+            : sheetTitles[entityType]
+        }
+        description={
+          entitiesPeriod ? `${entitiesPeriod.startDate} – ${entitiesPeriod.endDate}` : undefined
+        }
+        open={entitiesSheetOpen}
+        onOpenChange={(open) => !open && closeEntitiesSheet()}
+        side='right'
+        showFooter={false}>
+        {renderEntitiesList()}
+      </BaseSheet>
     </DashboardPage>
   )
 }

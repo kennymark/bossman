@@ -28,10 +28,16 @@ type PropertiesTabProps = {
 }
 
 export function PropertiesTab({ orgId }: PropertiesTabProps) {
-  const { data: properties, loading, pagination } = usePaginatedTab<RawProperty>(
-    ['org-properties', orgId],
-    (page, perPage) =>
-      api.get<PaginatedResponse<RawProperty>>(`/orgs/${orgId}/properties`, { params: { page, perPage } }).then((r) => r.data),
+  const {
+    data: properties,
+    loading,
+    pagination,
+  } = usePaginatedTab<RawProperty>(['org-properties', orgId], (page, perPage) =>
+    api
+      .get<PaginatedResponse<RawProperty>>(`/orgs/${orgId}/properties`, {
+        params: { page, perPage },
+      })
+      .then((r) => r.data),
   )
 
   return (

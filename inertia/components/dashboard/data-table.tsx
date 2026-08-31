@@ -9,6 +9,7 @@ import {
 } from '@tabler/icons-react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
+import type { Column as BaseColumn, ColumnWidthValue } from '#types/extra'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -33,7 +34,6 @@ import {
 } from '@/components/ui/table'
 import { useDisclosure } from '@/hooks/use-disclosure'
 import { cn } from '@/lib/utils'
-import type { Column as BaseColumn, ColumnWidthValue } from '#types/extra'
 
 /** DataTable column: extends base Column with filter props */
 interface Column<T> extends BaseColumn<T> {

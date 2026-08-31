@@ -3,26 +3,29 @@ import { Link, router, useForm } from '@inertiajs/react'
 import { IconDeviceFloppy, IconTrash } from '@tabler/icons-react'
 
 import type { RawBlogPost } from '#types/model-types'
-import { COVER_PHOTO_OPTIONS, getCoverImageUrl, getInitialIsUploadedPhotoLink } from '@/components/blog'
+import {
+  COVER_PHOTO_OPTIONS,
+  getCoverImageUrl,
+  getInitialIsUploadedPhotoLink,
+} from '@/components/blog'
 import { MarkdownEditor } from '@/components/blog/markdown-editor'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { FormField } from '@/components/ui/form_field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
-import { DateTimePicker } from '@/components/ui/date-time-picker'
-
 
 interface BlogAdminEditProps extends SharedProps {
   post: RawBlogPost
 }
 
 export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
-  console.log("🚀 ~ BlogAdminEdit ~ post:", post.coverImage)
+  console.log('🚀 ~ BlogAdminEdit ~ post:', post.coverImage)
 
   const { data, setData, put, processing, errors } = useForm<{
     title: string
@@ -41,7 +44,11 @@ export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
     coverImageAltUrl: post.coverImageAltUrl || '',
     coverImage: null,
     publish: Boolean(post.publishedAt) || Boolean(post.scheduledAt),
-    publishedAt: post.publishedAt ? new Date(post.publishedAt).toISOString() : post.scheduledAt ? new Date(post.scheduledAt).toISOString() : null,
+    publishedAt: post.publishedAt
+      ? new Date(post.publishedAt).toISOString()
+      : post.scheduledAt
+        ? new Date(post.scheduledAt).toISOString()
+        : null,
   })
 
   const submit = () => {
@@ -57,8 +64,7 @@ export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
         <Button variant='outline' asChild>
           <Link href={`/blog/${post.slug}`}>View</Link>
         </Button>
-      }
-    >
+      }>
       <Card>
         <CardHeader>
           <CardTitle>Post</CardTitle>
@@ -99,11 +105,7 @@ export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
                 />
               </FormField>
 
-              <FormField
-                label='Body'
-                htmlFor='body'
-                error={errors.body}
-                className='md:col-span-2'>
+              <FormField label='Body' htmlFor='body' error={errors.body} className='md:col-span-2'>
                 <MarkdownEditor
                   key={post.id}
                   editorKey={String(post.id)}
@@ -141,19 +143,19 @@ export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
                       />
                     </FormField>
                     {data.coverImage ? (
-                      <div className="mt-2 w-[400px] rounded-md overflow-hidden border border-border">
+                      <div className='mt-2 w-[400px] rounded-md overflow-hidden border border-border'>
                         <img
                           src={URL.createObjectURL(data.coverImage)}
-                          alt="Cover preview"
-                          className="max-h-48 w-full object-cover"
+                          alt='Cover preview'
+                          className='max-h-48 w-full object-cover'
                         />
                       </div>
                     ) : getCoverImageUrl(post) && !getInitialIsUploadedPhotoLink(post) ? (
-                      <div className="mt-2 w-[400px] rounded-md overflow-hidden border border-border">
+                      <div className='mt-2 w-[400px] rounded-md overflow-hidden border border-border'>
                         <img
                           src={getCoverImageUrl(post)!}
-                          alt="Current cover"
-                          className="max-h-48 w-full object-cover"
+                          alt='Current cover'
+                          className='max-h-48 w-full object-cover'
                         />
                       </div>
                     ) : null}
@@ -173,16 +175,16 @@ export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
                       />
                     </FormField>
                     {data.coverImageAltUrl && (
-                      <div className="mt-2 w-[400px] rounded-md overflow-hidden border border-border">
+                      <div className='mt-2 w-[400px] rounded-md overflow-hidden border border-border'>
                         <img
                           src={data.coverImageAltUrl}
-                          alt="Cover preview"
-                          className="max-h-48 w-full object-cover"
+                          alt='Cover preview'
+                          className='max-h-48 w-full object-cover'
                           onError={(e) => {
-                            ; (e.target as HTMLImageElement).style.display = 'none'
+                            ;(e.target as HTMLImageElement).style.display = 'none'
                           }}
                           onLoad={(e) => {
-                            ; (e.target as HTMLImageElement).style.display = 'block'
+                            ;(e.target as HTMLImageElement).style.display = 'block'
                           }}
                         />
                       </div>
@@ -202,7 +204,10 @@ export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
                         setData((prev) => ({
                           ...prev,
                           publish: isChecked,
-                          publishedAt: isChecked && !prev.publishedAt ? new Date().toISOString() : prev.publishedAt
+                          publishedAt:
+                            isChecked && !prev.publishedAt
+                              ? new Date().toISOString()
+                              : prev.publishedAt,
                         }))
                       }}
                       id='publish'
@@ -218,7 +223,7 @@ export default function BlogAdminEdit({ post }: BlogAdminEditProps) {
                         value={data.publishedAt}
                         onChange={(val) => setData('publishedAt', val)}
                         clearable
-                        placeholder="Now"
+                        placeholder='Now'
                       />
                     </div>
                   )}

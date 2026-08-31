@@ -3,8 +3,8 @@ import { Link } from '@inertiajs/react'
 import type { Column } from '#types/extra'
 import type { RawLease } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
-import { dateFormatter } from '@/lib/date'
 import { LeaseStatusBadge } from '@/components/leases/status-badge'
+import { dateFormatter } from '@/lib/date'
 
 /** Shared table columns for lease lists (e.g. org LeasesTab, property LeasesTab) */
 export const leasesTableColumns: Column<RawLease>[] = [

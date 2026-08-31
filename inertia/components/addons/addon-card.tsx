@@ -1,7 +1,8 @@
 import { IconPackage } from '@tabler/icons-react'
 
-import { Badge } from '@/components/ui/badge'
 import { ResourceCard } from '@/components/dashboard/resource-card'
+import { Badge } from '@/components/ui/badge'
+
 import { BILLING_LABELS, type AddonBillingType } from './constants'
 
 export interface AddonRow {

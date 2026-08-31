@@ -1,8 +1,9 @@
 import { IconCalendar, IconClock } from '@tabler/icons-react'
 
 import type { RawBlogPost } from '#types/model-types'
-import { formatBlogDate, getReadingMinutes } from './blog-utils'
 import { Badge } from '@/components/ui/badge'
+
+import { formatBlogDate, getReadingMinutes } from './blog-utils'
 
 export interface BlogStatusBadgeProps {
   post: RawBlogPost
@@ -14,7 +15,9 @@ export function BlogStatusBadge({ post, className }: BlogStatusBadgeProps) {
   const isPublished = Boolean(post.publishedAt)
 
   return (
-    <Badge variant={isPublished ? 'default' : isScheduled ? 'outline' : 'secondary'} className={className}>
+    <Badge
+      variant={isPublished ? 'default' : isScheduled ? 'outline' : 'secondary'}
+      className={className}>
       {isPublished ? 'Published' : isScheduled ? 'Scheduled' : 'Draft'}
     </Badge>
   )
@@ -29,12 +32,19 @@ export interface BlogMetaLineProps {
 
 /** Inline meta: optional status badge + date + read time (for show page header) */
 export function BlogMetaLine({ post, showStatus, className }: BlogMetaLineProps) {
-  const dateLabel = post.publishedAt ? formatBlogDate(post.publishedAt) : post.scheduledAt ? formatBlogDate(post.scheduledAt) : null
+  const dateLabel = post.publishedAt
+    ? formatBlogDate(post.publishedAt)
+    : post.scheduledAt
+      ? formatBlogDate(post.scheduledAt)
+      : null
   const minutes = getReadingMinutes(post.excerpt || '')
 
   return (
     <div
-      className={['flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground', className]
+      className={[
+        'flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground',
+        className,
+      ]
         .filter(Boolean)
         .join(' ')}>
       {showStatus ? <BlogStatusBadge post={post} className='shrink-0' /> : null}

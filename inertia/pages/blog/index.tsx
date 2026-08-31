@@ -4,10 +4,7 @@ import { useCallback, useRef } from 'react'
 
 import type { PaginatedResponse } from '#types/extra'
 import type { RawBlogPost } from '#types/model-types'
-import {
-  BlogFeaturedPostCard,
-  BlogPostCard,
-} from '@/components/blog'
+import { BlogFeaturedPostCard, BlogPostCard } from '@/components/blog'
 import { PublicLayout } from '@/components/layouts/public'
 import { LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
@@ -39,7 +36,6 @@ export default function BlogIndex({ posts, query: serverQuery }: BlogIndexProps)
     search: serverQuery?.search ?? '',
   })
   const search = String(query.search ?? '')
-
 
   const data = posts?.data ?? []
   const meta = posts?.metadata
@@ -135,8 +131,7 @@ export default function BlogIndex({ posts, query: serverQuery }: BlogIndexProps)
                         size='sm'
                         disabled={meta.currentPage >= meta.lastPage}
                         asChild={meta.currentPage < meta.lastPage}>
-                        <Link
-                          href={blogQuery(meta.currentPage + 1, meta.perPage, search)}>
+                        <Link href={blogQuery(meta.currentPage + 1, meta.perPage, search)}>
                           Next
                         </Link>
                       </Button>

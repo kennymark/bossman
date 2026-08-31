@@ -86,165 +86,156 @@ export default function PushNotificationsCreate(_props: PushNotificationsCreateP
     <DashboardPage
       title='Send push notification'
       description='Target Togetha users (landlords, agencies, tenants).'
-      backHref='/push-notifications'
-    >
+      backHref='/push-notifications'>
       <form onSubmit={handleSubmit} className='space-y-6'>
-          <AppCard title='Content' description='What should the notification say?'>
-            <FormField label='Title' htmlFor='title' required error={errors.title}>
-              <Input
-                id='title'
-                value={data.title}
-                onChange={(e) => setData('title', e.target.value)}
-                placeholder='Notification title'
-                required
-              />
-            </FormField>
-            <FormField
-              label='Description'
-              htmlFor='description'
+        <AppCard title='Content' description='What should the notification say?'>
+          <FormField label='Title' htmlFor='title' required error={errors.title}>
+            <Input
+              id='title'
+              value={data.title}
+              onChange={(e) => setData('title', e.target.value)}
+              placeholder='Notification title'
               required
-              error={errors.description}>
-              <Textarea
-                id='description'
-                value={data.description}
-                onChange={(e) => setData('description', e.target.value)}
-                placeholder='Notification body text'
-                rows={3}
-                required
+            />
+          </FormField>
+          <FormField label='Description' htmlFor='description' required error={errors.description}>
+            <Textarea
+              id='description'
+              value={data.description}
+              onChange={(e) => setData('description', e.target.value)}
+              placeholder='Notification body text'
+              rows={3}
+              required
+            />
+          </FormField>
+          <SimpleGrid cols={2}>
+            <FormField label='Image URL' htmlFor='imageUrl' error={errors.imageUrl}>
+              <Input
+                id='imageUrl'
+                type='url'
+                value={data.imageUrl}
+                onChange={(e) => setData('imageUrl', e.target.value)}
+                placeholder='https://example.com/image.jpg (optional)'
               />
             </FormField>
-            <SimpleGrid cols={2}>
-              <FormField label='Image URL' htmlFor='imageUrl' error={errors.imageUrl}>
-                <Input
-                  id='imageUrl'
-                  type='url'
-                  value={data.imageUrl}
-                  onChange={(e) => setData('imageUrl', e.target.value)}
-                  placeholder='https://example.com/image.jpg (optional)'
-                />
-              </FormField>
-              <FormField label='URL' htmlFor='url' error={errors.url}>
-                <Input
-                  id='url'
-                  type='url'
-                  value={data.url}
-                  onChange={(e) => setData('url', e.target.value)}
-                  placeholder='https://... (optional, opens when tapped)'
-                />
-              </FormField>
-            </SimpleGrid>
+            <FormField label='URL' htmlFor='url' error={errors.url}>
+              <Input
+                id='url'
+                type='url'
+                value={data.url}
+                onChange={(e) => setData('url', e.target.value)}
+                placeholder='https://... (optional, opens when tapped)'
+              />
+            </FormField>
+          </SimpleGrid>
 
-            <Label className='mt-4'>Audience</Label>
-            <RadioGroup
-              spacing={2}
-              cols={5}
-              options={targetTypeOptions}
-              value={data.targetType}
-              onChange={(value) => setData('targetType', value as typeof data.targetType)}
-            />
-            {data.targetType === 'specific' && (
-              <div className='space-y-2 my-2'>
-                <Label>Select users</Label>
-                <Input
-                  placeholder='Search by name or email...'
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  className='max-w-sm'
-                />
-                <ScrollArea className='h-[200px] rounded-md border p-2'>
-                  <div className='space-y-2'>
-                    {users.map((user) => (
-                      <label
-                        key={user.id}
-                        className='flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-muted/50'>
-                        <input
-                          type='checkbox'
-                          checked={data.targetUserIds.includes(user.id)}
-                          onChange={() => toggleUser(user.id)}
-                        />
-                        <span className='text-sm'>
-                          {user.name} ({user.email}) —{' '}
-                          <span className='text-muted-foreground capitalize'>
-                            {user.accountType}
-                          </span>
-                        </span>
-                      </label>
+          <Label className='mt-4'>Audience</Label>
+          <RadioGroup
+            spacing={2}
+            cols={5}
+            options={targetTypeOptions}
+            value={data.targetType}
+            onChange={(value) => setData('targetType', value as typeof data.targetType)}
+          />
+          {data.targetType === 'specific' && (
+            <div className='space-y-2 my-2'>
+              <Label>Select users</Label>
+              <Input
+                placeholder='Search by name or email...'
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className='max-w-sm'
+              />
+              <ScrollArea className='h-[200px] rounded-md border p-2'>
+                <div className='space-y-2'>
+                  {users.map((user) => (
+                    <label
+                      key={user.id}
+                      className='flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-muted/50'>
+                      <input
+                        type='checkbox'
+                        checked={data.targetUserIds.includes(user.id)}
+                        onChange={() => toggleUser(user.id)}
+                      />
+                      <span className='text-sm'>
+                        {user.name} ({user.email}) —{' '}
+                        <span className='text-muted-foreground capitalize'>{user.accountType}</span>
+                      </span>
+                    </label>
+                  ))}
+                  {users.length === 0 &&
+                    (userSearch ? (
+                      <EmptyState
+                        icon={IconUserX}
+                        title='No users match your search'
+                        description='Try a different search term.'
+                        className='py-6'
+                      />
+                    ) : (
+                      <p className='py-4 text-center text-sm text-muted-foreground'>
+                        Loading users...
+                      </p>
                     ))}
-                    {users.length === 0 &&
-                      (userSearch ? (
-                        <EmptyState
-                          icon={IconUserX}
-                          title='No users match your search'
-                          description='Try a different search term.'
-                          className='py-6'
-                        />
-                      ) : (
-                        <p className='py-4 text-center text-sm text-muted-foreground'>
-                          Loading users...
-                        </p>
-                      ))}
-                  </div>
-                </ScrollArea>
-                {errors.targetUserIds && (
-                  <p className='text-sm text-destructive'>{errors.targetUserIds}</p>
-                )}
-              </div>
-            )}
-          </AppCard>
-
-          <AppCard title='When to send' description='Send now or schedule for later.'>
-            <div className='flex flex-wrap gap-4'>
-              <label className='flex cursor-pointer items-center gap-2'>
-                <input
-                  type='radio'
-                  name='when'
-                  checked={!data.sendAt}
-                  onChange={() => setData('sendAt', '')}
-                  className='h-4 w-4'
-                />
-                <span>Send now</span>
-              </label>
-              <label className='flex cursor-pointer items-center gap-2'>
-                <input
-                  type='radio'
-                  name='when'
-                  checked={!!data.sendAt}
-                  onChange={() => {
-                    if (!data.sendAt) {
-                      const d = new Date()
-                      d.setMinutes(d.getMinutes() + 5)
-                      setData('sendAt', d.toISOString().slice(0, 16))
-                    }
-                  }}
-                  className='h-4 w-4'
-                />
-                <span>Schedule for later</span>
-              </label>
+                </div>
+              </ScrollArea>
+              {errors.targetUserIds && (
+                <p className='text-sm text-destructive'>{errors.targetUserIds}</p>
+              )}
             </div>
-            {data.sendAt && (
-              <FormField label='Send at (local time)' htmlFor='sendAt'>
-                <DateTimePicker
-                  id='sendAt'
-                  value={data.sendAt ? format(new Date(data.sendAt), "yyyy-MM-dd'T'HH:mm") : ''}
-                  onChange={(value) =>
-                    setData('sendAt', value ? new Date(value).toISOString() : '')
-                  }
-                  placeholder='Pick date & time'
-                  clearable
-                />
-              </FormField>
-            )}
-          </AppCard>
+          )}
+        </AppCard>
 
-          <div className='flex gap-2'>
-            <Button type='submit' disabled={processing}>
-              {processing ? 'Sending…' : data.sendAt ? 'Schedule notification' : 'Send now'}
-            </Button>
-            <Button type='button' variant='outline' asChild>
-              <Link href='/push-notifications'>Cancel</Link>
-            </Button>
+        <AppCard title='When to send' description='Send now or schedule for later.'>
+          <div className='flex flex-wrap gap-4'>
+            <label className='flex cursor-pointer items-center gap-2'>
+              <input
+                type='radio'
+                name='when'
+                checked={!data.sendAt}
+                onChange={() => setData('sendAt', '')}
+                className='h-4 w-4'
+              />
+              <span>Send now</span>
+            </label>
+            <label className='flex cursor-pointer items-center gap-2'>
+              <input
+                type='radio'
+                name='when'
+                checked={!!data.sendAt}
+                onChange={() => {
+                  if (!data.sendAt) {
+                    const d = new Date()
+                    d.setMinutes(d.getMinutes() + 5)
+                    setData('sendAt', d.toISOString().slice(0, 16))
+                  }
+                }}
+                className='h-4 w-4'
+              />
+              <span>Schedule for later</span>
+            </label>
           </div>
-        </form>
+          {data.sendAt && (
+            <FormField label='Send at (local time)' htmlFor='sendAt'>
+              <DateTimePicker
+                id='sendAt'
+                value={data.sendAt ? format(new Date(data.sendAt), "yyyy-MM-dd'T'HH:mm") : ''}
+                onChange={(value) => setData('sendAt', value ? new Date(value).toISOString() : '')}
+                placeholder='Pick date & time'
+                clearable
+              />
+            </FormField>
+          )}
+        </AppCard>
+
+        <div className='flex gap-2'>
+          <Button type='submit' disabled={processing}>
+            {processing ? 'Sending…' : data.sendAt ? 'Schedule notification' : 'Send now'}
+          </Button>
+          <Button type='button' variant='outline' asChild>
+            <Link href='/push-notifications'>Cancel</Link>
+          </Button>
+        </div>
+      </form>
     </DashboardPage>
   )
 }

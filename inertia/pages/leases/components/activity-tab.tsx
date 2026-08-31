@@ -11,10 +11,16 @@ interface ActivityTabProps {
 }
 
 export function ActivityTab({ leaseId }: ActivityTabProps) {
-  const { data: activity, loading, pagination } = usePaginatedTab<RawActivity>(
-    ['lease-activity', leaseId],
-    (page, perPage) =>
-      api.get<PaginatedResponse<RawActivity>>(`/leases/${leaseId}/activity`, { params: { page, perPage } }).then((r) => r.data),
+  const {
+    data: activity,
+    loading,
+    pagination,
+  } = usePaginatedTab<RawActivity>(['lease-activity', leaseId], (page, perPage) =>
+    api
+      .get<PaginatedResponse<RawActivity>>(`/leases/${leaseId}/activity`, {
+        params: { page, perPage },
+      })
+      .then((r) => r.data),
   )
 
   return (

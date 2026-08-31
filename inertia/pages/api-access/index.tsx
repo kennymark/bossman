@@ -253,7 +253,9 @@ export default function ApiAccessPage() {
                       </div>
                     </td>
                     <td className='py-3 pr-4 text-muted-foreground'>{relative(token.createdAt)}</td>
-                    <td className='py-3 pr-4 text-muted-foreground'>{relative(token.lastUsedAt)}</td>
+                    <td className='py-3 pr-4 text-muted-foreground'>
+                      {relative(token.lastUsedAt)}
+                    </td>
                     <td className='py-3'>
                       <Badge variant={token.isExpired ? 'destructive' : 'secondary'}>
                         {token.isExpired ? 'Expired' : 'Active'}

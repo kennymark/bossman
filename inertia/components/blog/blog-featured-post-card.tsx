@@ -1,12 +1,13 @@
-import { IconArrowRight } from '@tabler/icons-react'
 import { Link } from '@inertiajs/react'
+import { IconArrowRight } from '@tabler/icons-react'
 
 import type { RawBlogPost } from '#types/model-types'
-import { getCoverImageAlt, getCoverImageUrl } from './blog-utils'
-import { BlogMetaDateReadTime } from './blog-meta-date-read-time'
 import { Card } from '@/components/ui/card'
 import { HStack } from '@/components/ui/hstack'
 import { Stack } from '@/components/ui/stack'
+
+import { BlogMetaDateReadTime } from './blog-meta-date-read-time'
+import { getCoverImageAlt, getCoverImageUrl } from './blog-utils'
 
 export interface BlogFeaturedPostCardProps {
   post: RawBlogPost

@@ -1,8 +1,9 @@
 import { IconCalendar, IconClock } from '@tabler/icons-react'
 
 import type { RawBlogPost } from '#types/model-types'
-import { formatBlogDate, getReadingMinutes } from './blog-utils'
 import { HStack } from '@/components/ui/hstack'
+
+import { formatBlogDate, getReadingMinutes } from './blog-utils'
 
 export interface BlogMetaDateReadTimeProps {
   post: RawBlogPost
@@ -10,7 +11,11 @@ export interface BlogMetaDateReadTimeProps {
 }
 
 export function BlogMetaDateReadTime({ post, className }: BlogMetaDateReadTimeProps) {
-  const dateLabel = post.publishedAt ? formatBlogDate(post.publishedAt) : post.scheduledAt ? formatBlogDate(post.scheduledAt) : null
+  const dateLabel = post.publishedAt
+    ? formatBlogDate(post.publishedAt)
+    : post.scheduledAt
+      ? formatBlogDate(post.scheduledAt)
+      : null
   const minutes = getReadingMinutes(post.excerpt || '')
 
   return (

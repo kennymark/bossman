@@ -24,23 +24,23 @@ export default function AddonsIndex({ addons }: AddonsIndexProps) {
         </Button>
       }>
       {addons.length === 0 ? (
-          <EmptyState
-            icon={IconPackage}
-            title='No addons'
-            description='Create your first addon using the button above. You can set the price on the create page.'
-            className='rounded-lg border border-dashed border-border bg-muted/30'
-          />
-        ) : (
-          <AppCard
-            title='Addons'
-            description={`${addons.length} addon${addons.length === 1 ? '' : 's'}`}>
-            <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-              {addons.map((addon) => (
-                <AddonCard key={addon.id} addon={addon} />
-              ))}
-            </div>
-          </AppCard>
-        )}
+        <EmptyState
+          icon={IconPackage}
+          title='No addons'
+          description='Create your first addon using the button above. You can set the price on the create page.'
+          className='rounded-lg border border-dashed border-border bg-muted/30'
+        />
+      ) : (
+        <AppCard
+          title='Addons'
+          description={`${addons.length} addon${addons.length === 1 ? '' : 's'}`}>
+          <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
+            {addons.map((addon) => (
+              <AddonCard key={addon.id} addon={addon} />
+            ))}
+          </div>
+        </AppCard>
+      )}
     </DashboardPage>
   )
 }

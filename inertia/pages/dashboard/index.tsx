@@ -2,12 +2,13 @@ import type { SharedProps } from '@adonisjs/inertia/types'
 import { IconActivity, IconFileText, IconUsers } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+
 import type { PaginatedResponse } from '#types/extra'
 import type { RawActivity } from '#types/model-types'
 import { formatNumber } from '#utils/functions'
 import { activityColumns } from '@/components/dashboard/activity-columns'
-import { DataTable } from '@/components/dashboard/data-table'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { DataTable } from '@/components/dashboard/data-table'
 import { ActivityPerWeekChart, GrowthChart } from '@/components/dashboard/growth-chart'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { AppCard } from '@/components/ui/app-card'
@@ -39,7 +40,7 @@ const activityChartConfig = {
   count: { label: 'Activity', color: 'var(--chart-3)' },
 } satisfies ChartConfig
 
-interface DashboardIndexProps extends SharedProps { }
+interface DashboardIndexProps extends SharedProps {}
 
 export default function DashboardIndex(_props: DashboardIndexProps) {
   const [activityPage, setActivityPage] = useState(1)
@@ -117,7 +118,7 @@ export default function DashboardIndex(_props: DashboardIndexProps) {
           emptyMessage='No activity yet.'
           pagination={tablePaginationFromMeta(activityMeta, {
             onPageChange: setActivityPage,
-            onPageSizeChange: setActivityPerPage
+            onPageSizeChange: setActivityPerPage,
           })}
         />
       </AppCard>

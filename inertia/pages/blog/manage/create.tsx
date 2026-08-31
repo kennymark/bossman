@@ -5,19 +5,18 @@ import { IconPlus } from '@tabler/icons-react'
 import { COVER_PHOTO_OPTIONS } from '@/components/blog'
 import { MarkdownEditor } from '@/components/blog/markdown-editor'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { SimpleGrid } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { FormField } from '@/components/ui/form_field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
-import { DateTimePicker } from '@/components/ui/date-time-picker'
-import { SimpleGrid } from '@/components/ui'
 
-
-interface BlogAdminCreateProps extends SharedProps { }
+interface BlogAdminCreateProps extends SharedProps {}
 
 export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
   const { data, setData, post, processing, errors } = useForm<{
@@ -48,8 +47,7 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
     <DashboardPage
       title='New post'
       description='Create a post. Slug is auto-generated from the title.'
-      backHref='/blog/manage'
-    >
+      backHref='/blog/manage'>
       <Card>
         <CardHeader>
           <CardTitle>Post</CardTitle>
@@ -90,11 +88,7 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
                 />
               </FormField>
 
-              <FormField
-                label='Body'
-                htmlFor='body'
-                error={errors.body}
-                className='md:col-span-2'>
+              <FormField label='Body' htmlFor='body' error={errors.body} className='md:col-span-2'>
                 <MarkdownEditor
                   value={data.body}
                   onChange={(markdown) => setData('body', markdown)}
@@ -130,13 +124,12 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
                       />
                     </FormField>
                     <SimpleGrid cols={4}>
-
                       {data.coverImage && (
-                        <div className="mt-2 rounded-md overflow-hidden border border-border">
+                        <div className='mt-2 rounded-md overflow-hidden border border-border'>
                           <img
                             src={URL.createObjectURL(data.coverImage)}
-                            alt="Cover preview"
-                            className="max-h-48 w-full object-cover"
+                            alt='Cover preview'
+                            className='max-h-48 w-full object-cover'
                           />
                         </div>
                       )}
@@ -157,16 +150,16 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
                       />
                     </FormField>
                     {data.coverImageAltUrl && (
-                      <div className="mt-2 rounded-md overflow-hidden border border-border">
+                      <div className='mt-2 rounded-md overflow-hidden border border-border'>
                         <img
                           src={data.coverImageAltUrl}
-                          alt="Cover preview"
-                          className="max-h-48 w-full object-cover"
+                          alt='Cover preview'
+                          className='max-h-48 w-full object-cover'
                           onError={(e) => {
-                            ; (e.target as HTMLImageElement).style.display = 'none'
+                            ;(e.target as HTMLImageElement).style.display = 'none'
                           }}
                           onLoad={(e) => {
-                            ; (e.target as HTMLImageElement).style.display = 'block'
+                            ;(e.target as HTMLImageElement).style.display = 'block'
                           }}
                         />
                       </div>
@@ -186,7 +179,10 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
                         setData((prev) => ({
                           ...prev,
                           publish: isChecked,
-                          publishedAt: isChecked && !prev.publishedAt ? new Date().toISOString() : prev.publishedAt
+                          publishedAt:
+                            isChecked && !prev.publishedAt
+                              ? new Date().toISOString()
+                              : prev.publishedAt,
                         }))
                       }}
                       id='publish'
@@ -195,14 +191,14 @@ export default function BlogAdminCreate(_props: BlogAdminCreateProps) {
                       Publish
                     </Label>
                   </div>
-                  
+
                   {data.publish && (
                     <div>
                       <DateTimePicker
                         value={data.publishedAt}
                         onChange={(val) => setData('publishedAt', val)}
                         clearable
-                        placeholder="Now"
+                        placeholder='Now'
                       />
                     </div>
                   )}

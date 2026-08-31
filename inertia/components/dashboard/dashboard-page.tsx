@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import { Head } from '@inertiajs/react'
+import type { ReactNode } from 'react'
 
 import { DashboardLayout } from '@/components/dashboard/layout'
 import { PageHeader } from '@/components/dashboard/page_header'

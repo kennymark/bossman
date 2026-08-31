@@ -1,5 +1,6 @@
 import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
+
 import { worker } from '#boss/base'
 
 export default class TestBoss extends BaseCommand {

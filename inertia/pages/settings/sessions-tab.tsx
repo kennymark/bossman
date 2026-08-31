@@ -1,7 +1,4 @@
-import {
-  IconLogout,
-  IconTrash,
-} from '@tabler/icons-react'
+import { IconLogout, IconTrash } from '@tabler/icons-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 

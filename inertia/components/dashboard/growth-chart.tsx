@@ -75,39 +75,34 @@ export function ActivityPerWeekChart({ title, data, config }: ActivityPerWeekCha
   return (
     <AppCard title={title} description='Last 10 weeks'>
       <ChartContainer config={config} className='h-[200px] w-full'>
-          <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray='3 3' vertical={false} />
-            <XAxis
-              dataKey='label'
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tick={{ fontSize: 11 }}
-            />
-            <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length || !label) return null
-                const value = payload[0]?.value ?? 0
-                return (
-                  <div className='rounded-lg border border-border bg-card px-3 py-2 shadow-md'>
-                    <p className='text-xs font-medium text-muted-foreground'>{label}</p>
-                    <p className='text-sm font-semibold'>
-                      {seriesLabel}: {value}
-                    </p>
-                  </div>
-                )
-              }}
-              cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
-            />
-            <Bar
-              dataKey='count'
-              fill='var(--color-count)'
-              radius={[4, 4, 0, 0]}
-              name={seriesLabel}
-            />
-          </BarChart>
-        </ChartContainer>
+        <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray='3 3' vertical={false} />
+          <XAxis
+            dataKey='label'
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 11 }}
+          />
+          <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length || !label) return null
+              const value = payload[0]?.value ?? 0
+              return (
+                <div className='rounded-lg border border-border bg-card px-3 py-2 shadow-md'>
+                  <p className='text-xs font-medium text-muted-foreground'>{label}</p>
+                  <p className='text-sm font-semibold'>
+                    {seriesLabel}: {value}
+                  </p>
+                </div>
+              )
+            }}
+            cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
+          />
+          <Bar dataKey='count' fill='var(--color-count)' radius={[4, 4, 0, 0]} name={seriesLabel} />
+        </BarChart>
+      </ChartContainer>
     </AppCard>
   )
 }
@@ -119,39 +114,34 @@ export function GrowthChart({ title, data, config }: GrowthChartProps) {
   return (
     <AppCard title={title} description='Last 7 days'>
       <ChartContainer config={config} className='h-[200px] w-full'>
-          <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray='3 3' vertical={false} />
-            <XAxis
-              dataKey='label'
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tick={{ fontSize: 12 }}
-            />
-            <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length || !label) return null
-                const value = payload[0]?.value ?? 0
-                return (
-                  <div className='rounded-lg border border-border bg-card px-3 py-2 shadow-md'>
-                    <p className='text-xs font-medium text-muted-foreground'>{label}</p>
-                    <p className='text-sm font-semibold'>
-                      {seriesLabel}: {value}
-                    </p>
-                  </div>
-                )
-              }}
-              cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
-            />
-            <Bar
-              dataKey='count'
-              fill='var(--color-count)'
-              radius={[4, 4, 0, 0]}
-              name={seriesLabel}
-            />
-          </BarChart>
-        </ChartContainer>
+        <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray='3 3' vertical={false} />
+          <XAxis
+            dataKey='label'
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length || !label) return null
+              const value = payload[0]?.value ?? 0
+              return (
+                <div className='rounded-lg border border-border bg-card px-3 py-2 shadow-md'>
+                  <p className='text-xs font-medium text-muted-foreground'>{label}</p>
+                  <p className='text-sm font-semibold'>
+                    {seriesLabel}: {value}
+                  </p>
+                </div>
+              )
+            }}
+            cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
+          />
+          <Bar dataKey='count' fill='var(--color-count)' radius={[4, 4, 0, 0]} name={seriesLabel} />
+        </BarChart>
+      </ChartContainer>
     </AppCard>
   )
 }
@@ -330,49 +320,46 @@ export function AnalyticsGrowthChart({
   return (
     <AppCard
       title={title}
-      description={`${new Date(startDate).toLocaleDateString()} – ${new Date(endDate).toLocaleDateString()}`}
-    >
+      description={`${new Date(startDate).toLocaleDateString()} – ${new Date(endDate).toLocaleDateString()}`}>
       <ChartContainer config={config} className='h-[200px] w-full'>
-          <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray='3 3' vertical={false} />
-            <XAxis
-              dataKey='label'
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tick={{ fontSize: 11 }}
-            />
-            <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length || !label) return null
-                const value = payload[0]?.value ?? 0
-                return (
-                  <div className='rounded-lg border border-border bg-card px-3 py-2 shadow-md'>
-                    <p className='text-xs font-medium text-muted-foreground'>{label}</p>
-                    <p className='text-sm font-semibold'>
-                      {seriesLabel}: {value}
-                    </p>
-                    {onBarClick && (
-                      <p className='text-xs text-muted-foreground mt-1'>
-                        Click bar to view entities
-                      </p>
-                    )}
-                  </div>
-                )
-              }}
-              cursor={onBarClick ? { fill: 'hsl(var(--muted))', opacity: 0.3 } : false}
-            />
-            <Bar
-              dataKey='count'
-              fill='var(--color-count)'
-              radius={[4, 4, 0, 0]}
-              name={seriesLabel}
-              onClick={handleBarClick}
-              style={onBarClick ? { cursor: 'pointer' } : undefined}
-            />
-          </BarChart>
-        </ChartContainer>
+        <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray='3 3' vertical={false} />
+          <XAxis
+            dataKey='label'
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 11 }}
+          />
+          <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length || !label) return null
+              const value = payload[0]?.value ?? 0
+              return (
+                <div className='rounded-lg border border-border bg-card px-3 py-2 shadow-md'>
+                  <p className='text-xs font-medium text-muted-foreground'>{label}</p>
+                  <p className='text-sm font-semibold'>
+                    {seriesLabel}: {value}
+                  </p>
+                  {onBarClick && (
+                    <p className='text-xs text-muted-foreground mt-1'>Click bar to view entities</p>
+                  )}
+                </div>
+              )
+            }}
+            cursor={onBarClick ? { fill: 'hsl(var(--muted))', opacity: 0.3 } : false}
+          />
+          <Bar
+            dataKey='count'
+            fill='var(--color-count)'
+            radius={[4, 4, 0, 0]}
+            name={seriesLabel}
+            onClick={handleBarClick}
+            style={onBarClick ? { cursor: 'pointer' } : undefined}
+          />
+        </BarChart>
+      </ChartContainer>
     </AppCard>
   )
 }

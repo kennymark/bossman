@@ -18,34 +18,31 @@ export default function Settings(_props: SharedProps) {
   }
 
   return (
-    <DashboardPage
-      title='Settings'
-      description='Manage your account settings and preferences.'
-    >
+    <DashboardPage title='Settings' description='Manage your account settings and preferences.'>
       <Tabs value={currentTab} onValueChange={handleTabChange} className='space-y-6'>
-          <TabsList>
-            <TabsTrigger value='profile'>Profile</TabsTrigger>
-            <TabsTrigger value='password'>Password</TabsTrigger>
-            <TabsTrigger value='notifications'>Notifications</TabsTrigger>
-            <TabsTrigger value='sessions'>Sessions</TabsTrigger>
-          </TabsList>
+        <TabsList>
+          <TabsTrigger value='profile'>Profile</TabsTrigger>
+          <TabsTrigger value='password'>Password</TabsTrigger>
+          <TabsTrigger value='notifications'>Notifications</TabsTrigger>
+          <TabsTrigger value='sessions'>Sessions</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value='profile' className='space-y-6'>
-            <ProfileTab />
-          </TabsContent>
+        <TabsContent value='profile' className='space-y-6'>
+          <ProfileTab />
+        </TabsContent>
 
-          <TabsContent value='password'>
-            <PasswordTab />
-          </TabsContent>
+        <TabsContent value='password'>
+          <PasswordTab />
+        </TabsContent>
 
-          <TabsContent value='notifications'>
-            <NotificationsTab />
-          </TabsContent>
+        <TabsContent value='notifications'>
+          <NotificationsTab />
+        </TabsContent>
 
-          <TabsContent value='sessions'>
-            <SessionsTab />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value='sessions'>
+          <SessionsTab />
+        </TabsContent>
+      </Tabs>
     </DashboardPage>
   )
 }

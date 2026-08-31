@@ -5,8 +5,8 @@ import { useState } from 'react'
 import type { Column, PaginatedResponse } from '#types/extra'
 import { timeAgo } from '#utils/date'
 import { startCase } from '#utils/functions'
-import { DataTable } from '@/components/dashboard/data-table'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { DataTable } from '@/components/dashboard/data-table'
 import { LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
 import { BaseSheet } from '@/components/ui/base-sheet'
@@ -164,47 +164,46 @@ export default function LogsIndex({ audits, filters }: LogsIndexProps) {
   return (
     <DashboardPage
       title='Logs'
-      description='Audit events across the app (create, update, delete on auditable models).'
-    >
+      description='Audit events across the app (create, update, delete on auditable models).'>
       <BaseSheet
-          open={viewSheetOpen}
-          onOpenChange={(open) => !open && closeView()}
-          title='Audit details'
-          description={
-            selectedAudit
-              ? `Event: ${selectedAudit.event} · ${selectedAudit.auditableType ?? selectedAudit.auditable_type ?? ''}`
-              : undefined
-          }
-          side='right'
-          className='w-full sm:max-w-lg'
-          showFooter={false}>
-          {selectedAudit != null ? <AuditDetailContent audit={selectedAudit} /> : null}
-        </BaseSheet>
+        open={viewSheetOpen}
+        onOpenChange={(open) => !open && closeView()}
+        title='Audit details'
+        description={
+          selectedAudit
+            ? `Event: ${selectedAudit.event} · ${selectedAudit.auditableType ?? selectedAudit.auditable_type ?? ''}`
+            : undefined
+        }
+        side='right'
+        className='w-full sm:max-w-lg'
+        showFooter={false}>
+        {selectedAudit != null ? <AuditDetailContent audit={selectedAudit} /> : null}
+      </BaseSheet>
 
-        <Deferred data='audits' fallback={<LoadingSkeleton type='table' />}>
-          <AppCard title='Audit log' description={`${audits?.meta?.total ?? 0} events`}>
-            <div className='space-y-4'>
-              <LogsFilters
-                event={filters.event}
-                auditableType={filters.auditableType}
-                onEventChange={(v) => updateQuery({ event: v })}
-                onAuditableTypeChange={(v) => updateQuery({ auditableType: v })}
-              />
-              <DataTable
-                columns={buildColumns(openView)}
-                data={audits?.data ?? []}
-                pagination={tablePagination(audits, {
-                  onPageChange: changePage,
-                  onPageSizeChange: (pageSize) => {
-                    changeRows(pageSize)
-                    changePage(1)
-                  },
-                })}
-                emptyMessage='No audit events found'
-              />
-            </div>
-          </AppCard>
-        </Deferred>
+      <Deferred data='audits' fallback={<LoadingSkeleton type='table' />}>
+        <AppCard title='Audit log' description={`${audits?.meta?.total ?? 0} events`}>
+          <div className='space-y-4'>
+            <LogsFilters
+              event={filters.event}
+              auditableType={filters.auditableType}
+              onEventChange={(v) => updateQuery({ event: v })}
+              onAuditableTypeChange={(v) => updateQuery({ auditableType: v })}
+            />
+            <DataTable
+              columns={buildColumns(openView)}
+              data={audits?.data ?? []}
+              pagination={tablePagination(audits, {
+                onPageChange: changePage,
+                onPageSizeChange: (pageSize) => {
+                  changeRows(pageSize)
+                  changePage(1)
+                },
+              })}
+              emptyMessage='No audit events found'
+            />
+          </div>
+        </AppCard>
+      </Deferred>
     </DashboardPage>
   )
 }

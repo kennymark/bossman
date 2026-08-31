@@ -6,8 +6,8 @@ import PushNotification from '#models/push_notification'
 import TogethaUser from '#models/togetha_user'
 import { resolveUserIds, sendToRecipients } from '#services/push_notification_service'
 import PushNotificationTransformer from '#transformers/push_notification_transformer'
-import { storePushNotificationValidator } from '#validators/push_notification'
 import { paginatedIndex } from '#utils/paginated_index'
+import { storePushNotificationValidator } from '#validators/push_notification'
 
 export default class PushNotificationsController {
   async users({ request, response }: HttpContext) {
@@ -28,9 +28,7 @@ export default class PushNotificationsController {
       inertia,
       'notifications',
       (page, perPage) =>
-        PushNotification.query()
-          .orderBy('created_at', 'desc')
-          .paginate(page, perPage),
+        PushNotification.query().orderBy('created_at', 'desc').paginate(page, perPage),
       PushNotificationTransformer,
       { defaultPerPage: 20 },
     )

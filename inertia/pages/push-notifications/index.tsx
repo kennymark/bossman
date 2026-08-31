@@ -5,8 +5,8 @@ import { useState } from 'react'
 
 import type { Column, PaginatedResponse } from '#types/extra'
 import { timeAgo } from '#utils/date'
-import { DataTable } from '@/components/dashboard/data-table'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { DataTable } from '@/components/dashboard/data-table'
 import { LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
 import { Badge } from '@/components/ui/badge'
@@ -165,8 +165,7 @@ export default function PushNotificationsIndex({ notifications }: PushNotificati
             Send notification
           </Link>
         </Button>
-      }
-    >
+      }>
       <Deferred data='notifications' fallback={<LoadingSkeleton type='table' />}>
         <AppCard
           title={
@@ -175,8 +174,7 @@ export default function PushNotificationsIndex({ notifications }: PushNotificati
               Notifications
             </span>
           }
-          description={`${(notifications?.metadata ?? notifications?.meta)?.total ?? 0} total`}
-        >
+          description={`${(notifications?.metadata ?? notifications?.meta)?.total ?? 0} total`}>
           <DataTable
             columns={columns}
             data={notifications?.data ?? []}

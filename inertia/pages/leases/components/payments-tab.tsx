@@ -3,8 +3,8 @@ import type { RawPayment } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
 import { DataTable } from '@/components/dashboard/data-table'
 import { AppCard } from '@/components/ui/app-card'
-import { dateFormatter } from '@/lib/date'
 import { usePaginatedTab } from '@/hooks/use-paginated-tab'
+import { dateFormatter } from '@/lib/date'
 import api from '@/lib/http'
 
 const columns: Column<RawPayment>[] = [
@@ -45,10 +45,16 @@ type PaymentsTabProps = {
 }
 
 export function PaymentsTab({ leaseId }: PaymentsTabProps) {
-  const { data: payments, loading, pagination } = usePaginatedTab<RawPayment>(
-    ['lease-payments', leaseId],
-    (page, perPage) =>
-      api.get<PaginatedResponse<RawPayment>>(`/leases/${leaseId}/payments`, { params: { page, perPage } }).then((r) => r.data),
+  const {
+    data: payments,
+    loading,
+    pagination,
+  } = usePaginatedTab<RawPayment>(['lease-payments', leaseId], (page, perPage) =>
+    api
+      .get<PaginatedResponse<RawPayment>>(`/leases/${leaseId}/payments`, {
+        params: { page, perPage },
+      })
+      .then((r) => r.data),
   )
 
   return (

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 
+import type { BaseSheetOverlayProps } from '@/components/ui/base-overlay-types'
 import { Button } from '@/components/ui/button'
 import { HStack } from '@/components/ui/hstack'
 import {
@@ -13,7 +14,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import type { BaseSheetOverlayProps } from '@/components/ui/base-overlay-types'
 
 export type BaseSheetProps = BaseSheetOverlayProps
 

@@ -25,6 +25,7 @@ import {
 } from '@tabler/icons-react'
 import * as React from 'react'
 
+import type { PageKey } from '#utils/page_access'
 import {
   CommandDialog,
   CommandEmpty,
@@ -35,7 +36,6 @@ import {
   CommandSeparator,
 } from '@/components/ui/command'
 import { useTheme } from '@/hooks/use-theme'
-import type { PageKey } from '#utils/page_access'
 
 type CommandEntry = {
   label: string

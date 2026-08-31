@@ -1,7 +1,6 @@
-import { timeAgo } from '#utils/date'
-
 import type { Column } from '#types/extra'
 import type { RawActivity } from '#types/model-types'
+import { timeAgo } from '#utils/date'
 import { Badge } from '@/components/ui/badge'
 import { dateFormatter } from '@/lib/date'
 

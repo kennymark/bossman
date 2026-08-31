@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react'
 
 import type { RawBlogPost } from '#types/model-types'
-import { getCoverImageAlt, getCoverImageUrl } from './blog-utils'
-import { BlogMetaDateReadTime } from './blog-meta-date-read-time'
 import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+
+import { BlogMetaDateReadTime } from './blog-meta-date-read-time'
+import { getCoverImageAlt, getCoverImageUrl } from './blog-utils'
 
 export interface BlogPostCardProps {
   post: RawBlogPost

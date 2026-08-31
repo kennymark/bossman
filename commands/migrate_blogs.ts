@@ -95,7 +95,9 @@ export default class MigrateBlogs extends BaseCommand {
   }
 
   async run() {
-    const response = await strapi.get('/blog-posts?pagination[pageSize]=100&sort=publishedAt:desc&publicationState=preview&filters[publishedAt][$null]=true')
+    const response = await strapi.get(
+      '/blog-posts?pagination[pageSize]=100&sort=publishedAt:desc&publicationState=preview&filters[publishedAt][$null]=true',
+    )
     const blogPosts = response.data.data
     this.logger.info(`Found ${blogPosts.length} blog posts`)
 

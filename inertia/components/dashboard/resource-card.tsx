@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
 import { Link } from '@inertiajs/react'
 import { IconChevronRight } from '@tabler/icons-react'
+import type { ReactNode } from 'react'
 
 import { Card } from '@/components/ui/card'
 
@@ -33,7 +33,8 @@ export function ResourceCard({
 }: ResourceCardProps) {
   return (
     <Link href={href}>
-      <Card className={`group relative flex flex-col border-border bg-card transition-all duration-200 hover:border-primary/30 ${className ?? ''}`}>
+      <Card
+        className={`group relative flex flex-col border-border bg-card transition-all duration-200 hover:border-primary/30 ${className ?? ''}`}>
         <div className='flex w-full flex-col items-stretch gap-4 p-5 text-left'>
           <div className='flex items-start justify-between gap-3'>
             <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary ring-1 ring-primary/20'>

@@ -9,8 +9,7 @@ export function renderInertia(
   page: string,
   props: object,
 ): ReturnType<HttpContext['inertia']['render']> {
-  return (inertia.render as (page: string, props: object) => ReturnType<HttpContext['inertia']['render']>)(
-    page,
-    props,
-  )
+  return (
+    inertia.render as (page: string, props: object) => ReturnType<HttpContext['inertia']['render']>
+  )(page, props)
 }

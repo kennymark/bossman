@@ -1,5 +1,6 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
 import { Deferred, Link, router } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
 import {
   IconBriefcase,
   IconBuilding,
@@ -11,15 +12,14 @@ import {
 import { useMutation } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { usePage } from '@inertiajs/react'
 
 import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawOrg, RawUser } from '#types/model-types'
 import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
+import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { DataTable } from '@/components/dashboard/data-table'
 import { FilterSortBar } from '@/components/dashboard/filter-sort-bar'
-import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
@@ -28,8 +28,8 @@ import { Button } from '@/components/ui/button'
 import { SimpleGrid } from '@/components/ui/simplegrid'
 import { useInertiaParams } from '@/hooks/use-inertia-params'
 import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
-import { tablePagination } from '@/lib/pagination'
 import api from '@/lib/http'
+import { tablePagination } from '@/lib/pagination'
 
 const ORGS_SORT_BY_OPTIONS = [
   { value: 'name', label: 'Name' },
@@ -314,7 +314,7 @@ export default function OrgsIndex({ orgs, stats }: OrgsIndexProps) {
         </Button>
       }>
       {isGodAdmin && (
-      <SimpleGrid cols={{ base: 1, md: 3 }} spacing={4}>
+        <SimpleGrid cols={{ base: 1, md: 3 }} spacing={4}>
           <StatCard
             title='Total'
             description='All customers'
@@ -336,38 +336,38 @@ export default function OrgsIndex({ orgs, stats }: OrgsIndexProps) {
         </SimpleGrid>
       )}
 
-        <Deferred data='orgs' fallback={<LoadingSkeleton type='table' />}>
-          <AppCard title='All customers' description={`${orgs?.meta?.total ?? 0} total`}>
-            <div className='space-y-4'>
-              <FilterSortBar
-                filters={filterSortFields}
-                sort={sortConfig}
-                onFilterChange={handleFilterChange}
-                onClear={clearAllFilters}
-                hasActiveFilters={hasActiveFilters}
-                activeChips={activeChips}
-              />
-              <DataTable
-                columns={columns}
-                data={orgs?.data ?? []}
-                searchable
-                searchPlaceholder='Search by name or company...'
-                searchValue={String(query.search || '')}
-                onSearchChange={(value) => searchTable(String(value || ''))}
-                pagination={tablePagination(orgs, {
-                  onPageChange: changePage,
-                  onPageSizeChange: changeRows,
-                })}
-                emptyMessage='No customers found'
-                selectable
-                selectedRows={selectedRows}
-                onSelectionChange={setSelectedRows}
-                getRowId={(row) => String(row.id)}
-                bulkActions={bulkActions}
-              />
-            </div>
-          </AppCard>
-        </Deferred>
+      <Deferred data='orgs' fallback={<LoadingSkeleton type='table' />}>
+        <AppCard title='All customers' description={`${orgs?.meta?.total ?? 0} total`}>
+          <div className='space-y-4'>
+            <FilterSortBar
+              filters={filterSortFields}
+              sort={sortConfig}
+              onFilterChange={handleFilterChange}
+              onClear={clearAllFilters}
+              hasActiveFilters={hasActiveFilters}
+              activeChips={activeChips}
+            />
+            <DataTable
+              columns={columns}
+              data={orgs?.data ?? []}
+              searchable
+              searchPlaceholder='Search by name or company...'
+              searchValue={String(query.search || '')}
+              onSearchChange={(value) => searchTable(String(value || ''))}
+              pagination={tablePagination(orgs, {
+                onPageChange: changePage,
+                onPageSizeChange: changeRows,
+              })}
+              emptyMessage='No customers found'
+              selectable
+              selectedRows={selectedRows}
+              onSelectionChange={setSelectedRows}
+              getRowId={(row) => String(row.id)}
+              bulkActions={bulkActions}
+            />
+          </div>
+        </AppCard>
+      </Deferred>
     </DashboardPage>
   )
 }

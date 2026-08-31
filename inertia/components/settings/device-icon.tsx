@@ -1,8 +1,4 @@
-import {
-  IconDeviceDesktop,
-  IconDeviceMobile,
-  IconDeviceTablet,
-} from '@tabler/icons-react'
+import { IconDeviceDesktop, IconDeviceMobile, IconDeviceTablet } from '@tabler/icons-react'
 
 export interface DeviceIconProps {
   deviceType: string | null

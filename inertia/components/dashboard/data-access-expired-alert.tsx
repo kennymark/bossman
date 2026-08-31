@@ -31,9 +31,7 @@ export function DataAccessExpiredAlert({
     <Alert variant='destructive'>
       <IconAlertCircle className='h-4 w-4' />
       <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>
-        {description ?? defaultDescription(expiredAt)}
-      </AlertDescription>
+      <AlertDescription>{description ?? defaultDescription(expiredAt)}</AlertDescription>
     </Alert>
   )
 }

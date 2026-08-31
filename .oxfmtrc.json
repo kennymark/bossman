@@ -12,7 +12,7 @@
   "bracketSameLine": true,
   "bracketSpacing": true,
   "singleAttributePerLine": false,
-  "ignorePatterns": [],
+  "ignorePatterns": ["build/**", "backups/**", ".adonisjs/**", "database/schema.ts"],
   "sortPackageJson": false,
   "sortImports": {
     "order": "asc"

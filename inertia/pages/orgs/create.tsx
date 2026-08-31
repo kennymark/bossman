@@ -78,8 +78,7 @@ export default function OrgsCreate(props: OrgsCreateProps) {
     <DashboardPage
       title='Create a new plan for your landlords and agencies'
       description='Set up a new customer in a few steps.'
-      backHref='/orgs'
-    >
+      backHref='/orgs'>
       <LoadingOverlay isLoading={isPending} text='Creating customer...' />
       <Stepper steps={steps} />
     </DashboardPage>

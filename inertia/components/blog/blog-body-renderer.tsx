@@ -20,7 +20,7 @@ function processBold(text: string): React.ReactNode {
       parts.push(text.slice(lastIndex, match.index))
     }
     parts.push(
-      <strong key={match.index} className="font-semibold text-foreground">
+      <strong key={match.index} className='font-semibold text-foreground'>
         {match[1]}
       </strong>,
     )
@@ -47,10 +47,9 @@ function processInline(text: string): React.ReactNode {
       <a
         key={match.index}
         href={match[2]}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-primary underline underline-offset-2 hover:no-underline"
-      >
+        target='_blank'
+        rel='noopener noreferrer'
+        className='text-primary underline underline-offset-2 hover:no-underline'>
         {processBold(match[1])}
       </a>,
     )
@@ -74,8 +73,7 @@ export function renderMarkdown(content: string): React.ReactNode[] {
       elements.push(
         <ListTag
           key={`list-${elements.length}`}
-          className={`my-4 flex flex-col gap-2 pl-6 ${listType === 'ul' ? 'list-disc' : 'list-decimal'}`}
-        >
+          className={`my-4 flex flex-col gap-2 pl-6 ${listType === 'ul' ? 'list-disc' : 'list-decimal'}`}>
           {listItems}
         </ListTag>,
       )
@@ -89,42 +87,42 @@ export function renderMarkdown(content: string): React.ReactNode[] {
     if (line.startsWith('# ')) {
       flushList()
       elements.push(
-        <h1 key={i} className="mt-12 mb-6 font-mono text-3xl font-bold tracking-tight">
+        <h1 key={i} className='mt-12 mb-6 font-mono text-3xl font-bold tracking-tight'>
           {line.replace('# ', '')}
         </h1>,
       )
     } else if (line.startsWith('## ')) {
       flushList()
       elements.push(
-        <h2 key={i} className="mt-10 mb-4 font-mono text-2xl font-bold tracking-tight">
+        <h2 key={i} className='mt-10 mb-4 font-mono text-2xl font-bold tracking-tight'>
           {line.replace('## ', '')}
         </h2>,
       )
     } else if (line.startsWith('### ')) {
       flushList()
       elements.push(
-        <h3 key={i} className="mt-8 mb-3 font-mono text-xl font-bold tracking-tight">
+        <h3 key={i} className='mt-8 mb-3 font-mono text-xl font-bold tracking-tight'>
           {line.replace('### ', '')}
         </h3>,
       )
     } else if (line.startsWith('#### ')) {
       flushList()
       elements.push(
-        <h4 key={i} className="mt-6 mb-2 font-mono text-lg font-bold tracking-tight">
+        <h4 key={i} className='mt-6 mb-2 font-mono text-lg font-bold tracking-tight'>
           {line.replace('#### ', '')}
         </h4>,
       )
     } else if (line.startsWith('- ')) {
       listType = 'ul'
       listItems.push(
-        <li key={i} className="leading-relaxed text-muted-foreground">
+        <li key={i} className='leading-relaxed text-muted-foreground'>
           {processInline(line.replace('- ', ''))}
         </li>,
       )
     } else if (/^\d+\.\s/.test(line)) {
       listType = 'ol'
       listItems.push(
-        <li key={i} className="leading-relaxed text-muted-foreground">
+        <li key={i} className='leading-relaxed text-muted-foreground'>
           {processInline(line.replace(/^\d+\.\s/, ''))}
         </li>,
       )
@@ -138,16 +136,12 @@ export function renderMarkdown(content: string): React.ReactNode[] {
         const [, alt, src] = match
         const altStr = alt ?? ''
         elements.push(
-          <figure key={i} className="my-6">
-            <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border">
-              <img
-                src={src}
-                alt={altStr}
-                className="h-full w-full object-cover"
-              />
+          <figure key={i} className='my-6'>
+            <div className='relative aspect-video w-full overflow-hidden rounded-xl border border-border'>
+              <img src={src} alt={altStr} className='h-full w-full object-cover' />
             </div>
             {altStr && (
-              <figcaption className="mt-2 text-center text-sm text-muted-foreground">
+              <figcaption className='mt-2 text-center text-sm text-muted-foreground'>
                 {altStr}
               </figcaption>
             )}
@@ -155,7 +149,7 @@ export function renderMarkdown(content: string): React.ReactNode[] {
         )
       } else {
         elements.push(
-          <p key={i} className="my-4 leading-relaxed text-muted-foreground">
+          <p key={i} className='my-4 leading-relaxed text-muted-foreground'>
             {processInline(line)}
           </p>,
         )
@@ -163,7 +157,7 @@ export function renderMarkdown(content: string): React.ReactNode[] {
     } else {
       flushList()
       elements.push(
-        <p key={i} className="my-4 leading-relaxed text-muted-foreground">
+        <p key={i} className='my-4 leading-relaxed text-muted-foreground'>
           {processInline(line)}
         </p>,
       )
@@ -181,19 +175,11 @@ export function BlogBodyRenderer({ body, className }: BlogBodyRendererProps) {
   const content = typeof body === 'string' ? body : ''
 
   if (!content.trim()) {
-    return (
-      <div className={cn('text-sm text-muted-foreground', className)}>
-        No content.
-      </div>
-    )
+    return <div className={cn('text-sm text-muted-foreground', className)}>No content.</div>
   }
 
   return (
-    <div
-      className={cn(
-        'max-w-none text-base leading-7 text-foreground/90',
-        className,
-      )}>
+    <div className={cn('max-w-none text-base leading-7 text-foreground/90', className)}>
       {renderMarkdown(content)}
     </div>
   )

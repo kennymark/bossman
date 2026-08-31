@@ -38,14 +38,20 @@ jobs:
 
       - run: npm ci
 
-      # Non-blocking: ~60 files predate this workflow and are not yet formatted.
-      # Run `npm run fmt` once across the repo, then drop continue-on-error.
       - name: Format check
         run: npm run fmt:check
-        continue-on-error: true
 
       - name: Typecheck
         run: npm run typecheck
 
       - name: Test
         run: npm test
+
+      # The server can typecheck and test clean while the client bundle fails to build,
+      # which only shows up at deploy time. Cheaper to catch it here.
+      - name: Build
+        run: npm run build
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+        continue-on-error: true

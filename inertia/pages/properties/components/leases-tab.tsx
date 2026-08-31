@@ -11,21 +11,22 @@ type LeasesTabProps = {
 }
 
 export function LeasesTab({ propertyId }: LeasesTabProps) {
-  const { data: leases, loading, pagination } = usePaginatedTab<RawLease>(
-    ['property-leases', propertyId],
-    (page, perPage) =>
-      api
-        .get<PaginatedResponse<RawLease>>(`/leaseable-entities/${propertyId}/leases`, {
-          params: { page, perPage },
-        })
-        .then((r) => r.data),
+  const {
+    data: leases,
+    loading,
+    pagination,
+  } = usePaginatedTab<RawLease>(['property-leases', propertyId], (page, perPage) =>
+    api
+      .get<PaginatedResponse<RawLease>>(`/leaseable-entities/${propertyId}/leases`, {
+        params: { page, perPage },
+      })
+      .then((r) => r.data),
   )
 
   return (
     <AppCard
       title='Leases'
-      description={`Leases for this property (${pagination?.total ?? 0} total)`}
-    >
+      description={`Leases for this property (${pagination?.total ?? 0} total)`}>
       <DataTable
         columns={leasesTableColumns}
         data={leases}

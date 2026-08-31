@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { AppCard } from '@/components/ui/app-card'
+import { BaseDialog } from '@/components/ui/base-dialog'
 import { BaseModal } from '@/components/ui/base-modal'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -27,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { BaseDialog } from '@/components/ui/base-dialog'
 import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
 import api from '@/lib/http'
 
@@ -186,9 +186,7 @@ export function TeamInvitationsInviteButton() {
           </div>
           <div className='space-y-2'>
             <Label htmlFor='inviteRole'>Role</Label>
-            <Select
-              value={inviteRole}
-              onValueChange={(v) => setInviteRole(v as InviteRole)}>
+            <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as InviteRole)}>
               <SelectTrigger id='inviteRole' className='w-full'>
                 <SelectValue placeholder='Select role' />
               </SelectTrigger>

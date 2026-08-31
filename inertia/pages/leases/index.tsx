@@ -1,16 +1,17 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
 import { Deferred, Link } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
 import { IconAlertCircle, IconCircleCheck, IconCircleX, IconFileText } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
-import { usePage } from '@inertiajs/react'
+
 import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawLease, RawUser } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
 import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
-import { DataTable } from '@/components/dashboard/data-table'
-import { DataAccessExpiredAlert } from '@/components/dashboard/data-access-expired-alert'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { DataAccessExpiredAlert } from '@/components/dashboard/data-access-expired-alert'
+import { DataTable } from '@/components/dashboard/data-table'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { LeaseStatusBadge } from '@/components/leases/status-badge'
 import { LoadingSkeleton, Stack } from '@/components/ui'
@@ -18,8 +19,8 @@ import { AppCard } from '@/components/ui/app-card'
 import { SimpleGrid } from '@/components/ui/simplegrid'
 import { useInertiaParams } from '@/hooks/use-inertia-params'
 import { dateFormatter } from '@/lib/date'
-import { tablePagination } from '@/lib/pagination'
 import api from '@/lib/http'
+import { tablePagination } from '@/lib/pagination'
 
 interface LeasesIndexProps extends SharedProps {
   leases: PaginatedResponse<RawLease>
@@ -102,10 +103,7 @@ export default function LeasesIndex({
 
   return (
     <DashboardPage title='Leases' description='All leases for your organisation.'>
-      <DataAccessExpiredAlert
-        expired={dataAccessExpired}
-        expiredAt={dataAccessExpiredAt}
-      />
+      <DataAccessExpiredAlert expired={dataAccessExpired} expiredAt={dataAccessExpiredAt} />
 
       {isGodAdmin && (
         <SimpleGrid cols={{ base: 1, md: 2, lg: 4 }} spacing={4}>

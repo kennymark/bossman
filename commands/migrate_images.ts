@@ -28,7 +28,6 @@ export default class MigrateImages extends BaseCommand {
 
       // if image exists in blog drive, then delete it
       if (exists) {
-
         const file = await backupDrive.getBytes(coverImage.path)
 
         await blogDrive.put(coverImage.path, file, { contentType: coverImage.mimeType })

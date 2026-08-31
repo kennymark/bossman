@@ -11,10 +11,16 @@ type ActivitiesTabProps = {
 }
 
 export function ActivitiesTab({ orgId }: ActivitiesTabProps) {
-  const { data: activities, loading, pagination } = usePaginatedTab<RawActivity>(
-    ['org-activities', orgId],
-    (page, perPage) =>
-      api.get<PaginatedResponse<RawActivity>>(`/orgs/${orgId}/activities`, { params: { page, perPage } }).then((r) => r.data),
+  const {
+    data: activities,
+    loading,
+    pagination,
+  } = usePaginatedTab<RawActivity>(['org-activities', orgId], (page, perPage) =>
+    api
+      .get<PaginatedResponse<RawActivity>>(`/orgs/${orgId}/activities`, {
+        params: { page, perPage },
+      })
+      .then((r) => r.data),
   )
 
   return (

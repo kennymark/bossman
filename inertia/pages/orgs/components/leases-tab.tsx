@@ -11,10 +11,14 @@ type LeasesTabProps = {
 }
 
 export function LeasesTab({ orgId }: LeasesTabProps) {
-  const { data: leases, loading, pagination } = usePaginatedTab<RawLease>(
-    ['org-leases', orgId],
-    (page, perPage) =>
-      api.get<PaginatedResponse<RawLease>>(`/orgs/${orgId}/leases`, { params: { page, perPage } }).then((r) => r.data),
+  const {
+    data: leases,
+    loading,
+    pagination,
+  } = usePaginatedTab<RawLease>(['org-leases', orgId], (page, perPage) =>
+    api
+      .get<PaginatedResponse<RawLease>>(`/orgs/${orgId}/leases`, { params: { page, perPage } })
+      .then((r) => r.data),
   )
 
   return (

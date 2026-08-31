@@ -20,8 +20,8 @@ import type { RawOrg } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
 import { timeAgo } from '#utils/date'
 import { startCase } from '#utils/functions'
-import DetailRow from '@/components/dashboard/detail-row'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import DetailRow from '@/components/dashboard/detail-row'
 import { type QuickActionOption, QuickActions } from '@/components/dashboard/quick-actions'
 import { DateTimePicker, OnlyShowIf, SimpleGrid } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
@@ -281,8 +281,7 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
           </Button>
           <QuickActions options={quickActions} />
         </div>
-      }
-    >
+      }>
       <BaseSheet
         open={banUserSheetOpen}
         onOpenChange={setBanUserSheetOpen}
@@ -384,239 +383,233 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
       />
 
       <Tabs value={currentTab} onValueChange={handleTabChange} className='space-y-6'>
-          <TabsList>
-            <TabsTrigger value='details'>Details</TabsTrigger>
-            <TabsTrigger value='leases'>Leases</TabsTrigger>
-            <TabsTrigger value='properties'>Properties</TabsTrigger>
-            <TabsTrigger value='activities'>Activities</TabsTrigger>
-            <TabsTrigger value='invoices'>Invoices</TabsTrigger>
-          </TabsList>
+        <TabsList>
+          <TabsTrigger value='details'>Details</TabsTrigger>
+          <TabsTrigger value='leases'>Leases</TabsTrigger>
+          <TabsTrigger value='properties'>Properties</TabsTrigger>
+          <TabsTrigger value='activities'>Activities</TabsTrigger>
+          <TabsTrigger value='invoices'>Invoices</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value='details' className='space-y-6'>
-            <AppCard
-              title='User information'
-              description='Details and identifiers'
-              className='space-y-6'>
-              <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+        <TabsContent value='details' className='space-y-6'>
+          <AppCard
+            title='User information'
+            description='Details and identifiers'
+            className='space-y-6'>
+            <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+              <DetailRow
+                label='Owner type'
+                value={
+                  <Badge variant='outline' className='w-fit capitalize'>
+                    {ownerRole}
+                  </Badge>
+                }
+              />
+              <DetailRow label='Country' value={country} />
+              <DetailRow
+                label='Subscription'
+                value={
+                  <Badge variant={hasActiveSubscription ? 'default' : 'secondary'}>
+                    {hasActiveSubscription ? 'Active' : 'Inactive'}
+                  </Badge>
+                }
+              />
+              {banStatus?.isBanned && (
                 <DetailRow
-                  label='Owner type'
+                  label='Account'
                   value={
-                    <Badge variant='outline' className='w-fit capitalize'>
-                      {ownerRole}
+                    <Badge variant='destructive' className='w-fit'>
+                      Banned
                     </Badge>
                   }
                 />
-                <DetailRow label='Country' value={country} />
+              )}
+              {org.isFavourite && (
                 <DetailRow
-                  label='Subscription'
+                  label='Favourite'
                   value={
-                    <Badge variant={hasActiveSubscription ? 'default' : 'secondary'}>
-                      {hasActiveSubscription ? 'Active' : 'Inactive'}
+                    <Badge variant='secondary' className='w-fit gap-1'>
+                      <IconStar className='h-3 w-3' />
+                      Yes
                     </Badge>
                   }
                 />
-                {banStatus?.isBanned && (
-                  <DetailRow
-                    label='Account'
-                    value={
-                      <Badge variant='destructive' className='w-fit'>
-                        Banned
-                      </Badge>
-                    }
-                  />
-                )}
-                {org.isFavourite && (
-                  <DetailRow
-                    label='Favourite'
-                    value={
-                      <Badge variant='secondary' className='w-fit gap-1'>
-                        <IconStar className='h-3 w-3' />
-                        Yes
-                      </Badge>
-                    }
-                  />
-                )}
-                {org.isTestAccount && (
-                  <DetailRow
-                    label='Test account'
-                    value={
-                      <Badge variant='outline' className='w-fit gap-1'>
-                        <IconFlask className='h-3 w-3' />
-                        Yes
-                      </Badge>
-                    }
-                  />
-                )}
-                {org.isSalesOrg && (
-                  <DetailRow
-                    label='Sales account'
-                    value={
-                      <Badge variant='secondary' className='w-fit gap-1'>
-                        <IconBuildingStore className='h-3 w-3' />
-                        Yes
-                      </Badge>
-                    }
-                  />
-                )}
+              )}
+              {org.isTestAccount && (
                 <DetailRow
-                  label='Loops user'
+                  label='Test account'
                   value={
-                    <Badge variant={isLoopsUser ? 'default' : 'secondary'} className='w-fit'>
-                      {isLoopsUser ? 'Yes' : 'No'}
+                    <Badge variant='outline' className='w-fit gap-1'>
+                      <IconFlask className='h-3 w-3' />
+                      Yes
                     </Badge>
                   }
                 />
-
-                <DetailRow label='Creator email' value={String(org.creatorEmail)} />
-
-                <DetailRow label='Custom Plan' value={org.isOnCustomPlan ? 'Yes' : 'No'} />
+              )}
+              {org.isSalesOrg && (
                 <DetailRow
-                  label='Joined at'
-                  value={`${dateFormatter(org.createdAt)} (${timeAgo(org.createdAt)})`}
+                  label='Sales account'
+                  value={
+                    <Badge variant='secondary' className='w-fit gap-1'>
+                      <IconBuildingStore className='h-3 w-3' />
+                      Yes
+                    </Badge>
+                  }
                 />
-              </div>
-            </AppCard>
+              )}
+              <DetailRow
+                label='Loops user'
+                value={
+                  <Badge variant={isLoopsUser ? 'default' : 'secondary'} className='w-fit'>
+                    {isLoopsUser ? 'Yes' : 'No'}
+                  </Badge>
+                }
+              />
 
-            <OnlyShowIf condition={org.isOnCustomPlan}>
-              <AppCard title='Custom Plan' description='Custom plan features'>
-                <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={3}>
-                  <DetailRow
-                    label='Tenant limit'
-                    value={org.customPlanFeatures?.tenantLimit ?? '—'}
-                  />
-                  <DetailRow
-                    label='Team member limit'
-                    value={org.customPlanFeatures?.teamMemberLimit ?? '—'}
-                  />
-                  <DetailRow
-                    label='Storage limit'
-                    value={org.customPlanFeatures?.storageLimit ?? '—'}
-                  />
-                  <DetailRow
-                    label='Property limit'
-                    value={org.customPlanFeatures?.propertyLimit ?? '—'}
-                  />
-                  <DetailRow
-                    label='Activity log retention'
-                    value={org.customPlanFeatures?.activityLogRetention ?? '—'}
-                  />
-                  <DetailRow
-                    label='Deposit protection'
-                    value={org.customPlanFeatures?.depositProtection ?? '—'}
-                  />
-                  <DetailRow
-                    label='Advanced reporting'
-                    value={org.customPlanFeatures?.advancedReporting ?? '—'}
-                  />
-                  <DetailRow
-                    label='E-sign docs limit'
-                    value={org.customPlanFeatures?.eSignDocsLimit ?? '—'}
-                  />
-                  <DetailRow
-                    label='AI invocation limit'
-                    value={org.customPlanFeatures?.aiInvocationLimit ?? '—'}
-                  />
-                  <DetailRow
-                    label='Custom templates limit'
-                    value={org.customPlanFeatures?.customTemplatesLimit ?? '—'}
-                  />
-                </SimpleGrid>
-              </AppCard>
+              <DetailRow label='Creator email' value={String(org.creatorEmail)} />
 
-              <AppCard title='Custom payment schedule' description='Custom payment schedule'>
-                <SimpleGrid cols={3}>
-                  <DetailRow
-                    label='Cost per tenant'
-                    value={formatCurrency(
-                      org.customPaymentSchedule?.amount,
-                      org.customPaymentSchedule?.currency,
-                    )}
-                  />
-                  <DetailRow
-                    label='Trial period'
-                    value={org.customPaymentSchedule?.trialPeriodInDays}
-                  />
-                  <DetailRow
-                    label='Frequency'
-                    value={startCase(org.customPaymentSchedule?.frequency)}
-                  />
-                  {org.customPaymentSchedule?.promoCode && (
-                    <DetailRow label='Promo code' value={org.customPaymentSchedule.promoCode} />
-                  )}
-                  <DetailRow label='Promo code' value={org.customPaymentSchedule?.promoCode} />
-                </SimpleGrid>
-              </AppCard>
+              <DetailRow label='Custom Plan' value={org.isOnCustomPlan ? 'Yes' : 'No'} />
+              <DetailRow
+                label='Joined at'
+                value={`${dateFormatter(org.createdAt)} (${timeAgo(org.createdAt)})`}
+              />
+            </div>
+          </AppCard>
 
-              <AppCard title='Pages' description='Enabled sections for this customer'>
-                <SimpleGrid cols={3}>
-                  {org?.pages?.orgPages.map((page: { label: string; isEnabled: boolean }) => (
-                    <DetailRow
-                      key={page.label}
-                      label={page.label}
-                      value={page.isEnabled ? 'Yes' : 'No'}
-                    />
-                  ))}
-                </SimpleGrid>
-              </AppCard>
-            </OnlyShowIf>
-
-            <AppCard
-              title='Settings'
-              description="Configure the org's settings."
-              className='space-y-6'>
+          <OnlyShowIf condition={org.isOnCustomPlan}>
+            <AppCard title='Custom Plan' description='Custom plan features'>
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={3}>
                 <DetailRow
-                  label='Preferred currency'
-                  value={org.settings?.preferredCurrency ?? '—'}
+                  label='Tenant limit'
+                  value={org.customPlanFeatures?.tenantLimit ?? '—'}
                 />
                 <DetailRow
-                  label='Preferred timezone'
-                  value={org.settings?.preferredTimezone ?? '—'}
+                  label='Team member limit'
+                  value={org.customPlanFeatures?.teamMemberLimit ?? '—'}
                 />
                 <DetailRow
-                  label='Preferred date format'
-                  value={org.settings?.preferredDateFormat ?? '—'}
+                  label='Storage limit'
+                  value={org.customPlanFeatures?.storageLimit ?? '—'}
                 />
                 <DetailRow
-                  label='Weekly digest'
-                  value={org.settings?.weeklyDigest ? 'Yes' : 'No'}
+                  label='Property limit'
+                  value={org.customPlanFeatures?.propertyLimit ?? '—'}
                 />
                 <DetailRow
-                  label='Monthly digest'
-                  value={org.settings?.monthlyDigest ? 'Yes' : 'No'}
+                  label='Activity log retention'
+                  value={org.customPlanFeatures?.activityLogRetention ?? '—'}
                 />
                 <DetailRow
-                  label='Auto archive leases'
-                  value={org.settings?.autoArchiveLeases ? 'Yes' : 'No'}
+                  label='Deposit protection'
+                  value={org.customPlanFeatures?.depositProtection ?? '—'}
                 />
                 <DetailRow
-                  label='Enable payments'
-                  value={org.settings?.enablePayments ? 'Yes' : 'No'}
+                  label='Advanced reporting'
+                  value={org.customPlanFeatures?.advancedReporting ?? '—'}
                 />
                 <DetailRow
-                  label='Notifications'
-                  value={org.settings?.notifications ? 'Yes' : 'No'}
+                  label='E-sign docs limit'
+                  value={org.customPlanFeatures?.eSignDocsLimit ?? '—'}
+                />
+                <DetailRow
+                  label='AI invocation limit'
+                  value={org.customPlanFeatures?.aiInvocationLimit ?? '—'}
+                />
+                <DetailRow
+                  label='Custom templates limit'
+                  value={org.customPlanFeatures?.customTemplatesLimit ?? '—'}
                 />
               </SimpleGrid>
             </AppCard>
-          </TabsContent>
 
-          <TabsContent value='leases' className='space-y-6'>
-            <LeasesTab orgId={id} />
-          </TabsContent>
+            <AppCard title='Custom payment schedule' description='Custom payment schedule'>
+              <SimpleGrid cols={3}>
+                <DetailRow
+                  label='Cost per tenant'
+                  value={formatCurrency(
+                    org.customPaymentSchedule?.amount,
+                    org.customPaymentSchedule?.currency,
+                  )}
+                />
+                <DetailRow
+                  label='Trial period'
+                  value={org.customPaymentSchedule?.trialPeriodInDays}
+                />
+                <DetailRow
+                  label='Frequency'
+                  value={startCase(org.customPaymentSchedule?.frequency)}
+                />
+                {org.customPaymentSchedule?.promoCode && (
+                  <DetailRow label='Promo code' value={org.customPaymentSchedule.promoCode} />
+                )}
+                <DetailRow label='Promo code' value={org.customPaymentSchedule?.promoCode} />
+              </SimpleGrid>
+            </AppCard>
 
-          <TabsContent value='properties' className='space-y-6'>
-            <PropertiesTab orgId={id} />
-          </TabsContent>
+            <AppCard title='Pages' description='Enabled sections for this customer'>
+              <SimpleGrid cols={3}>
+                {org?.pages?.orgPages.map((page: { label: string; isEnabled: boolean }) => (
+                  <DetailRow
+                    key={page.label}
+                    label={page.label}
+                    value={page.isEnabled ? 'Yes' : 'No'}
+                  />
+                ))}
+              </SimpleGrid>
+            </AppCard>
+          </OnlyShowIf>
 
-          <TabsContent value='activities' className='space-y-6'>
-            <ActivitiesTab orgId={id} />
-          </TabsContent>
+          <AppCard
+            title='Settings'
+            description="Configure the org's settings."
+            className='space-y-6'>
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={3}>
+              <DetailRow
+                label='Preferred currency'
+                value={org.settings?.preferredCurrency ?? '—'}
+              />
+              <DetailRow
+                label='Preferred timezone'
+                value={org.settings?.preferredTimezone ?? '—'}
+              />
+              <DetailRow
+                label='Preferred date format'
+                value={org.settings?.preferredDateFormat ?? '—'}
+              />
+              <DetailRow label='Weekly digest' value={org.settings?.weeklyDigest ? 'Yes' : 'No'} />
+              <DetailRow
+                label='Monthly digest'
+                value={org.settings?.monthlyDigest ? 'Yes' : 'No'}
+              />
+              <DetailRow
+                label='Auto archive leases'
+                value={org.settings?.autoArchiveLeases ? 'Yes' : 'No'}
+              />
+              <DetailRow
+                label='Enable payments'
+                value={org.settings?.enablePayments ? 'Yes' : 'No'}
+              />
+              <DetailRow label='Notifications' value={org.settings?.notifications ? 'Yes' : 'No'} />
+            </SimpleGrid>
+          </AppCard>
+        </TabsContent>
 
-          <TabsContent value='invoices' className='space-y-6'>
-            <InvoicesTab orgId={id} />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value='leases' className='space-y-6'>
+          <LeasesTab orgId={id} />
+        </TabsContent>
+
+        <TabsContent value='properties' className='space-y-6'>
+          <PropertiesTab orgId={id} />
+        </TabsContent>
+
+        <TabsContent value='activities' className='space-y-6'>
+          <ActivitiesTab orgId={id} />
+        </TabsContent>
+
+        <TabsContent value='invoices' className='space-y-6'>
+          <InvoicesTab orgId={id} />
+        </TabsContent>
+      </Tabs>
     </DashboardPage>
   )
 }

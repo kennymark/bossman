@@ -31,10 +31,7 @@ export interface SortableProject {
   updatedAt: string
 }
 
-export function sortProjects<T extends SortableProject>(
-  projects: T[],
-  sort: SortValue,
-): T[] {
+export function sortProjects<T extends SortableProject>(projects: T[], sort: SortValue): T[] {
   const [field, order] = sort.split(':') as [keyof T, 'asc' | 'desc']
   return [...projects].sort((a, b) => {
     const aVal = a[field]

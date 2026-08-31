@@ -7,8 +7,8 @@ import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawBlogPost } from '#types/model-types'
 import { BlogStatusBadge } from '@/components/blog'
 import { formatBlogDateTime } from '@/components/blog/blog-utils'
-import { DataTable } from '@/components/dashboard/data-table'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { DataTable } from '@/components/dashboard/data-table'
 import { LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
 import { Button } from '@/components/ui/button'
@@ -39,7 +39,6 @@ export default function BlogAdminIndex({ posts }: BlogAdminIndexProps) {
 
   const currentStatus = (query.status as StatusFilter) || 'all'
 
-
   const columns: Column<RawBlogPost>[] = [
     {
       key: 'title',
@@ -61,7 +60,12 @@ export default function BlogAdminIndex({ posts }: BlogAdminIndexProps) {
       key: 'publishedAt',
       header: 'Published / Scheduled',
       width: 200,
-      cell: (row) => (row.publishedAt ? formatBlogDateTime(row.publishedAt) : row.scheduledAt ? formatBlogDateTime(row.scheduledAt) : '—'),
+      cell: (row) =>
+        row.publishedAt
+          ? formatBlogDateTime(row.publishedAt)
+          : row.scheduledAt
+            ? formatBlogDateTime(row.scheduledAt)
+            : '—',
     },
     {
       key: 'actions',
@@ -91,8 +95,7 @@ export default function BlogAdminIndex({ posts }: BlogAdminIndexProps) {
                 preserveScroll: true,
                 onFinish: () => setIsDeletingId(null),
               })
-            }}>
-          </Button>
+            }}></Button>
         </div>
       ),
     },
@@ -126,17 +129,17 @@ export default function BlogAdminIndex({ posts }: BlogAdminIndexProps) {
             onSearchChange={(value) => searchTable(String(value || ''))}
             toolbarStart={
               <div className='flex items-center gap-2 shrink-0'>
-
                 <div className='flex rounded-lg border border-border p-0.5 bg-muted/30'>
                   {STATUS_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type='button'
                       onClick={() => updateQuery({ status: opt.value, page: 1 })}
-                      className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${currentStatus === opt.value
+                      className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                        currentStatus === opt.value
                           ? 'bg-background text-foreground shadow-sm'
                           : 'text-muted-foreground hover:text-foreground'
-                        }`}>
+                      }`}>
                       {opt.label}
                     </button>
                   ))}

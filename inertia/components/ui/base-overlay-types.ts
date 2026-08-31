@@ -2,13 +2,7 @@
 
 import type * as React from 'react'
 
-export type ButtonVariant =
-  | 'default'
-  | 'destructive'
-  | 'outline'
-  | 'secondary'
-  | 'ghost'
-  | 'link'
+export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
 
 /** Shared props for confirm/cancel overlay components (BaseModal, BaseDialog, BaseSheet). */
 export interface BaseOverlayProps {

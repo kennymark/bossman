@@ -2,6 +2,7 @@ import { IconCalendar, IconServer } from '@tabler/icons-react'
 
 import { timeAgo } from '#utils/date'
 import { ResourceCard } from '@/components/dashboard/resource-card'
+
 import type { SortableProject } from './sort-utils'
 
 export interface ProjectCardProps {

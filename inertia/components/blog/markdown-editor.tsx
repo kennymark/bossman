@@ -19,6 +19,7 @@ import {
   usePublisher,
   type MDXEditorMethods,
 } from '@mdxeditor/editor'
+
 import '@mdxeditor/editor/style.css'
 import * as React from 'react'
 
@@ -50,8 +51,7 @@ function BlockTypeButtons() {
           onPointerDown={(e) => {
             e.preventDefault()
             applyBlock(value)
-          }}
-        >
+          }}>
           {label}
         </ButtonWithTooltip>
       ))}
@@ -67,12 +67,7 @@ export interface MarkdownEditorProps {
   editorKey?: string
 }
 
-export function MarkdownEditor({
-  value,
-  onChange,
-  className,
-  editorKey,
-}: MarkdownEditorProps) {
+export function MarkdownEditor({ value, onChange, className, editorKey }: MarkdownEditorProps) {
   const ref = React.useRef<MDXEditorMethods>(null)
   const [mounted, setMounted] = React.useState(false)
   const { resolvedTheme } = useTheme()
@@ -94,7 +89,7 @@ export function MarkdownEditor({
           'flex min-h-[280px] items-center justify-center rounded-lg border border-input bg-muted/30 text-muted-foreground',
           className,
         )}>
-        <span className="text-sm">Loading editor…</span>
+        <span className='text-sm'>Loading editor…</span>
       </div>
     )
   }
@@ -134,7 +129,7 @@ export function MarkdownEditor({
         ref={ref}
         markdown={value}
         onChange={onChange}
-        contentEditableClassName="mdxeditor-content-scroll"
+        contentEditableClassName='mdxeditor-content-scroll'
         plugins={[
           linkPlugin(),
           linkDialogPlugin(),
@@ -156,12 +151,11 @@ export function MarkdownEditor({
                 <InsertThematicBreak />
               </>
             ),
-            toolbarClassName: 'border-b border-border bg-muted/30 px-2 py-1 gap-1 flex-wrap shrink-0',
+            toolbarClassName:
+              'border-b border-border bg-muted/30 px-2 py-1 gap-1 flex-wrap shrink-0',
           }),
         ]}
-        className={cn(
-          'min-h-0 flex-1 flex flex-col prose prose-sm dark:prose-invert max-w-none',
-        )}
+        className={cn('min-h-0 flex-1 flex flex-col prose prose-sm dark:prose-invert max-w-none')}
       />
     </div>
   )

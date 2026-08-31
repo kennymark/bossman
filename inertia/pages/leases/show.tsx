@@ -5,9 +5,10 @@ import { IconPencil } from '@tabler/icons-react'
 import type { RawLease } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
 import { startCase } from '#utils/functions'
-import DetailRow from '@/components/dashboard/detail-row'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import DetailRow from '@/components/dashboard/detail-row'
 import { type QuickActionOption, QuickActions } from '@/components/dashboard/quick-actions'
+import { LeaseStatusBadge } from '@/components/leases/status-badge'
 import { AppCard } from '@/components/ui/app-card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -16,7 +17,6 @@ import { dateFormatter } from '@/lib/date'
 
 import { ActivityTab } from './components/activity-tab'
 import { PaymentsTab } from './components/payments-tab'
-import { LeaseStatusBadge } from '@/components/leases/status-badge'
 
 interface LeaseShowProps extends SharedProps {
   lease: RawLease
@@ -52,60 +52,59 @@ export default function LeaseShow({ lease }: LeaseShowProps) {
             <Link>View Contract</Link>
           </Button>
         </div>
-      }
-    >
+      }>
       <Tabs value={currentTab} onValueChange={handleTabChange} className='space-y-6'>
-          <TabsList>
-            <TabsTrigger value='details'>Details</TabsTrigger>
-            <TabsTrigger value='payments'>Payments</TabsTrigger>
-            <TabsTrigger value='activity'>Activity</TabsTrigger>
-          </TabsList>
+        <TabsList>
+          <TabsTrigger value='details'>Details</TabsTrigger>
+          <TabsTrigger value='payments'>Payments</TabsTrigger>
+          <TabsTrigger value='activity'>Activity</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value='details' className='space-y-6'>
-            <AppCard title='Lease information' description='Details and identifiers'>
-              <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-                <DetailRow label='Status' value={<LeaseStatusBadge status={lease.status} />} />
-                <DetailRow label='Rent' value={formatCurrency(lease.rentAmount, lease.currency)} />
+        <TabsContent value='details' className='space-y-6'>
+          <AppCard title='Lease information' description='Details and identifiers'>
+            <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+              <DetailRow label='Status' value={<LeaseStatusBadge status={lease.status} />} />
+              <DetailRow label='Rent' value={formatCurrency(lease.rentAmount, lease.currency)} />
 
-                <DetailRow label='eLease' value={lease.isELease ? 'Yes' : 'No'} />
-                <DetailRow label='Frequency' value={startCase(lease.frequency)} />
-                <DetailRow label='Remaining duration' value={lease.remainingDuration} />
+              <DetailRow label='eLease' value={lease.isELease ? 'Yes' : 'No'} />
+              <DetailRow label='Frequency' value={startCase(lease.frequency)} />
+              <DetailRow label='Remaining duration' value={lease.remainingDuration} />
 
-                <DetailRow
-                  label='Start date'
-                  value={lease.startDate ? dateFormatter(lease.startDate) : null}
-                />
-                <DetailRow
-                  label='End date'
-                  value={lease.endDate ? dateFormatter(lease.endDate) : 'Rolling'}
-                />
-                <DetailRow
-                  label='Deposit'
-                  value={formatCurrency(lease.depositAmount, lease.currency)}
-                />
-                <DetailRow label='Tenant' value={lease.tenantName} />
-                <DetailRow
-                  label='Property'
-                  value={
-                    <Link
-                      href={`/properties/${lease.leaseableEntityId}`}
-                      className='font-medium hover:underline'>
-                      {lease.propertyAddress}
-                    </Link>
-                  }
-                />
-              </div>
-            </AppCard>
-          </TabsContent>
+              <DetailRow
+                label='Start date'
+                value={lease.startDate ? dateFormatter(lease.startDate) : null}
+              />
+              <DetailRow
+                label='End date'
+                value={lease.endDate ? dateFormatter(lease.endDate) : 'Rolling'}
+              />
+              <DetailRow
+                label='Deposit'
+                value={formatCurrency(lease.depositAmount, lease.currency)}
+              />
+              <DetailRow label='Tenant' value={lease.tenantName} />
+              <DetailRow
+                label='Property'
+                value={
+                  <Link
+                    href={`/properties/${lease.leaseableEntityId}`}
+                    className='font-medium hover:underline'>
+                    {lease.propertyAddress}
+                  </Link>
+                }
+              />
+            </div>
+          </AppCard>
+        </TabsContent>
 
-          <TabsContent value='payments' className='space-y-6'>
-            <PaymentsTab leaseId={lease.id} />
-          </TabsContent>
+        <TabsContent value='payments' className='space-y-6'>
+          <PaymentsTab leaseId={lease.id} />
+        </TabsContent>
 
-          <TabsContent value='activity' className='space-y-6'>
-            <ActivityTab leaseId={lease.id} />
-          </TabsContent>
-        </Tabs>
+        <TabsContent value='activity' className='space-y-6'>
+          <ActivityTab leaseId={lease.id} />
+        </TabsContent>
+      </Tabs>
     </DashboardPage>
   )
 }
