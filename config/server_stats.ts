@@ -1,21 +1,41 @@
 import { defineConfig } from 'adonisjs-server-stats'
 
 export default defineConfig({
-  // How often to collect and broadcast stats (in milliseconds).
-  // Higher = fewer HTTP requests and fewer session commits from the stats bar.
-  authorize: (ctx) => {
-    const user = ctx.auth.user
-    return Boolean(user?.isGodAdmin)
-  },
+  /**
+   * Who may read the stats endpoint and see the toolbar.
+   *
+   * This reads `ctx.auth.user`, so it depends on `silent_auth_middleware` having
+   * resolved the session. That middleware used to skip this very path, which meant the
+   * guard always saw an anonymous request and denied everyone — do not add a skip back.
+   */
+  authorize: (ctx) => Boolean(ctx.auth.user?.isGodAdmin),
+
+  /**
+   * How often the client polls for stats, in milliseconds. Higher means fewer HTTP
+   * requests from the stats bar.
+   */
   pollInterval: 10_000,
+
   dashboard: true,
 
   toolbar: {
     tracing: true,
 
-    excludeFromTracing: ['/admin/api/debug', '/__transmit/events', ' /stats/api/requests'],
+    /**
+     * Paths kept out of the trace list because they are polling noise and would drown
+     * out real requests. These are matched with `startsWith`, so they have to be exact
+     * — `' /stats/api/requests'` carried a leading space and silently matched nothing.
+     */
+    excludeFromTracing: ['/admin/api/debug', '/__transmit', '/stats/api/requests'],
   },
-  // Real-time transport: 'transmit' for SSE via @adonisjs/transmit, 'none' for polling only
+
+  /**
+   * SSE broadcasting of the stats payload. Left off: the toolbar polls
+   * `pollInterval` instead, which is enough for a console.
+   *
+   * Note this flag does not gate the dashboard and debug channels — those broadcast
+   * whenever Transmit is available, which is why `start/transmit.ts` guards them.
+   */
   realtime: false,
 
   collectors: 'auto',
