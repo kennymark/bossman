@@ -1,5 +1,5 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
-import { Deferred, Head, router } from '@inertiajs/react'
+import { Deferred, router, usePage } from '@inertiajs/react'
 import { IconDownload, IconPlus, IconRotate2, IconTrash } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -7,34 +7,32 @@ import { toast } from 'sonner'
 
 import type { Column, PaginatedResponse } from '#types/extra'
 import type { RawDbBackup } from '#types/model-types'
+import { CONFIRMATION_PHRASES, MIN_REASON_LENGTH, confirmationMatches } from '#utils/confirmation'
 import { timeAgo } from '#utils/date'
 import { formatFileSize } from '#utils/functions'
-import { DataTable } from '@/components/dashboard/data-table'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
+import { DataTable } from '@/components/dashboard/data-table'
 import { LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
-import { BaseDialog } from '@/components/ui/base-dialog'
 import { BaseModal } from '@/components/ui/base-modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LoadingOverlay } from '@/components/ui/loading'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Stack } from '@/components/ui/stack'
+import { Textarea } from '@/components/ui/textarea'
 import { useInertiaParams } from '@/hooks/use-inertia-params'
-import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
 import { getFilenameFromContentDisposition } from '@/lib/download'
-import { tablePagination } from '@/lib/pagination'
+import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
 import api from '@/lib/http'
+import { tablePagination } from '@/lib/pagination'
+
+import { BackupHealth, type BackupHealthEnvironment } from './components/backup-health'
+import { RestoreDialog } from './components/restore-dialog'
 
 interface DbBackupsIndexProps extends SharedProps {
   backups: PaginatedResponse<RawDbBackup>
+  health: { environments: BackupHealthEnvironment[] }
 }
 
 const baseColumns: Column<RawDbBackup>[] = [
@@ -63,13 +61,22 @@ const baseColumns: Column<RawDbBackup>[] = [
   },
 ]
 
-export default function DbBackupsIndex({ backups }: DbBackupsIndexProps) {
+export default function DbBackupsIndex({ backups, health }: DbBackupsIndexProps) {
+  const page = usePage<SharedProps>()
+  const canRestoreProd = Boolean(page.props.isGodAdmin)
+
   const { changePage, changeRows } = useInertiaParams({ page: 1, perPage: 20 })
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [restoreModalOpen, setRestoreModalOpen] = useState(false)
-  const [restoreBackupId, setRestoreBackupId] = useState<string>('')
-  const [restoreConnectionUrl, setRestoreConnectionUrl] = useState('')
   const [downloadingId, setDownloadingId] = useState<number | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<RawDbBackup | null>(null)
+  const [deleteReason, setDeleteReason] = useState('')
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+
+  const deletePhrase = CONFIRMATION_PHRASES['backup.delete']()
+  /** Mirrors the server's rule, so the request is never sent only to fail validation. */
+  const canDelete =
+    confirmationMatches(deleteConfirm, deletePhrase) &&
+    deleteReason.trim().length >= MIN_REASON_LENGTH
 
   const handleDownload = async (row: RawDbBackup) => {
     setDownloadingId(row.id)
@@ -117,24 +124,19 @@ export default function DbBackupsIndex({ backups }: DbBackupsIndexProps) {
             onClick={() => handleDownload(row)}>
             <IconDownload className='h-4 w-4' />
           </Button>
-          <BaseDialog
-            title='Delete backup?'
-            description='This will remove the backup record and the file from storage. This action cannot be undone.'
-            trigger={
-              <Button
-                type='button'
-                variant='ghost'
-                size='icon'
-                className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
-                aria-label='Delete backup'>
-                <IconTrash className='h-4 w-4' />
-              </Button>
-            }
-            primaryText='Delete'
-            primaryVariant='destructive'
-            secondaryText='Cancel'
-            onPrimaryAction={() => router.delete(`/db-backups/${row.id}`)}
-          />
+          <Button
+            type='button'
+            variant='ghost'
+            size='icon'
+            className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+            aria-label='Delete backup'
+            onClick={() => {
+              setDeleteTarget(row)
+              setDeleteReason('')
+              setDeleteConfirm('')
+            }}>
+            <IconTrash className='h-4 w-4' />
+          </Button>
         </div>
       ),
     },
@@ -147,22 +149,11 @@ export default function DbBackupsIndex({ backups }: DbBackupsIndexProps) {
       router.reload()
     },
     onError: (err: ServerErrorResponse) => {
+      /**
+       * The endpoint now reports a failed backup as a failure. It used to answer
+       * `{ success: true }` regardless, so this toast could not fire.
+       */
       toast.error(serverErrorResponder(err) || 'Failed to create backup')
-    },
-  })
-
-  const restoreBackupMutation = useMutation({
-    mutationFn: ({ backupId, connectionUrl }: { backupId: number; connectionUrl: string }) =>
-      api.post(`/db-backups/${backupId}/restore`, { connectionUrl }),
-    onSuccess: () => {
-      toast.success('Restore completed successfully')
-      setRestoreModalOpen(false)
-      setRestoreBackupId('')
-      setRestoreConnectionUrl('')
-      router.reload()
-    },
-    onError: (err: ServerErrorResponse) => {
-      toast.error(serverErrorResponder(err) || 'Failed to restore backup')
     },
   })
 
@@ -171,83 +162,31 @@ export default function DbBackupsIndex({ backups }: DbBackupsIndexProps) {
     createBackupMutation.mutate()
   }
 
-  const handleRestore = () => {
-    const backupId = Number(restoreBackupId)
-    if (!restoreBackupId || Number.isNaN(backupId) || !restoreConnectionUrl.trim()) {
-      toast.error('Select a backup and enter a connection URL')
-      return
-    }
-    restoreBackupMutation.mutate({
-      backupId,
-      connectionUrl: restoreConnectionUrl.trim(),
+  const handleDelete = () => {
+    if (!deleteTarget) return
+    router.delete(`/db-backups/${deleteTarget.id}`, {
+      data: { reason: deleteReason, confirm: deleteConfirm },
+      onFinish: () => setDeleteTarget(null),
     })
   }
 
   return (
     <DashboardPage
       title='Backups'
-      description='View database backup history.'
+      description='View backup health and database backup history.'
       actions={
         <div className='flex items-center gap-2'>
-          <BaseModal
-            open={restoreModalOpen}
-            onOpenChange={(open) => {
-              setRestoreModalOpen(open)
-              if (!open) {
-                setRestoreBackupId('')
-                setRestoreConnectionUrl('')
-              }
-            }}
-            title='Restore backup'
-            description='Choose a backup and the database connection URL to restore it to. This will overwrite the target database.'
+          <RestoreDialog
+            backups={backups?.data ?? []}
+            canRestoreProd={canRestoreProd}
+            onRestored={() => router.reload()}
             trigger={
               <Button type='button' variant='outline'>
                 <IconRotate2 className='mr-2 h-4 w-4' />
                 Restore
               </Button>
             }
-            primaryText='Restore'
-            secondaryText='Cancel'
-            onPrimaryAction={handleRestore}
-            isLoading={restoreBackupMutation.isPending}
-            primaryDisabled={!restoreBackupId || !restoreConnectionUrl.trim()}>
-            <Stack spacing={4}>
-              <div className='space-y-2'>
-                <Label htmlFor='restore-backup'>Backup</Label>
-                <Select
-                  value={restoreBackupId}
-                  onValueChange={(value) => setRestoreBackupId(value ?? '')}
-                  id='restore-backup'>
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder='Select a backup to restore' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(backups?.data ?? []).map((backup) => (
-                      <SelectItem key={backup.id} value={String(backup.id)}>
-                        {backup.fileName ?? backup.filePath ?? `Backup #${backup.id}`} (
-                        {backup.createdAt ? new Date(backup.createdAt).toLocaleString() : '—'})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className='space-y-2'>
-                <Label htmlFor='restore-connection-url'>Connection URL</Label>
-                <Input
-                  id='restore-connection-url'
-                  type='url'
-                  placeholder='postgresql://user:password@host:5432/dbname'
-                  value={restoreConnectionUrl}
-                  onChange={(e) => setRestoreConnectionUrl(e.target.value)}
-                  className='font-mono text-sm'
-                />
-                <p className='text-xs text-muted-foreground'>
-                  PostgreSQL connection URL of the database to restore into. Existing data may
-                  be overwritten.
-                </p>
-              </div>
-            </Stack>
-          </BaseModal>
+          />
           <BaseModal
             open={createModalOpen}
             onOpenChange={setCreateModalOpen}
@@ -267,21 +206,17 @@ export default function DbBackupsIndex({ backups }: DbBackupsIndexProps) {
         </div>
       }>
       <LoadingOverlay
-        text={
-          downloadingId !== null
-            ? 'Downloading...'
-            : createBackupMutation.isPending
-              ? 'Creating backup...'
-              : 'Restoring backup...'
-        }
+        text={downloadingId !== null ? 'Downloading...' : 'Creating backup...'}
         className='z-[100]'
-        isLoading={
-          downloadingId !== null ||
-          createBackupMutation.isPending ||
-          restoreBackupMutation.isPending
-        }
+        isLoading={downloadingId !== null || createBackupMutation.isPending}
       />
-      <Deferred data='backups' fallback={<LoadingSkeleton type='table' />}>
+
+      <div className='space-y-6'>
+        <Deferred data='health' fallback={<LoadingSkeleton type='card' />}>
+          <BackupHealth environments={health?.environments ?? []} />
+        </Deferred>
+
+        <Deferred data='backups' fallback={<LoadingSkeleton type='table' />}>
           <AppCard title='Backups' description={`${backups?.meta?.total ?? 0} total`}>
             <DataTable
               columns={columns}
@@ -294,6 +229,52 @@ export default function DbBackupsIndex({ backups }: DbBackupsIndexProps) {
             />
           </AppCard>
         </Deferred>
+      </div>
+
+      <BaseModal
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
+        }}
+        title='Delete backup?'
+        description='This removes the backup record and the file from storage. This cannot be undone.'
+        primaryText='Delete'
+        primaryVariant='destructive'
+        secondaryText='Cancel'
+        onPrimaryAction={handleDelete}
+        primaryDisabled={!canDelete}>
+        <Stack spacing={4}>
+          <p className='text-sm font-mono break-all'>{deleteTarget?.fileName}</p>
+          <div className='space-y-2'>
+            <Label htmlFor='delete-reason'>Reason</Label>
+            <Textarea
+              id='delete-reason'
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              placeholder='Recorded in the audit log.'
+              rows={2}
+            />
+            {deleteReason.length > 0 && deleteReason.trim().length < MIN_REASON_LENGTH && (
+              <p className='text-xs text-muted-foreground'>
+                At least {MIN_REASON_LENGTH} characters.
+              </p>
+            )}
+          </div>
+          <div className='space-y-2'>
+            <Label htmlFor='delete-confirm'>
+              Type <span className='font-mono font-semibold'>{deletePhrase}</span> to confirm
+            </Label>
+            <Input
+              id='delete-confirm'
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder={deletePhrase}
+              className='font-mono text-sm'
+              autoComplete='off'
+            />
+          </div>
+        </Stack>
+      </BaseModal>
     </DashboardPage>
   )
 }

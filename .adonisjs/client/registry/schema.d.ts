@@ -139,281 +139,6 @@ export interface Registry {
       response: unknown
     }
   }
-  'server-stats.dashboard': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.overview': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/overview'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.overview.chart': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/overview/chart'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.requests': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/requests'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.requests.show': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/requests/:id'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.queries': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/queries'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.events': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/events'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.routes': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/routes'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.logs': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/logs'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.emails': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/emails'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.emails.preview': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/emails/:id/preview'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.traces': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/traces'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.traces.show': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/traces/:id'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.queries.grouped': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/queries/grouped'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.queries.explain': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/queries/:id/explain'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.cache': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/cache'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.cache.show': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/cache/:key'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { key: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.cache.delete': {
-    methods: ["DELETE"]
-    pattern: '/__stats/api/cache/:key'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { key: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.jobs': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/jobs'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.jobs.show': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/jobs/:id'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.jobs.retry': {
-    methods: ["POST"]
-    pattern: '/__stats/api/jobs/:id/retry'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.config': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/config'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.filters': {
-    methods: ["GET","HEAD"]
-    pattern: '/__stats/api/filters'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.filters.create': {
-    methods: ["POST"]
-    pattern: '/__stats/api/filters'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-    }
-  }
-  'server-stats.filters.delete': {
-    methods: ["DELETE"]
-    pattern: '/__stats/api/filters/:id'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: unknown
-    }
-  }
   'drive.fs.serve': {
     methods: ["GET","HEAD"]
     pattern: '/uploads/*'
@@ -423,6 +148,17 @@ export interface Registry {
       params: {}
       query: {}
       response: unknown
+    }
+  }
+  'api_access.stats': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/api-access/stats'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api_access_controller').default['stats']>>>
     }
   }
   'analytics.orgs_stats': {
@@ -744,14 +480,25 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['requestDeleteCustomUser']>>>
     }
   }
+  'org_actions.bulk_preview': {
+    methods: ["POST"]
+    pattern: '/api/v1/orgs/actions/bulk-preview'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkPreviewValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkPreviewValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkPreview']>>>
+    }
+  }
   'org_actions.bulk_make_favourite': {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-make-favourite'
     types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      body: {}
       paramsTuple: []
       params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkMakeFavourite']>>>
     }
   }
@@ -759,10 +506,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-undo-favourite'
     types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      body: {}
       paramsTuple: []
       params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkUndoFavourite']>>>
     }
   }
@@ -770,10 +517,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-make-test-account'
     types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      body: {}
       paramsTuple: []
       params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkMakeTestAccount']>>>
     }
   }
@@ -781,10 +528,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-undo-test-account'
     types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      body: {}
       paramsTuple: []
       params: {}
-      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
+      query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkUndoTestAccount']>>>
     }
   }
@@ -858,21 +605,43 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/db-backups'
     types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/destructive').createBackupValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/destructive').createBackupValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/db_backups_controller').default['store']>>>
+    }
+  }
+  'db_backups.health': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/db-backups/health'
+    types: {
       body: {}
       paramsTuple: []
       params: {}
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/db_backups_controller').default['store']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/db_backups_controller').default['health']>>>
+    }
+  }
+  'db_backups.restore_preview': {
+    methods: ["POST"]
+    pattern: '/api/v1/db-backups/:id/restore-preview'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/destructive').restorePreviewValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/destructive').restorePreviewValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/db_backups_controller').default['restorePreview']>>>
     }
   }
   'db_backups.restore': {
     methods: ["POST"]
     pattern: '/api/v1/db-backups/:id/restore'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/destructive').restoreBackupValidator)>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/destructive').restoreBackupValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/db_backups_controller').default['restore']>>>
     }
   }
@@ -984,6 +753,17 @@ export interface Registry {
       params: { serviceId: ParamValue }
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['serviceDeploy']>>>
+    }
+  }
+  'railway.refresh': {
+    methods: ["POST"]
+    pattern: '/api/v1/railway/refresh'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['refresh']>>>
     }
   }
   'dashboard.index': {
@@ -1206,6 +986,17 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['index']>>>
     }
   }
+  'api_access.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api-access'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api_access_controller').default['index']>>>
+    }
+  }
   'db_backups.index': {
     methods: ["GET","HEAD"]
     pattern: '/db-backups'
@@ -1342,10 +1133,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/db-backups'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/destructive').createBackupValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/destructive').createBackupValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/db_backups_controller').default['store']>>>
     }
   }
@@ -1353,11 +1144,22 @@ export interface Registry {
     methods: ["DELETE"]
     pattern: '/db-backups/:id'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/destructive').deleteBackupValidator)>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/destructive').deleteBackupValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/db_backups_controller').default['destroy']>>>
+    }
+  }
+  'audits.page': {
+    methods: ["GET","HEAD"]
+    pattern: '/audits'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['page']>>>
     }
   }
   'blog_posts.admin_index': {
@@ -1525,6 +1327,17 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth_controller').default['login']>>>
     }
   }
+  'auth.two_factor_challenge': {
+    methods: ["POST"]
+    pattern: '/api/v1/auth/2fa/challenge'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/auth').twoFactorChallengeValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/auth').twoFactorChallengeValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth_controller').default['twoFactorChallenge']>>>
+    }
+  }
   'auth.forgot_password': {
     methods: ["POST"]
     pattern: '/api/v1/auth/forgot-password'
@@ -1688,6 +1501,17 @@ export interface Registry {
       params: {}
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/users_controller').default['getSettings']>>>
+    }
+  }
+  'two_factor.status': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/user/2fa/status'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/two_factor_controller').default['status']>>>
     }
   }
   'two_factor.setup': {
@@ -1930,6 +1754,28 @@ export interface Registry {
       params: {}
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['recent']>>>
+    }
+  }
+  'audits.actions': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/audits/actions'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['actions']>>>
+    }
+  }
+  'audits.actors': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/audits/actors'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['actors']>>>
     }
   }
   'health_checks': {

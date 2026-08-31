@@ -1,11 +1,20 @@
+import { compose } from '@adonisjs/core/helpers'
 import { slugify } from '@adonisjs/lucid-slugify'
 import { BaseModel, column, computed } from '@adonisjs/lucid/orm'
 import { Attachment, attachment } from '@jrmc/adonis-attachment'
+import { Auditable } from '@stouder-io/adonis-auditing'
 import type { DateTime } from 'luxon'
 
 import { FileStoreRoutes } from '../enum/file_store.ts'
 
-export default class BlogPost extends BaseModel {
+/**
+ * Auditable: field-level diffs land in the admin database's `audits` table.
+ *
+ * Deliberately not applied to `User` or `Org` — the mixin copies every attribute into
+ * the audit row, which for `User` means the password hash and the 2FA secret. Operator
+ * intent for those is recorded by `recordAdminAction` instead.
+ */
+export default class BlogPost extends compose(BaseModel, Auditable) {
   static table = 'blog_posts'
 
   @column({ isPrimary: true })

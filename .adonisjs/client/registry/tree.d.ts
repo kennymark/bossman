@@ -17,44 +17,15 @@ export interface ApiDefinition {
       traces: typeof routes['server-stats.debug.traces']
       traceDetail: typeof routes['server-stats.debug.traceDetail']
     }
-    dashboard: typeof routes['server-stats.dashboard']
-    overview: typeof routes['server-stats.overview'] & {
-      chart: typeof routes['server-stats.overview.chart']
-    }
-    requests: typeof routes['server-stats.requests'] & {
-      show: typeof routes['server-stats.requests.show']
-    }
-    queries: typeof routes['server-stats.queries'] & {
-      grouped: typeof routes['server-stats.queries.grouped']
-      explain: typeof routes['server-stats.queries.explain']
-    }
-    events: typeof routes['server-stats.events']
-    routes: typeof routes['server-stats.routes']
-    logs: typeof routes['server-stats.logs']
-    emails: typeof routes['server-stats.emails'] & {
-      preview: typeof routes['server-stats.emails.preview']
-    }
-    traces: typeof routes['server-stats.traces'] & {
-      show: typeof routes['server-stats.traces.show']
-    }
-    cache: typeof routes['server-stats.cache'] & {
-      show: typeof routes['server-stats.cache.show']
-      delete: typeof routes['server-stats.cache.delete']
-    }
-    jobs: typeof routes['server-stats.jobs'] & {
-      show: typeof routes['server-stats.jobs.show']
-      retry: typeof routes['server-stats.jobs.retry']
-    }
-    config: typeof routes['server-stats.config']
-    filters: typeof routes['server-stats.filters'] & {
-      create: typeof routes['server-stats.filters.create']
-      delete: typeof routes['server-stats.filters.delete']
-    }
   }
   drive: {
     fs: {
       serve: typeof routes['drive.fs.serve']
     }
+  }
+  apiAccess: {
+    stats: typeof routes['api_access.stats']
+    index: typeof routes['api_access.index']
   }
   analytics: {
     orgsStats: typeof routes['analytics.orgs_stats']
@@ -114,6 +85,7 @@ export interface ApiDefinition {
     undoTestAccount: typeof routes['org_actions.undo_test_account']
     toggleSalesAccount: typeof routes['org_actions.toggle_sales_account']
     requestDeleteCustomUser: typeof routes['org_actions.request_delete_custom_user']
+    bulkPreview: typeof routes['org_actions.bulk_preview']
     bulkMakeFavourite: typeof routes['org_actions.bulk_make_favourite']
     bulkUndoFavourite: typeof routes['org_actions.bulk_undo_favourite']
     bulkMakeTestAccount: typeof routes['org_actions.bulk_make_test_account']
@@ -133,6 +105,8 @@ export interface ApiDefinition {
     }
   }
   dbBackups: {
+    health: typeof routes['db_backups.health']
+    restorePreview: typeof routes['db_backups.restore_preview']
     restore: typeof routes['db_backups.restore']
     index: typeof routes['db_backups.index']
     download: typeof routes['db_backups.download']
@@ -152,6 +126,7 @@ export interface ApiDefinition {
     deploymentRestart: typeof routes['railway.deployment_restart']
     deploymentRedeploy: typeof routes['railway.deployment_redeploy']
     serviceDeploy: typeof routes['railway.service_deploy']
+    refresh: typeof routes['railway.refresh']
   }
   teamsPage: {
     index: typeof routes['teams_page.index']
@@ -174,6 +149,13 @@ export interface ApiDefinition {
   emailsPage: {
     index: typeof routes['emails_page.index']
     show: typeof routes['emails_page.show']
+  }
+  audits: {
+    page: typeof routes['audits.page']
+    index: typeof routes['audits.index']
+    recent: typeof routes['audits.recent']
+    actions: typeof routes['audits.actions']
+    actors: typeof routes['audits.actors']
   }
   blogPosts: {
     adminIndex: typeof routes['blog_posts.admin_index']
@@ -204,6 +186,7 @@ export interface ApiDefinition {
   auth: {
     logout: typeof routes['auth.logout']
     login: typeof routes['auth.login']
+    twoFactorChallenge: typeof routes['auth.two_factor_challenge']
     forgotPassword: typeof routes['auth.forgot_password']
     resetPassword: typeof routes['auth.reset_password']
     verifyEmail: typeof routes['auth.verify_email']
@@ -225,6 +208,7 @@ export interface ApiDefinition {
     revokeAll: typeof routes['sessions.revoke_all']
   }
   twoFactor: {
+    status: typeof routes['two_factor.status']
     setup: typeof routes['two_factor.setup']
     enable: typeof routes['two_factor.enable']
     disable: typeof routes['two_factor.disable']
@@ -244,10 +228,6 @@ export interface ApiDefinition {
     markAllAsRead: typeof routes['notifications.mark_all_as_read']
     unreadCount: typeof routes['notifications.unread_count']
     delete: typeof routes['notifications.delete']
-  }
-  audits: {
-    index: typeof routes['audits.index']
-    recent: typeof routes['audits.recent']
   }
   healthChecks: typeof routes['health_checks']
   attachments: typeof routes['attachments']

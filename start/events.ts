@@ -34,32 +34,38 @@ emitter.on('db:connection:disconnect', (connectionName) => {
 //   logger.info(`${method} ${url} [${string.prettyHrTime(duration)}]`)
 // })
 
-emitter.on('mail:sent', async (event) => {
-  // @ts-expect-error
-  const responseString = event.response.original.response as unknown as string
-  const testMessageUrl = getTestMessageUrl(responseString)
-  const msg = {
+emitter.on('mail:sent', (event) => {
+  const msg: Record<string, unknown> = {
     subject: event.message.subject,
     from: event.message.from,
     to: event.message.to,
-    url: testMessageUrl,
   }
+
+  /**
+   * The Ethereal preview link is a development convenience and only exists on the SMTP
+   * transport's response. This used to reach into `response.original.response`
+   * unconditionally and regex it, so on any real transport the value was `undefined`
+   * and the listener threw on every single mail sent — swallowed by `emitter.onError`,
+   * and therefore invisible.
+   */
+  const previewUrl = getTestMessageUrl(event)
+  if (previewUrl) msg.url = previewUrl
 
   logger.debug({ msg }, 'Mail sent')
 })
 
-const getTestMessageUrl = (info: string) => {
-  const web = 'https://ethereal.email/message'
-  // given this response, extract the MSGID
-  const msgIdRegex = /MSGID=([^ ]+)/
-  const msgIdMatch = info.match(msgIdRegex)
-  const msgId = msgIdMatch ? msgIdMatch[1] : null
-  if (msgId) {
-    // Clean the MSGID by removing any trailing characters like ']' and trimming whitespace
-    const cleanMsgId = msgId.replace(/[\]\s]+$/, '').trim()
-    return `${web}/${cleanMsgId}`
-  }
-  return `No MSGID found in response`
+/** Ethereal preview URL, when the transport actually returned an SMTP MSGID. */
+const getTestMessageUrl = (event: unknown): string | null => {
+  const response = (event as { response?: { original?: { response?: unknown } } })?.response
+    ?.original?.response
+
+  if (typeof response !== 'string') return null
+
+  const msgId = response.match(/MSGID=([^ ]+)/)?.[1]
+  if (!msgId) return null
+
+  // Clean the MSGID by removing any trailing characters like ']' and trimming whitespace
+  return `https://ethereal.email/message/${msgId.replace(/[\]\s]+$/, '').trim()}`
 }
 
 emitter.onError((error) => logger.error(error))

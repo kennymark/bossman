@@ -37,8 +37,10 @@ const orgs = await Org.query({ connection: appEnv })
 `request.appEnv()` is resolved once per request by `AppEnvMiddleware` and is **derived from the authenticated user, never from request input**:
 
 - God admins (`isGodAdmin`) may switch between `dev` and `prod`
-- Members granted `enableProdAccess` are pinned to `prod`
+- Members granted `enableProdAccess` are pinned to `prod`, until `prodAccessExpiresAt` passes
 - Everyone else is pinned to `dev`
+
+Production grants can be time-boxed. Granting one requires a god admin and a stated reason, both recorded in the audit trail; the `expire-prod-access` cron clears lapsed grants hourly.
 
 The session records a _preference_; `resolveAppEnv` in `app/services/app_env_service.ts` decides what is actually honoured. Never reintroduce a header or query-param fallback — that is a direct path to production data.
 
@@ -50,6 +52,15 @@ Two independent gates, both applied by route groups rather than inside controlle
 2. **`pageAccess`** — a team member may be restricted to a subset of pages via `team_members.allowed_pages`. The required grant is derived from the request path by `requiredPageKeyForPath` in `app/utils/page_access.ts`, which maps a page and the `/api/v1` route behind it to the same key. Pass `pageAccess({ page: 'teams' })` when a path does not name its own page.
 
 Add new admin routes inside an existing gated group. A route added outside one is reachable by any signed-in user.
+
+## Auditing
+
+Two complementary trails, both in `ADMIN_DB`:
+
+- **`admin_actions`** — operator intent: who, what, which environment, why, and whether it worked. Written by `recordAdminAction` and read at `/audits`. A regular admin sees their own; god and super admins see everyone's.
+- **`audits`** — model field diffs from `@stouder-io/adonis-auditing`, for models that opt into the `Auditable` mixin.
+
+Destructive actions (restore, ban, bulk org updates, member removal, backup deletion) require a retyped confirmation phrase and a reason, both enforced server-side. Restore and bulk updates offer a dry run that reports exactly what would change before anything is written.
 
 ## Getting started
 
@@ -97,8 +108,8 @@ npm test
 
 `tests/bootstrap.ts` migrates the database before the run and rolls it back afterwards, and clears the rate limiter between tests so throttled routes do not leak 429s across cases.
 
-- `tests/unit/` — pure logic (`app_env`, `page_access`, user model, utils)
-- `tests/functional/` — HTTP behaviour (`auth`, `authorization`, `health`)
+- `tests/unit/` — pure logic (`app_env`, `page_access`, `confirmation`, `two_factor`, user model, utils)
+- `tests/functional/` — HTTP behaviour (`auth`, `two_factor_login`, `transmit_channels`, `authorization`, `health`)
 
 Authorization changes should come with a test in `tests/functional/authorization.spec.ts`.
 
@@ -140,13 +151,21 @@ Notable environment variables beyond the obvious: `ADMIN_DB`, `DEV_DB`, `PROD_DB
 
 `GET /docs` (Scalar; `/docs/1` RapiDoc, `/docs/2` Swagger UI) and `GET /swagger` for the raw spec. Both require an authenticated admin — they describe the entire internal API surface.
 
+## Backups
+
+`pg_dump` runs every 6 hours via pg-boss and streams to Cloudflare R2. Every attempt — successful or not — is recorded in `backup_runs`, which is what the health panel on `/db-backups` and the hourly `backup-health-check` cron read; `db_backups` only ever gets a row when a backup completes.
+
+Restores target a **named** database (`dev` or `prod`) whose connection string comes from the server environment, never from the request. Restoring into production additionally requires a god admin.
+
+Local dump files are a cache — R2 holds the artefact — and are pruned after each run and daily by `prune-local-backups`.
+
 ## Health checks
 
 `GET /health` returns liveness only (`{ isHealthy }`) to anonymous callers, so load balancer probes keep working without disclosing internals. The full report — every database connection, disk, memory — requires either a signed-in admin or the `x-monitoring-secret` header matching `HEALTH_CHECK_SECRET`.
 
 ## CI
 
-`.github/workflows/ci.yml` runs format check, typecheck, and tests against a PostgreSQL service container on every push and pull request. The format step is currently `continue-on-error` because a batch of files predates the formatter; run `npm run fmt` across the repo once, then remove that flag.
+`.github/workflows/ci.yml` runs format check, typecheck, tests and a production build against a PostgreSQL service container on every push and pull request. `npm audit` runs advisory-only.
 
 ## Deployment
 

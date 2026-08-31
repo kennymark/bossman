@@ -19,6 +19,7 @@ import {
   IconLogs,
   IconPlugConnected,
   IconServer,
+  IconShieldLock,
   IconSettings,
   IconStack,
   IconSun,
@@ -106,6 +107,11 @@ const developerNavSections: NavSection[] = [
       { title: 'Servers', href: '/servers', icon: <IconServer className='h-4 w-4' /> },
       { title: 'Backups', href: '/db-backups', icon: <IconDatabase className='h-4 w-4' /> },
       { title: 'API & MCP', href: '/api-access', icon: <IconPlugConnected className='h-4 w-4' /> },
+      /**
+       * Not page-gated: every admin can read their own trail, and the controller widens
+       * the scope to everyone's for god and super admins.
+       */
+      { title: 'Audit trail', href: '/audits', icon: <IconShieldLock className='h-4 w-4' /> },
     ],
   },
 ]

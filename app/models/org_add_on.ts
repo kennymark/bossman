@@ -1,12 +1,21 @@
+import { compose } from '@adonisjs/core/helpers'
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { ModelObject } from '@adonisjs/lucid/types/model'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { Auditable } from '@stouder-io/adonis-auditing'
 import type { DateTime } from 'luxon'
 
 import Addon from './addon.js'
 import Org from './org.js'
 
-export default class OrgAddOn extends BaseModel {
+/**
+ * Auditable: field-level diffs land in the admin database's `audits` table.
+ *
+ * Deliberately not applied to `User` or `Org` — the mixin copies every attribute into
+ * the audit row, which for `User` means the password hash and the 2FA secret. Operator
+ * intent for those is recorded by `recordAdminAction` instead.
+ */
+export default class OrgAddOn extends compose(BaseModel, Auditable) {
   @column({ isPrimary: true })
   declare id: string
 

@@ -50,12 +50,42 @@ When adding a route under `/api/v1`, confirm `requiredPageKeyForPath` maps it to
 
 `resolveAppEnv` (`app/services/app_env_service.ts`) is the only thing allowed to decide `dev` vs `prod`. It reads the user, and treats the session value as an untrusted preference. Never add a header, query-param, or body fallback.
 
+A production grant can also expire (`users.prod_access_expires_at`). `canAccessProd` treats a lapsed grant as no grant, and `expire-prod-access` clears the stored flag hourly so the record matches what is enforced. Null means "no expiry".
+
+### 8. Raw SQL takes bindings, never interpolation
+
+`extensions/model.ts` builds query fragments. The `search` macro used to interpolate `?search=` straight into a `plainto_tsquery('...')` literal. Every value is now bound, and every _identifier_ goes through `assertSafeIdentifier`, which throws rather than interpolating anything that is not a plain column name.
+
+Identifiers reaching `search`/`sortBy` must come from a controller-side allow-list (see `LEASE_SEARCH_COLUMNS` and friends), never from the request.
+
+### 9. Destructive actions are confirmed and recorded
+
+Restore, ban, bulk org updates, member removal and backup deletion all require a retyped confirmation phrase (`app/utils/confirmation.ts`) and a reason, both checked server-side — the dialog is a convenience, not the control. They then call `recordAdminAction` (`app/services/admin_audit_service.ts`), which writes to `admin_actions` in the admin database.
+
+Use `recordAdminAction` for anything an operator does to customer data. Model-level `Auditable` covers field diffs, but must not go on `User` or `Org`: the mixin copies every attribute into the audit row, which for `User` means the password hash and the 2FA secret.
+
+### 10. Backups fail loudly
+
+`BackupService.createBackup` throws. It used to catch everything and return normally, so the endpoint answered `{ success: true }` for a backup that had not happened and pg-boss never retried. Every attempt is recorded in `backup_runs` (admin DB) whether or not it succeeded — that table, not `db_backups`, is what the health panel and the `backup-health-check` cron read.
+
+`DbBackup.fileName` is the storage key and is derived with a basename split, not a `replace('backups/', '')`: `BackupService` builds an absolute path via `app.makePath`, and the old version silently produced a key that did not exist in R2.
+
+### 11. Login is two steps whenever 2FA is on
+
+`AuthController.login` does not create a session for an account with `twoFactorEnabled`. It parks a challenge in the session and answers `requiresTwoFactor`; `POST /api/v1/auth/2fa/challenge` completes the login. `POST /api/v1/user/2fa/verify` is a step-up check for an already-authenticated user and is _not_ the login gate.
+
+TOTP secrets are stored encrypted and recovery codes hashed; both readers tolerate the pre-migration plaintext format.
+
+### 12. Transmit channels need an `authorize` rule
+
+`start/transmit.ts` registers them and is imported by `start/routes.ts` immediately before `transmit.registerRoutes()`. A channel with no rule is open to anyone, including unauthenticated clients. `silent_auth_middleware` must keep resolving `/__transmit` — the rules read `ctx.auth.user`.
+
 ## Conventions
 
 - **Imports** use subpath aliases (`#models/*`, `#services/*`, `#utils/*`, `#boss/*`). Frontend uses `@/*` for `inertia/*`.
 - **Controllers** stay thin: validate, delegate to a service, transform, respond.
 - **Transformers** (`app/transformers/`) shape models for the client — do not serialise models directly.
-- **Validation** is VineJS on the server. Use `vine.enum` for anything that maps to a fixed set (a DB connection name, a status) — `vine.string()` lets bad values reach the query layer.
+- **Validation** is VineJS on the server. Use `vine.enum` for anything that maps to a fixed set (a DB connection name, a status) — `vine.string()` lets bad values reach the query layer. `perPage` is capped at `MAX_PER_PAGE` in `app/utils/vine.ts`; anything paginating the customer databases must respect it.
 - **Errors** go through `logger`, not `console`. Never return driver details (table, column, constraint) to a client.
 - **Formatting** is oxfmt (`npm run fmt`), not Biome. Format only files you touched; a repo-wide reformat buries the diff.
 
@@ -77,5 +107,4 @@ Clearing the Vite cache matters: it caches pre-bundled dependencies and will kee
 ## Gotchas that are not bugs
 
 - `__transmit/events` connection failures in dev — the Transmit client points at a fixed port that may not match `ace serve`'s.
-- React hydration mismatch warnings — `inertia/app.tsx` calls `hydrateRoot()` while `config/inertia.ts` has `ssr.enabled: false`. React recovers by client-rendering. `createRoot` would be correct; changing it is a standalone fix.
 - 500s from `/api/v1/dashboard/*` on a machine that cannot reach `DEV_DB`.

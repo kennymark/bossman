@@ -23,6 +23,14 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       /** Resolved from the user by AppEnvMiddleware, not read raw from the session. */
       appEnv: ctx.request.appEnv(),
       isDev: env.get('NODE_ENV') === 'development',
+      /**
+       * A few screens gate an action on this rather than on a page grant — restoring
+       * into production, for instance. The server checks it again; this only decides
+       * what the UI offers.
+       */
+      isGodAdmin: ctx.inertia.always(Boolean(user?.isGodAdmin)),
+      /** Surfaced so the UI can warn before a production grant lapses. */
+      prodAccessExpiresAt: user?.prodAccessExpiresAt?.toISO() ?? null,
       pageAccess: ctx.inertia.always(pageAccess ?? undefined),
       params: ctx.request.params(),
       qs,

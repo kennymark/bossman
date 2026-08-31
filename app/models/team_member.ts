@@ -24,6 +24,10 @@ export default class TeamMember extends compose(SuperBaseModel, Auditable) {
   @column()
   declare enableProdAccess: boolean
 
+  /** Optional expiry on the production grant; null means it does not lapse. */
+  @column.dateTime({ columnName: 'prod_access_expires_at', serializeAs: 'prodAccessExpiresAt' })
+  declare prodAccessExpiresAt: DateTime | null
+
   /** Data access: 'all' = full access; 'selected' = only allowed properties/leases (legacy, prefer per-resource modes). */
   @column()
   declare dataAccessMode: 'all' | 'selected'

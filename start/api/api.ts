@@ -1,8 +1,11 @@
 import router from '@adonisjs/core/services/router'
 import vine from '@vinejs/vine'
 
+import { recordAdminAction } from '#services/admin_audit_service'
 import { canSwitchEnv } from '#services/app_env_service'
 import { middleware } from '#start/kernel'
+
+import { apiThrottle } from '../limiter.js'
 
 const AnalyticsController = () => import('#controllers/analytics_controller')
 const ApiAccessController = () => import('#controllers/api_access_controller')
@@ -54,6 +57,8 @@ router
       OrgActionsController,
       'requestDeleteCustomUser',
     ])
+    /** Dry run first: shows exactly which orgs a bulk action would touch. */
+    router.post('/orgs/actions/bulk-preview', [OrgActionsController, 'bulkPreview'])
     router.post('/orgs/actions/bulk-make-favourite', [OrgActionsController, 'bulkMakeFavourite'])
     router.post('/orgs/actions/bulk-undo-favourite', [OrgActionsController, 'bulkUndoFavourite'])
     router.post('/orgs/actions/bulk-make-test-account', [
@@ -73,6 +78,9 @@ router
 
     router.get('/push-notifications/users', [PushNotificationsController, 'users'])
     router.post('/db-backups', [DbBackupsController, 'store']).as('api.db_backups.store')
+    router.get('/db-backups/health', [DbBackupsController, 'health'])
+    /** Dry run: reports what a restore would do without running it. */
+    router.post('/db-backups/:id/restore-preview', [DbBackupsController, 'restorePreview'])
     router.post('/db-backups/:id/restore', [DbBackupsController, 'restore'])
 
     router.get('/emails', [EmailsController, 'index'])
@@ -86,11 +94,14 @@ router
     router.post('/railway/deployments/:id/restart', [RailwayController, 'deploymentRestart'])
     router.post('/railway/deployments/:id/redeploy', [RailwayController, 'deploymentRedeploy'])
     router.post('/railway/services/:serviceId/deploy', [RailwayController, 'serviceDeploy'])
+    /** Drops the cached Railway reads; the next page load goes back to the API. */
+    router.post('/railway/refresh', [RailwayController, 'refresh'])
 
     router.get('update-env', ({ request, response }) => {
       return response.ok({ appEnv: request.appEnv() })
     })
-    router.put('update-env', async ({ request, session, response, auth }) => {
+    router.put('update-env', async (ctx) => {
+      const { request, session, response, auth } = ctx
       const updateEnvValidator = vine.create(
         vine.object({
           appEnv: vine.enum(['dev', 'prod'] as const),
@@ -112,7 +123,18 @@ router
         })
       }
 
+      const previous = request.appEnv()
       session.put('appEnv', requestedEnv)
+
+      /** Switching into prod is worth a line in the log, even for a god admin. */
+      if (previous !== requestedEnv) {
+        await recordAdminAction(ctx, {
+          action: 'env.switch',
+          appEnv: requestedEnv,
+          metadata: { from: previous, to: requestedEnv },
+        })
+      }
+
       return response.ok({ message: 'Environment updated successfully', appEnv: requestedEnv })
     })
   })
@@ -121,5 +143,8 @@ router
    * Same gate as the pages these endpoints back. Previously this group was guarded by
    * `auth()` alone, so any signed-in user could call endpoints for pages they had no
    * grant for — including creating and restoring database backups.
+   *
+   * `apiThrottle` was defined but never applied, leaving every endpoint here —
+   * analytics, org mutations, backup creation, Railway redeploys — unmetered.
    */
-  .use([middleware.auth(), middleware.appRole(), middleware.pageAccess()])
+  .use([apiThrottle, middleware.auth(), middleware.appRole(), middleware.pageAccess()])

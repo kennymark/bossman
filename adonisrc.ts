@@ -104,7 +104,6 @@ export default defineConfig({
     },
     () => import('#start/email'),
     () => import('#start/mail'),
-    () => import('#start/scheduler'),
   ],
 
   /*

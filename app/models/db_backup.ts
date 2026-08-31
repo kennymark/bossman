@@ -14,10 +14,19 @@ export default class DbBackup extends compose(BaseModel, Auditable) {
   @column()
   declare fileSize: number
 
-  @computed() get fileName() {
-    // backups/v2-backup-1769948533686.sql
-    // remove the backups/ prefix
-    return this.filePath?.replace('backups/', '')
+  /**
+   * The object key in the backup bucket, which is always the file's basename.
+   *
+   * This used to be `filePath.replace('backups/', '')`, which only produced the right
+   * key because `BackupService` happened to build a *relative* path — it read
+   * `app.appRoot.host`, which is `''` for a `file://` URL. Correcting that to an
+   * absolute path would have left the prefix in place and silently broken download and
+   * restore for every backup. Taking the basename is right for either shape.
+   */
+  @computed() get fileName(): string | null {
+    if (!this.filePath) return null
+    const segments = this.filePath.split(/[\\/]/)
+    return segments[segments.length - 1] || null
   }
 
   /**

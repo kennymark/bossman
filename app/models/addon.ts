@@ -1,10 +1,19 @@
+import { compose } from '@adonisjs/core/helpers'
 import { slugify } from '@adonisjs/lucid-slugify'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { Auditable } from '@stouder-io/adonis-auditing'
 import type { DateTime } from 'luxon'
 
 import { consumeJsonArray, prepareJson } from '#utils/json_column'
 
-export default class Addon extends BaseModel {
+/**
+ * Auditable: field-level diffs land in the admin database's `audits` table.
+ *
+ * Deliberately not applied to `User` or `Org` — the mixin copies every attribute into
+ * the audit row, which for `User` means the password hash and the 2FA secret. Operator
+ * intent for those is recorded by `recordAdminAction` instead.
+ */
+export default class Addon extends compose(BaseModel, Auditable) {
   @column({ isPrimary: true })
   declare id: string
 

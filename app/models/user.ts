@@ -42,6 +42,25 @@ export default class User extends compose(SuperBaseModel, AuthFinder) {
   @column({ columnName: 'enable_prod_access', serializeAs: 'enableProdAccess' })
   declare enableProdAccess: boolean
 
+  /**
+   * When the production grant lapses. Null means it does not.
+   *
+   * `resolveAppEnv` treats an expired grant as no grant, so a lapsed member silently
+   * drops back to the dev database rather than keeping production access forever.
+   */
+  @column.dateTime({ columnName: 'prod_access_expires_at', serializeAs: 'prodAccessExpiresAt' })
+  declare prodAccessExpiresAt: DateTime | null
+
+  /** Why production access was granted, captured at grant time. */
+  @column({ columnName: 'prod_access_reason', serializeAs: 'prodAccessReason' })
+  declare prodAccessReason: string | null
+
+  @column({ columnName: 'prod_access_granted_by', serializeAs: 'prodAccessGrantedBy' })
+  declare prodAccessGrantedBy: string | null
+
+  @column.dateTime({ columnName: 'prod_access_granted_at', serializeAs: 'prodAccessGrantedAt' })
+  declare prodAccessGrantedAt: DateTime | null
+
   @computed()
   public get isAdminOrSuperAdmin() {
     return this.role === 'admin' || this.role === 'super_admin'

@@ -39,6 +39,10 @@ export const updateMemberValidator = vine.create(
     allowedLeaseIds: vine.array(vine.string()).optional(),
     /** Optional time limit on access to properties & leases; empty = no limit. */
     dataAccessExpiresAt: vine.string().optional(),
+    /** Optional time limit on production database access; empty = no limit. */
+    prodAccessExpiresAt: vine.string().optional(),
+    /** Required when turning production access on, so the grant is justified in the log. */
+    prodAccessReason: vine.string().trim().maxLength(500).optional(),
   }),
 )
 

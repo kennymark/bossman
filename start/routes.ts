@@ -16,7 +16,7 @@ import { controllers } from '#generated/controllers'
 
 import { middleware } from './kernel.js'
 import './api/api.js'
-import { loginThrottle, throttle } from './limiter.js'
+import { apiThrottle, loginThrottle, throttle, twoFactorThrottle } from './limiter.js'
 
 router.get('/', async ({ auth, response }) => {
   return auth.user ? response.redirect('/dashboard') : response.redirect('/login')
@@ -69,6 +69,7 @@ router
     router.get('/emails/:id', [controllers.EmailsPage, 'show'])
     router.post('/db-backups', [controllers.DbBackups, 'store'])
     router.delete('/db-backups/:id', [controllers.DbBackups, 'destroy'])
+    router.get('/audits', [controllers.Audits, 'page'])
 
     router
       .group(() => {
@@ -126,6 +127,8 @@ router
 router
   .group(() => {
     router.post('/login', [controllers.Auth, 'login']).use(loginThrottle)
+    /** Second step of login: runs before any session exists, so it is not behind auth(). */
+    router.post('/2fa/challenge', [controllers.Auth, 'twoFactorChallenge']).use(twoFactorThrottle)
     router.post('/forgot-password', [controllers.Auth, 'forgotPassword'])
     router.post('/reset-password', [controllers.Auth, 'resetPassword'])
     router.get('/verify-email', [controllers.Auth, 'verifyEmail'])
@@ -149,6 +152,7 @@ router
     router.delete('/account', [controllers.Users, 'deleteAccount'])
     router.put('/settings', [controllers.Users, 'updateSettings'])
     router.get('/settings', [controllers.Users, 'getSettings'])
+    router.get('/2fa/status', [controllers.TwoFactor, 'status'])
     router.post('/2fa/setup', [controllers.TwoFactor, 'setup'])
     router.post('/2fa/enable', [controllers.TwoFactor, 'enable'])
     router.post('/2fa/disable', [controllers.TwoFactor, 'disable'])
@@ -156,7 +160,7 @@ router
     router.post('/2fa/recovery-codes', [controllers.TwoFactor, 'regenerateRecoveryCodes'])
   })
   .prefix('api/v1/user')
-  .use(middleware.auth())
+  .use([apiThrottle, middleware.auth()])
 
 // Members and invitations (no teams)
 router
@@ -168,7 +172,12 @@ router
     router.delete('/:memberId', [controllers.Members, 'destroy'])
   })
   .prefix('api/v1/members')
-  .use([middleware.auth(), middleware.appRole(), middleware.pageAccess({ page: 'teams' })])
+  .use([
+    apiThrottle,
+    middleware.auth(),
+    middleware.appRole(),
+    middleware.pageAccess({ page: 'teams' }),
+  ])
 
 router
   .group(() => {
@@ -178,7 +187,12 @@ router
     router.post('/:invitationId/invite-link', [controllers.TeamInvitations, 'inviteLink'])
   })
   .prefix('api/v1/invitations')
-  .use([middleware.auth(), middleware.appRole(), middleware.pageAccess({ page: 'teams' })])
+  .use([
+    apiThrottle,
+    middleware.auth(),
+    middleware.appRole(),
+    middleware.pageAccess({ page: 'teams' }),
+  ])
 
 // Public team invitation routes
 router
@@ -186,6 +200,7 @@ router
     router.post('/accept', [controllers.TeamInvitations, 'accept'])
   })
   .prefix('api/v1/team-invitations')
+  .use(throttle)
 
 // Notification routes
 router
@@ -197,15 +212,18 @@ router
     router.delete('/:id', [controllers.Notifications, 'delete'])
   })
   .prefix('api/v1/notifications')
-  .use(middleware.auth())
+  .use([apiThrottle, middleware.auth()])
 
 router
   .group(() => {
     router.get('/', [controllers.Audits, 'index'])
     router.get('/recent', [controllers.Audits, 'recent'])
+    /** Operator action log — scope is decided per user inside the controller. */
+    router.get('/actions', [controllers.Audits, 'actions'])
+    router.get('/actors', [controllers.Audits, 'actors'])
   })
   .prefix('api/v1/audits')
-  .use(middleware.auth())
+  .use([apiThrottle, middleware.auth()])
 
 router.get('/health', [controllers.HealthChecks])
 
@@ -235,4 +253,7 @@ router
   })
   .use([middleware.auth(), middleware.appRole()])
 router.attachments()
+
+/** Channel authorization must be registered before the Transmit routes are mounted. */
+await import('./transmit.js')
 transmit.registerRoutes()

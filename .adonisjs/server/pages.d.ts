@@ -18,6 +18,7 @@ declare module '@adonisjs/inertia/types' {
     'addons/index': ExtractProps<(typeof import('../../inertia/pages/addons/index.tsx'))['default']>
     'analytics/index': ExtractProps<(typeof import('../../inertia/pages/analytics/index.tsx'))['default']>
     'api-access/index': ExtractProps<(typeof import('../../inertia/pages/api-access/index.tsx'))['default']>
+    'audits/index': ExtractProps<(typeof import('../../inertia/pages/audits/index.tsx'))['default']>
     'blog/index': ExtractProps<(typeof import('../../inertia/pages/blog/index.tsx'))['default']>
     'blog/manage/categories': ExtractProps<(typeof import('../../inertia/pages/blog/manage/categories.tsx'))['default']>
     'blog/manage/create': ExtractProps<(typeof import('../../inertia/pages/blog/manage/create.tsx'))['default']>
@@ -26,6 +27,8 @@ declare module '@adonisjs/inertia/types' {
     'blog/show': ExtractProps<(typeof import('../../inertia/pages/blog/show.tsx'))['default']>
     'dashboard/components/team-invitations': ExtractProps<(typeof import('../../inertia/pages/dashboard/components/team-invitations.tsx'))['default']>
     'dashboard/index': ExtractProps<(typeof import('../../inertia/pages/dashboard/index.tsx'))['default']>
+    'db-backups/components/backup-health': ExtractProps<(typeof import('../../inertia/pages/db-backups/components/backup-health.tsx'))['default']>
+    'db-backups/components/restore-dialog': ExtractProps<(typeof import('../../inertia/pages/db-backups/components/restore-dialog.tsx'))['default']>
     'db-backups/index': ExtractProps<(typeof import('../../inertia/pages/db-backups/index.tsx'))['default']>
     'emails/index': ExtractProps<(typeof import('../../inertia/pages/emails/index.tsx'))['default']>
     'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.tsx'))['default']>
