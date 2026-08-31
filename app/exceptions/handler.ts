@@ -23,13 +23,13 @@ export default class HttpExceptionHandler extends ExceptionHandler {
   protected statusPages: Record<StatusPageRange, StatusPageRenderer> = {
     '404': (error, ctx) => {
       if (ctx.inertia) {
-        return ctx.inertia.render('errors/not_found', { error })
+        return ctx.inertia.render('errors/not_found', { error: publicError(error) })
       }
       return ctx.response.status(404).send({ error: 'Not found' })
     },
     '500..599': (error, ctx) => {
       if (ctx.inertia) {
-        return ctx.inertia.render('errors/server_error', { error })
+        return ctx.inertia.render('errors/server_error', { error: publicError(error) })
       }
       return ctx.response.status(500).send({ error: 'Internal server error' })
     },
@@ -106,6 +106,28 @@ export default class HttpExceptionHandler extends ExceptionHandler {
   async report(error: unknown, ctx: HttpContext) {
     return super.report(error, ctx)
   }
+}
+
+/**
+ * The only error shape allowed into an Inertia page prop.
+ *
+ * The raw error used to be handed straight to `errors/server_error`. `pg` errors carry
+ * enumerable `detail`, `table`, `column` and `constraint` fields, so they survived
+ * serialisation into the page props and disclosed the schema — on `/blog` and
+ * `/blog/:slug`, to anonymous visitors. Only a status and a generic sentence get out;
+ * the real error is already logged by `report()`.
+ */
+export function publicError(error: unknown): { status: number; message: string } {
+  const status =
+    typeof error === 'object' && error !== null && typeof (error as any).status === 'number'
+      ? (error as any).status
+      : 500
+
+  if (status === 404) {
+    return { status, message: 'The page you are looking for could not be found.' }
+  }
+
+  return { status, message: 'Something went wrong on our end. The error has been logged.' }
 }
 
 // Key (email)=(agency@yourgaff.co.uk) already exists.

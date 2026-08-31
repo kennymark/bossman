@@ -19,6 +19,19 @@ export default class AuthMiddleware {
       guards?: (keyof Authenticators)[]
     } = {},
   ) {
+    /**
+     * An unauthenticated API call gets a 401, not a redirect to the login page.
+     *
+     * `authenticateUsing` redirects for everything, so an expired session on an XHR
+     * request answered `200` with the login page's HTML — the client saw a success and
+     * had no way to tell it needed to sign in again. The page routes still redirect,
+     * which is what a browser navigation wants; `appRole` and `pageAccess` already draw
+     * the same distinction.
+     */
+    if (ctx.request.url().startsWith('/api/') && !(await ctx.auth.check())) {
+      return ctx.response.unauthorized({ error: 'Authentication required' })
+    }
+
     await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
     return next()
   }

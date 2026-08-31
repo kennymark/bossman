@@ -7,7 +7,12 @@ const authConfig = defineConfig({
   guards: {
     web: sessionGuard({
       useRememberMeTokens: true,
-      rememberMeTokensAge: '2 years',
+      /**
+       * Two weeks, not the two years this used to be. A remember-me token is a
+       * standing credential for a console that reads and writes the production
+       * customer database; it should not outlive the laptop it was issued to.
+       */
+      rememberMeTokensAge: '14 days',
       provider: sessionUserProvider({
         model: () => import('#models/user'),
       }),

@@ -12,10 +12,14 @@ export default class TwoFactorController {
     }
 
     const secret = twoFactorService.generateSecret(user.email)
+    if (!secret.base32) {
+      return response.internalServerError({ error: 'Could not generate a 2FA secret' })
+    }
+
     const qrCode = await twoFactorService.generateQRCode(secret.otpauth_url || '')
 
-    // Store the secret temporarily (user needs to verify before enabling)
-    user.twoFactorSecret = secret.base32 || null
+    /** Stored encrypted, and still inert until `enable` verifies a code against it. */
+    user.twoFactorSecret = twoFactorService.encryptSecret(secret.base32)
     await user.save()
 
     return response.ok({
@@ -29,7 +33,8 @@ export default class TwoFactorController {
     const user = auth.getUserOrFail()
     const { token } = request.only(['token'])
 
-    if (!user.twoFactorSecret) {
+    const secret = twoFactorService.decryptSecret(user.twoFactorSecret)
+    if (!secret) {
       return response.badRequest({ error: 'Please setup 2FA first' })
     }
 
@@ -38,17 +43,21 @@ export default class TwoFactorController {
     }
 
     // Verify the token
-    const isValid = twoFactorService.verifyToken(user.twoFactorSecret, token)
-    if (!isValid) {
+    if (!twoFactorService.verifyToken(secret, token)) {
       return response.badRequest({ error: 'Invalid verification token' })
     }
 
     // Generate recovery codes
-    const recoveryCodes = twoFactorService.generateRecoveryCodes(8)
+    const recoveryCodes = twoFactorService.generateRecoveryCodes()
 
     // Enable 2FA
     user.twoFactorEnabled = true
-    user.twoFactorRecoveryCodes = recoveryCodes.join(',')
+    /** Only hashes are persisted — the plaintext below is shown once and discarded. */
+    user.twoFactorRecoveryCodes = twoFactorService.hashRecoveryCodes(recoveryCodes)
+    /** Re-encrypt a legacy plaintext secret while we are already writing the row. */
+    if (twoFactorService.secretNeedsMigration(user.twoFactorSecret)) {
+      user.twoFactorSecret = twoFactorService.encryptSecret(secret)
+    }
     await user.save()
 
     return response.ok({
@@ -84,6 +93,12 @@ export default class TwoFactorController {
     return response.ok({ message: '2FA disabled successfully' })
   }
 
+  /**
+   * Re-check the second factor for an already signed-in user.
+   *
+   * This is a step-up check, not the login gate — the login gate is
+   * `POST /api/v1/auth/2fa/challenge`, which runs before any session exists.
+   */
   async verify({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
     const { token, recoveryCode } = request.only(['token', 'recoveryCode'])
@@ -92,7 +107,8 @@ export default class TwoFactorController {
       return response.badRequest({ error: '2FA is not enabled' })
     }
 
-    if (!user.twoFactorSecret) {
+    const secret = twoFactorService.decryptSecret(user.twoFactorSecret)
+    if (!secret) {
       return response.badRequest({ error: '2FA secret not found' })
     }
 
@@ -111,7 +127,7 @@ export default class TwoFactorController {
       }
     } else if (token) {
       // Verify TOTP token
-      isValid = twoFactorService.verifyToken(user.twoFactorSecret, token)
+      isValid = twoFactorService.verifyToken(secret, token)
     } else {
       return response.badRequest({ error: 'Token or recovery code is required' })
     }
@@ -120,7 +136,10 @@ export default class TwoFactorController {
       return response.badRequest({ error: 'Invalid verification code' })
     }
 
-    return response.ok({ message: '2FA verification successful' })
+    return response.ok({
+      message: '2FA verification successful',
+      recoveryCodesRemaining: twoFactorService.countRecoveryCodes(user.twoFactorRecoveryCodes),
+    })
   }
 
   async regenerateRecoveryCodes({ auth, request, response }: HttpContext) {
@@ -142,13 +161,22 @@ export default class TwoFactorController {
     }
 
     // Generate new recovery codes
-    const recoveryCodes = twoFactorService.generateRecoveryCodes(8)
-    user.twoFactorRecoveryCodes = recoveryCodes.join(',')
+    const recoveryCodes = twoFactorService.generateRecoveryCodes()
+    user.twoFactorRecoveryCodes = twoFactorService.hashRecoveryCodes(recoveryCodes)
     await user.save()
 
     return response.ok({
       message: 'Recovery codes regenerated successfully',
       recoveryCodes, // Show only once
+    })
+  }
+
+  /** How many recovery codes remain, for the settings page. */
+  async status({ auth, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    return response.ok({
+      enabled: user.twoFactorEnabled,
+      recoveryCodesRemaining: twoFactorService.countRecoveryCodes(user.twoFactorRecoveryCodes),
     })
   }
 }

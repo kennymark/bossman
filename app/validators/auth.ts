@@ -31,3 +31,14 @@ export const resetPasswordValidator = vine.create(
     token: vine.string(),
   }),
 )
+
+/**
+ * Second step of login. Exactly one of `token` (TOTP) or `recoveryCode` is used; the
+ * controller rejects a request carrying neither.
+ */
+export const twoFactorChallengeValidator = vine.create(
+  vine.object({
+    token: vine.string().trim().maxLength(12).optional(),
+    recoveryCode: vine.string().trim().maxLength(64).optional(),
+  }),
+)

@@ -41,3 +41,15 @@ export const loginThrottle = limiter.define('login', (ctx) => {
     .usingKey(`login_${ctx.request.ip()}`)
     .blockFor('5 mins')
 })
+
+/**
+ * Second-factor attempts. Tighter than the login limiter because a TOTP code is only
+ * six digits: without this an attacker who already has the password can simply guess.
+ */
+export const twoFactorThrottle = limiter.define('two_factor', (ctx) => {
+  return limiter
+    .allowRequests(6)
+    .every('5 minutes')
+    .usingKey(`2fa_${ctx.request.ip()}`)
+    .blockFor('15 mins')
+})

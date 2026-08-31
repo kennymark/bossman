@@ -14,7 +14,24 @@ import { PAGE_KEY_TO_PATH, type PageKey, requiredPageKeyForPath } from '#utils/p
 export default class PageAccessMiddleware {
   async handle(ctx: HttpContext, next: NextFn, options: { page?: PageKey } = {}) {
     const user = ctx.auth.user
-    if (!user?.isAdminOrSuperAdmin) return next()
+
+    /**
+     * Fails closed. This used to `return next()` for anyone who was not an admin, which
+     * was only safe because `appRole()` always happens to run first in every group that
+     * uses this. Relying on that ordering is one careless route away from a page-gated
+     * endpoint being reachable by a signed-in non-admin.
+     */
+    if (!user) {
+      return ctx.request.url().startsWith('/api/')
+        ? ctx.response.unauthorized({ error: 'Authentication required' })
+        : ctx.response.redirect('/login')
+    }
+
+    if (!user.isAdminOrSuperAdmin) {
+      return ctx.request.url().startsWith('/api/')
+        ? ctx.response.forbidden({ error: 'Access required' })
+        : ctx.response.redirect('/login')
+    }
 
     const pathname = ctx.request.url().split('?')[0]?.split('#')[0] || '/'
     const requiredKey = options.page ?? requiredPageKeyForPath(pathname)

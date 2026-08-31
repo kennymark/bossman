@@ -96,7 +96,7 @@ export function NotificationCenter({ userId, initialUnreadCount = 0 }: Notificat
 
   // Listen for real-time notifications
   useRealTimeClient({
-    channel: `notification:${userId}`,
+    channel: `notifications/${userId}`,
     onMessage: (data: { type: string; notification?: Notification; notificationId?: string }) => {
       if (data.type === 'notification') {
         toast.info(data.notification?.title || 'Notification', {

@@ -9,20 +9,37 @@ import TogethaUser from '#models/togetha_user'
 
 type DateRange = { startDate: string; endDate: string }
 
+/** Only `YYYY-MM-DD` reaches a `::date` comparison; anything else falls back. */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+
+function isValidIsoDate(value: unknown): value is string {
+  if (typeof value !== 'string' || !ISO_DATE.test(value)) return false
+  const parsed = new Date(`${value}T00:00:00Z`)
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
+}
+
+/**
+ * Bounds and shapes the reporting window.
+ *
+ * The values are bound parameters, so they were never injectable — but they went
+ * unvalidated into `created_at::date >= ?`, so `?startDate=abc` came back as a 500
+ * straight from the driver. An out-of-order range is swapped rather than rejected.
+ */
 function parseDateRange(request: HttpContext['request']): DateRange {
-  const startDate = request.input('startDate', '')
-  const endDate = request.input('endDate', '')
   const now = new Date()
   const defaultEnd = now.toISOString().slice(0, 10)
   const defaultStart = new Date(now)
   defaultStart.setMonth(defaultStart.getMonth() - 1)
-  return {
-    startDate:
-      typeof startDate === 'string' && startDate
-        ? startDate
-        : defaultStart.toISOString().slice(0, 10),
-    endDate: typeof endDate === 'string' && endDate ? endDate : defaultEnd,
-  }
+
+  const rawStart = request.input('startDate', '')
+  const rawEnd = request.input('endDate', '')
+
+  let startDate = isValidIsoDate(rawStart) ? rawStart : defaultStart.toISOString().slice(0, 10)
+  let endDate = isValidIsoDate(rawEnd) ? rawEnd : defaultEnd
+
+  if (startDate > endDate) [startDate, endDate] = [endDate, startDate]
+
+  return { startDate, endDate }
 }
 
 export default class AnalyticsController {

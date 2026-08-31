@@ -1,12 +1,17 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
+import { MAX_PER_PAGE } from '#utils/vine'
+
 type PaginatorLike = {
   all(): unknown[]
   getMeta(): { currentPage: number; perPage: number; total: number; lastPage: number }
 }
 
 type TransformerLike = {
-  paginate(items: unknown[], meta: PaginatorLike['getMeta'] extends () => infer M ? M : never): unknown
+  paginate(
+    items: unknown[],
+    meta: PaginatorLike['getMeta'] extends () => infer M ? M : never,
+  ): unknown
 }
 
 export interface PaginatedIndexOptions {
@@ -34,20 +39,20 @@ export async function paginatedIndex<T extends PaginatorLike>(
   transformer: TransformerLike,
   options: PaginatedIndexOptions = {},
 ): Promise<Record<string, ReturnType<HttpContext['inertia']['defer']>>> {
-  const { defaultPerPage = 20, maxPerPage } = options
+  /**
+   * `maxPerPage` used to default to `Number.MAX_SAFE_INTEGER`, and no caller passed
+   * one — so `?perPage=1000000` issued an unbounded query. The cap is now the same
+   * ceiling the query validator enforces.
+   */
+  const { defaultPerPage = 20, maxPerPage = MAX_PER_PAGE } = options
   const params = await request.paginationQs()
-  const page = params.page ?? 1
-  const perPage = Math.min(
-    params.perPage ?? defaultPerPage,
-    maxPerPage ?? Number.MAX_SAFE_INTEGER,
-  )
+  const page = Math.max(params.page ?? 1, 1)
+  const perPage = Math.min(Math.max(params.perPage ?? defaultPerPage, 1), maxPerPage)
 
-  const defer = inertia.defer(
-    (async () => {
-      const paginator = await getPaginator(page, perPage)
-      return transformer.paginate(paginator.all(), paginator.getMeta())
-    }) as any,
-  )
+  const defer = inertia.defer((async () => {
+    const paginator = await getPaginator(page, perPage)
+    return transformer.paginate(paginator.all(), paginator.getMeta())
+  }) as any)
 
   return { [dataKey]: defer } as Record<string, ReturnType<HttpContext['inertia']['defer']>>
 }

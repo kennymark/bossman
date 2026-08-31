@@ -7,6 +7,13 @@ import Payment from '#models/payment'
 import { getDataAccessForUser } from '#services/data_access_service'
 import LeaseTransformer from '#transformers/lease_transformer'
 
+/**
+ * Columns `?search=` and `?sortBy=` may touch. Named here rather than taken from the
+ * request: both reach SQL as identifiers.
+ */
+const LEASE_SEARCH_COLUMNS = ['name', 'short_id'] as const
+const LEASE_SORTABLE_COLUMNS = ['created_at', 'start_date', 'end_date', 'name', 'status'] as const
+
 export default class LeasesController {
   async index({ auth, request, inertia }: HttpContext) {
     const params = await request.paginationQs()
@@ -27,7 +34,10 @@ export default class LeasesController {
       }
     }
 
-    const leasesPromise = baseQuery.withPagination(params)
+    const leasesPromise = baseQuery.withPagination(params, {
+      searchColumns: LEASE_SEARCH_COLUMNS,
+      sortableColumns: LEASE_SORTABLE_COLUMNS,
+    })
     return inertia.render('leases/index', {
       leases: inertia.defer(async () => {
         const p = await leasesPromise

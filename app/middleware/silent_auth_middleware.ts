@@ -4,10 +4,13 @@ import type { NextFn } from '@adonisjs/core/types/http'
 /**
  * Paths that skip auth check to avoid a user DB lookup on every request.
  * - /admin/api/server-stats: stats bar polling
- * - /__transmit: Transmit SSE/subscribe (can fire very frequently)
  * Debug panel (/admin/api/debug) is not skipped so it keeps working.
+ *
+ * `/__transmit` used to be on this list. It cannot be: Transmit channel authorization
+ * runs inside the subscribe request and decides access from `ctx.auth.user`, so
+ * skipping the check there left every channel rule looking at an anonymous request.
  */
-const SKIP_AUTH_PATHS = ['/admin/api/server-stats', '/__transmit']
+const SKIP_AUTH_PATHS = ['/admin/api/server-stats']
 
 function shouldSkipAuth(url: string): boolean {
   let path = url.includes('?') ? url.slice(0, url.indexOf('?')) : url

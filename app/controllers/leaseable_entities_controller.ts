@@ -7,6 +7,13 @@ import LeaseableEntity from '#models/leaseable_entity'
 import { getDataAccessForUser } from '#services/data_access_service'
 import LeaseableEntityTransformer from '#transformers/leaseable_entity_transformer'
 
+/**
+ * Columns `?search=` and `?sortBy=` may touch. Named here rather than taken from the
+ * request: both reach SQL as identifiers.
+ */
+const ENTITY_SEARCH_COLUMNS = ['address', 'description', 'summary'] as const
+const ENTITY_SORTABLE_COLUMNS = ['created_at', 'address', 'type', 'bedrooms'] as const
+
 export default class LeaseableEntitiesController {
   async index({ auth, request, inertia }: HttpContext) {
     const params = await request.paginationQs()
@@ -30,7 +37,11 @@ export default class LeaseableEntitiesController {
       }
     }
 
-    const entitiesPromise = baseQuery.withPagination(params)
+    const entitiesPromise = baseQuery.withPagination(params, {
+      searchColumns: ENTITY_SEARCH_COLUMNS,
+      sortableColumns: ENTITY_SORTABLE_COLUMNS,
+      defaultSort: 'address',
+    })
     return inertia.render('properties/index', {
       leaseableEntities: inertia.defer(async () => {
         const p = await entitiesPromise

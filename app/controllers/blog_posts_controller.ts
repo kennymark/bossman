@@ -11,6 +11,9 @@ import { createBlogPostValidator, updateBlogPostValidator } from '#validators/bl
 
 import { allowedImageExtensions } from '../data/file.js'
 
+/** Columns `?sortBy=` may name. An arbitrary identifier must never reach ORDER BY. */
+const BLOG_SORTABLE_COLUMNS = ['published_at', 'created_at', 'updated_at', 'title'] as const
+
 export default class BlogPostsController {
   async index({ request, inertia }: HttpContext) {
     const params = await request.paginationQs()
@@ -19,7 +22,7 @@ export default class BlogPostsController {
       .whereNotNull('publishedAt')
       .orderBy('publishedAt', 'desc')
       .if(params.search, (q) => q.whereILike('title', `%${params.search}%`))
-      .sortBy(params.sortBy || 'publishedAt', params.sortOrder || 'desc')
+      .sortBy(params.sortBy || 'published_at', params.sortOrder || 'desc', BLOG_SORTABLE_COLUMNS)
       .paginate(params.page || 1, params.perPage || 12)
 
     return inertia.render('blog/index', {
@@ -55,9 +58,13 @@ export default class BlogPostsController {
       .orderBy('createdAt', 'desc')
       .if(params.search, (q) => {
         const term = `%${params.search}%`
-        q.whereILike('title', term).orWhereILike('excerpt', term)
+        /**
+         * Grouped: an ungrouped `orWhere` here escaped the status filters above, so a
+         * search on the "draft" tab also returned published and scheduled posts.
+         */
+        q.where((sub) => sub.whereILike('title', term).orWhereILike('excerpt', term))
       })
-      .sortBy(params.sortBy || 'publishedAt', params.sortOrder || 'desc')
+      .sortBy(params.sortBy || 'published_at', params.sortOrder || 'desc', BLOG_SORTABLE_COLUMNS)
       .paginate(params.page || 1, params.perPage || 10)
 
     return inertia.render('blog/manage/index', {

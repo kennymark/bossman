@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface ServerErrorProps {
+  /**
+   * Sanitised by `publicError()` in the exception handler — a status and a generic
+   * sentence. Driver details (table, column, constraint) never reach this page.
+   */
   error: {
     message?: string
-    code?: string
     status?: number
   }
 }

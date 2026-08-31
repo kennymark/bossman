@@ -5,16 +5,127 @@ import PasswordReset from '#models/password_reset'
 import User from '#models/user'
 import { generateShortId } from '#services/app.functions'
 import sessionService from '#services/session_service'
+import twoFactorChallenge from '#services/two_factor_challenge_service'
+import twoFactorService from '#services/two_factor_service'
 import env from '#start/env'
-import { forgotPasswordValidator, loginValidator, resetPasswordValidator } from '#validators/auth'
+import {
+  forgotPasswordValidator,
+  loginValidator,
+  resetPasswordValidator,
+  twoFactorChallengeValidator,
+} from '#validators/auth'
 
 const appUrl = env.get('APP_URL')
 
 export default class AuthController {
-  async login({ request, response, auth, now, session }: HttpContext) {
+  /**
+   * Step one: password.
+   *
+   * When the account has 2FA enabled this deliberately does **not** sign the user in.
+   * It parks a short-lived challenge in the session and answers `requiresTwoFactor`;
+   * `twoFactorChallenge` below completes the login. Previously this method called
+   * `auth.login()` unconditionally, so a user with 2FA switched on was still protected
+   * by nothing but their password — the whole 2FA feature was decorative.
+   */
+  async login(ctx: HttpContext) {
+    const { request, response, auth, now, session } = ctx
     const { email, password, remember } = await request.validateUsing(loginValidator)
 
     const user = await User.verifyCredentials(email, password)
+
+    if (user.twoFactorEnabled) {
+      twoFactorChallenge.start(ctx, user.id, Boolean(remember))
+      return response.ok({
+        message: 'Enter your authentication code to continue.',
+        data: { requiresTwoFactor: true },
+      })
+    }
+
+    twoFactorChallenge.clear(ctx)
+    await this.completeLogin(ctx, user)
+
+    return response.ok({
+      message: 'Login successful',
+      data: {
+        user,
+        redirectTo: '/dashboard',
+      },
+    })
+  }
+
+  /**
+   * Step two: TOTP code or recovery code.
+   *
+   * Reads the pending challenge from the session — never a user id from the request —
+   * so this endpoint cannot be used to sign in as somebody else.
+   */
+  async twoFactorChallenge(ctx: HttpContext) {
+    const { request, response } = ctx
+    const { token, recoveryCode } = await request.validateUsing(twoFactorChallengeValidator)
+
+    const challenge = twoFactorChallenge.get(ctx)
+    if (!challenge) {
+      return response.unauthorized({
+        error: 'Your sign-in request expired. Please enter your password again.',
+        type: 'challenge_expired',
+      })
+    }
+
+    if (!token && !recoveryCode) {
+      return response.badRequest({ error: 'Enter your authentication code or a recovery code.' })
+    }
+
+    const user = await User.find(challenge.userId)
+    if (!user?.twoFactorEnabled) {
+      twoFactorChallenge.clear(ctx)
+      return response.unauthorized({ error: 'Two-factor authentication is not enabled.' })
+    }
+
+    const secret = twoFactorService.decryptSecret(user.twoFactorSecret)
+    let verified = false
+
+    if (recoveryCode) {
+      verified = twoFactorService.verifyRecoveryCode(user.twoFactorRecoveryCodes, recoveryCode)
+      if (verified) {
+        /** Single use — consumed before the session is created, not after. */
+        user.twoFactorRecoveryCodes = twoFactorService.removeRecoveryCode(
+          user.twoFactorRecoveryCodes,
+          recoveryCode,
+        )
+        await user.save()
+      }
+    } else if (token && secret) {
+      verified = twoFactorService.verifyToken(secret, token)
+    }
+
+    if (!verified) {
+      const remaining = twoFactorChallenge.recordFailure(ctx)
+      ctx.logger.warn({ userId: user.id }, 'Failed 2FA challenge')
+      return response.badRequest({
+        error: remaining
+          ? `Invalid code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+          : 'Too many incorrect codes. Please sign in again.',
+        type: remaining ? 'invalid_code' : 'challenge_expired',
+      })
+    }
+
+    twoFactorChallenge.clear(ctx)
+    await this.completeLogin(ctx, user, challenge.remember)
+
+    return response.ok({
+      message: 'Login successful',
+      data: {
+        user,
+        recoveryCodesRemaining: twoFactorService.countRecoveryCodes(user.twoFactorRecoveryCodes),
+        redirectTo: '/dashboard',
+      },
+    })
+  }
+
+  /** Everything that happens once both factors are satisfied. */
+  private async completeLogin(ctx: HttpContext, user: User, remember = false) {
+    const { auth, session, request, now } = ctx
+
     await auth.use('web').login(user, remember)
     await user.merge({ lastLoginAt: now }).save()
 
@@ -29,19 +140,13 @@ export default class AuthController {
       userAgent: request.header('user-agent') || null,
       lastActivity: now,
     })
-
-    return response.ok({
-      message: 'Login successful',
-      data: {
-        user,
-        redirectTo: '/dashboard',
-      },
-    })
   }
 
-  async logout({ auth, response, session }: HttpContext) {
+  async logout(ctx: HttpContext) {
+    const { auth, response, session } = ctx
     await auth.use('web').logout()
     session.forget('deviceSessionId')
+    twoFactorChallenge.clear(ctx)
     return response.redirect('/login')
   }
 

@@ -32,7 +32,7 @@ export class NotificationService {
     })
 
     // Broadcast via Transmit
-    transmit.broadcast(`notification:${userId}`, {
+    transmit.broadcast(`notifications/${userId}`, {
       type: 'notification',
       notification: notification.serialize(),
     })
@@ -83,7 +83,7 @@ export class NotificationService {
     await notification.save()
 
     // Broadcast update
-    transmit.broadcast(`notification:${userId}`, {
+    transmit.broadcast(`notifications/${userId}`, {
       type: 'notification:read',
       notificationId: notification.id,
     })
@@ -99,7 +99,7 @@ export class NotificationService {
     })
 
     // Broadcast update
-    transmit.broadcast(`notification:${userId}`, {
+    transmit.broadcast(`notifications/${userId}`, {
       type: 'notifications:all_read',
     })
   }
@@ -117,7 +117,7 @@ export class NotificationService {
     await notification.delete()
 
     // Broadcast deletion
-    transmit.broadcast(`notification:${userId}`, {
+    transmit.broadcast(`notifications/${userId}`, {
       type: 'notification:deleted',
       notificationId: notification.id,
     })
