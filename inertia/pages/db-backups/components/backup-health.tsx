@@ -29,6 +29,8 @@ export interface BackupHealthEnvironment {
 
 export interface BackupHealthProps {
   environments: BackupHealthEnvironment[]
+  /** True when the health log could not be read at all — see `buildHealth`. */
+  unavailable?: boolean
 }
 
 const STATUS_COPY: Record<BackupHealthStatus, { label: string; hint: string }> = {
@@ -67,75 +69,90 @@ function formatAge(ageHours: number | null): string {
  * never produced a backup row, so a database could go weeks without a usable dump
  * while this page happily listed the last successful one.
  */
-export function BackupHealth({ environments }: BackupHealthProps) {
+export function BackupHealth({ environments, unavailable }: BackupHealthProps) {
   return (
-    <div className='grid gap-4 sm:grid-cols-2'>
-      {environments.map((env) => (
-        <AppCard
-          key={env.appEnv}
-          title={env.appEnv === 'prod' ? 'Production' : 'Development'}
-          description={STATUS_COPY[env.status].hint}>
-          <div className='space-y-4'>
-            <div className='flex items-center gap-3'>
-              <StatusIcon status={env.status} />
-              <div>
-                <p className={cn('text-lg font-semibold leading-none', STATUS_STYLES[env.status])}>
-                  {STATUS_COPY[env.status].label}
-                </p>
-                <p className='text-sm text-muted-foreground mt-1'>
-                  Last success {formatAge(env.ageHours)}
-                  {env.lastSuccessSize ? ` · ${formatFileSize(env.lastSuccessSize)}` : ''}
-                </p>
-              </div>
-            </div>
-
-            {env.consecutiveFailures > 0 && (
-              <div className='rounded-md border border-destructive/40 bg-destructive/5 p-3'>
-                <p className='text-sm font-medium text-destructive'>
-                  {env.consecutiveFailures} consecutive failure
-                  {env.consecutiveFailures === 1 ? '' : 's'}
-                </p>
-                {env.lastError && (
-                  <p className='text-xs font-mono text-muted-foreground mt-1 break-all line-clamp-3'>
-                    {env.lastError}
+    <div className='space-y-3'>
+      {unavailable && (
+        <div className='rounded-md border border-amber-500/40 bg-amber-500/5 p-3'>
+          <p className='text-sm font-medium text-amber-700 dark:text-amber-400'>
+            Backup health is unavailable
+          </p>
+          <p className='text-xs text-muted-foreground mt-1'>
+            The backup run log could not be read. If this is a fresh deploy, run{' '}
+            <code className='font-mono'>node ace migration:run</code>. Backups themselves are
+            unaffected — the list below is live.
+          </p>
+        </div>
+      )}
+      <div className='grid gap-4 sm:grid-cols-2'>
+        {environments.map((env) => (
+          <AppCard
+            key={env.appEnv}
+            title={env.appEnv === 'prod' ? 'Production' : 'Development'}
+            description={STATUS_COPY[env.status].hint}>
+            <div className='space-y-4'>
+              <div className='flex items-center gap-3'>
+                <StatusIcon status={env.status} />
+                <div>
+                  <p
+                    className={cn('text-lg font-semibold leading-none', STATUS_STYLES[env.status])}>
+                    {STATUS_COPY[env.status].label}
                   </p>
-                )}
-              </div>
-            )}
-
-            {env.history.length > 0 && (
-              <div>
-                <p className='text-xs text-muted-foreground mb-2'>Recent runs (oldest first)</p>
-                <div
-                  className='flex items-end gap-1 h-10'
-                  role='img'
-                  aria-label={`Recent ${env.appEnv} backup runs`}>
-                  {env.history.map((run) => (
-                    <span
-                      key={run.id}
-                      title={`${run.status}${run.startedAt ? ` · ${new Date(run.startedAt).toLocaleString()}` : ''}${run.error ? ` · ${run.error}` : ''}`}
-                      className={cn(
-                        'flex-1 min-w-[4px] rounded-sm',
-                        run.status === 'success'
-                          ? 'bg-emerald-500/70 h-full'
-                          : run.status === 'failed'
-                            ? 'bg-destructive/80 h-full'
-                            : 'bg-muted-foreground/40 h-1/2',
-                      )}
-                    />
-                  ))}
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Last success {formatAge(env.ageHours)}
+                    {env.lastSuccessSize ? ` · ${formatFileSize(env.lastSuccessSize)}` : ''}
+                  </p>
                 </div>
               </div>
-            )}
 
-            {env.lastRunStatus && (
-              <Badge variant={env.lastRunStatus === 'failed' ? 'destructive' : 'secondary'}>
-                Last run: {env.lastRunStatus}
-              </Badge>
-            )}
-          </div>
-        </AppCard>
-      ))}
+              {env.consecutiveFailures > 0 && (
+                <div className='rounded-md border border-destructive/40 bg-destructive/5 p-3'>
+                  <p className='text-sm font-medium text-destructive'>
+                    {env.consecutiveFailures} consecutive failure
+                    {env.consecutiveFailures === 1 ? '' : 's'}
+                  </p>
+                  {env.lastError && (
+                    <p className='text-xs font-mono text-muted-foreground mt-1 break-all line-clamp-3'>
+                      {env.lastError}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {env.history.length > 0 && (
+                <div>
+                  <p className='text-xs text-muted-foreground mb-2'>Recent runs (oldest first)</p>
+                  <div
+                    className='flex items-end gap-1 h-10'
+                    role='img'
+                    aria-label={`Recent ${env.appEnv} backup runs`}>
+                    {env.history.map((run) => (
+                      <span
+                        key={run.id}
+                        title={`${run.status}${run.startedAt ? ` · ${new Date(run.startedAt).toLocaleString()}` : ''}${run.error ? ` · ${run.error}` : ''}`}
+                        className={cn(
+                          'flex-1 min-w-[4px] rounded-sm',
+                          run.status === 'success'
+                            ? 'bg-emerald-500/70 h-full'
+                            : run.status === 'failed'
+                              ? 'bg-destructive/80 h-full'
+                              : 'bg-muted-foreground/40 h-1/2',
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {env.lastRunStatus && (
+                <Badge variant={env.lastRunStatus === 'failed' ? 'destructive' : 'secondary'}>
+                  Last run: {env.lastRunStatus}
+                </Badge>
+              )}
+            </div>
+          </AppCard>
+        ))}
+      </div>
     </div>
   )
 }

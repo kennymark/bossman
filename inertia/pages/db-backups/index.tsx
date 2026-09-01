@@ -32,7 +32,7 @@ import { RestoreDialog } from './components/restore-dialog'
 
 interface DbBackupsIndexProps extends SharedProps {
   backups: PaginatedResponse<RawDbBackup>
-  health: { environments: BackupHealthEnvironment[] }
+  health: { environments: BackupHealthEnvironment[]; unavailable?: boolean }
 }
 
 const baseColumns: Column<RawDbBackup>[] = [
@@ -213,7 +213,10 @@ export default function DbBackupsIndex({ backups, health }: DbBackupsIndexProps)
 
       <div className='space-y-6'>
         <Deferred data='health' fallback={<LoadingSkeleton type='card' />}>
-          <BackupHealth environments={health?.environments ?? []} />
+          <BackupHealth
+            environments={health?.environments ?? []}
+            unavailable={health?.unavailable}
+          />
         </Deferred>
 
         <Deferred data='backups' fallback={<LoadingSkeleton type='table' />}>

@@ -48,7 +48,39 @@ export default class DbBackupsController {
     return response.ok(await this.buildHealth())
   }
 
+  /**
+   * Never throws.
+   *
+   * This is a deferred prop on the backups page, and the page's real job is listing
+   * backups. Letting a health-panel query take the whole page down — which is exactly
+   * what happened before `backup_runs` had been migrated — trades the useful part of
+   * the screen for the decorative one. A failure degrades to "unknown" instead.
+   */
   private async buildHealth() {
+    try {
+      return await this.collectHealth()
+    } catch (err) {
+      logger.error({ err }, 'Could not read backup health')
+      return {
+        environments: (['dev', 'prod'] as const).map((appEnv) => ({
+          appEnv,
+          status: 'unknown' as const,
+          ageHours: null,
+          lastSuccessAt: null,
+          lastSuccessSize: null,
+          lastRunAt: null,
+          lastRunStatus: null,
+          lastError: null,
+          consecutiveFailures: 0,
+          history: [],
+        })),
+        /** Surfaced so the panel can say why it is empty rather than implying health. */
+        unavailable: true,
+      }
+    }
+  }
+
+  private async collectHealth() {
     const environments = await Promise.all(
       (['dev', 'prod'] as const).map(async (appEnv) => {
         const [lastSuccess, lastRun, recent] = await Promise.all([
