@@ -13,10 +13,16 @@
   @vite(['resources/css/app.css', 'inertia/app.tsx'])
 </head>
 
-
-@serverStats()
 <body class="min-h-screen w-screen font-sans">
   @inertia()
+
+  {{--
+    Must sit inside <body>, and after @inertia() so it stays outside the div React
+    mounts into. It was previously between </head> and <body>, which is not a valid
+    place for content: the parser foster-parents it to the start of the body, which is
+    why the unrendered tag showed up in the top-left corner.
+  --}}
+  @serverStats()
 </body>
 
 </html>

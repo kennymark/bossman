@@ -39,4 +39,22 @@ export default defineConfig({
   realtime: false,
 
   collectors: 'auto',
+
+  /**
+   * Opt in to running in production.
+   *
+   * Outside production the package registers everything; in production it registers
+   * *nothing* unless this is set — including the Edge plugin behind `@serverStats()`.
+   * That is why the deployed app rendered the literal text `@serverStats()`: an
+   * unregistered Edge tag is emitted verbatim.
+   *
+   * Enabling requires the `authorize` guard above, which limits both the endpoint and
+   * the toolbar to god admins. `capture` is deliberately omitted: every capture
+   * subsystem defaults to off in production, so metrics are collected but request
+   * bodies and queries are not. Set `enabled: false` to turn the whole thing off in
+   * production again.
+   */
+  production: {
+    enabled: true,
+  },
 })
