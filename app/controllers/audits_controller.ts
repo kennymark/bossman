@@ -1,9 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
+import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 
 import AdminAction from '#models/admin_action'
 import { ADMIN_ACTIONS } from '#services/admin_audit_service'
-import { MAX_PER_PAGE } from '#utils/vine'
+import type { CsvColumn } from '#utils/csv'
+import { MAX_EXPORT_ROWS, sendCsv } from '#utils/csv_response'
+import { MAX_PER_PAGE, type QueryParams } from '#utils/vine'
+import { auditsExportValidator } from '#validators/exports'
 import { auditActionsValidator, auditsIndexValidator } from '#validators/query'
 
 /**
@@ -16,6 +20,75 @@ import { auditActionsValidator, auditsIndexValidator } from '#validators/query'
 function canReadAllAudits(user: { isGodAdmin: boolean; role: string }): boolean {
   return user.isGodAdmin || user.role === 'super_admin'
 }
+
+/**
+ * The scope decision and every request filter, applied to an admin-actions query.
+ *
+ * Shared by `actions` and `export` so a downloaded file can never contain a row the
+ * page would not have shown. Scope is applied first and no filter can widen it: a
+ * regular admin is pinned to their own rows whatever `actorId` says.
+ *
+ * `targetType` matches case-insensitively — call sites record `'Org'` while links
+ * written by hand tend to say `org`, and both should land on the same trail.
+ */
+function applyActionFilters(
+  query: ModelQueryBuilderContract<typeof AdminAction>,
+  user: { id: string; isGodAdmin: boolean; role: string },
+  qs: Record<string, unknown>,
+  params: QueryParams,
+): ModelQueryBuilderContract<typeof AdminAction> {
+  const { action, appEnv, actorId, outcome, targetType, targetId } = qs
+
+  if (!canReadAllAudits(user)) {
+    query.where('actorId', user.id)
+  } else if (typeof actorId === 'string' && actorId) {
+    query.where('actorId', actorId)
+  }
+
+  if (typeof action === 'string' && action) query.where('action', action)
+  if (appEnv === 'dev' || appEnv === 'prod') query.where('appEnv', appEnv)
+  if (outcome === 'success' || outcome === 'failed') query.where('outcome', outcome)
+  if (typeof targetType === 'string' && targetType) {
+    query.whereRaw('LOWER(target_type) = ?', [targetType.toLowerCase()])
+  }
+  if (typeof targetId === 'string' && targetId) query.where('targetId', targetId)
+  if (params.startDate && params.endDate) {
+    query.whereBetween('createdAt', [`${params.startDate} 00:00:00`, `${params.endDate} 23:59:59`])
+  }
+  if (params.search) {
+    const term = `%${params.search}%`
+    query.where((sub) => {
+      sub
+        .whereILike('actorEmail', term)
+        .orWhereILike('targetLabel', term)
+        .orWhereILike('reason', term)
+    })
+  }
+
+  return query
+}
+
+/**
+ * The audit trail as an operator would want to read it in a spreadsheet. Metadata was
+ * redacted when the row was written, so it is safe to include as JSON.
+ */
+const ADMIN_ACTION_EXPORT_COLUMNS: readonly CsvColumn<AdminAction>[] = [
+  { header: 'ID', value: (row) => row.id },
+  { header: 'When', value: (row) => row.createdAt?.toISO() ?? null },
+  { header: 'Actor email', value: (row) => row.actorEmail },
+  { header: 'Actor role', value: (row) => row.actorRole },
+  { header: 'Actor ID', value: (row) => row.actorId },
+  { header: 'Action', value: (row) => row.action },
+  { header: 'Environment', value: (row) => row.appEnv },
+  { header: 'Target type', value: (row) => row.targetType },
+  { header: 'Target ID', value: (row) => row.targetId },
+  { header: 'Target', value: (row) => row.targetLabel },
+  { header: 'Reason', value: (row) => row.reason },
+  { header: 'Outcome', value: (row) => row.outcome },
+  { header: 'Error', value: (row) => row.error },
+  { header: 'IP address', value: (row) => row.ipAddress },
+  { header: 'Metadata', value: (row) => row.metadata },
+]
 
 export default class AuditsController {
   /** The audit page itself. Data is fetched by the endpoints below. */
@@ -41,37 +114,8 @@ export default class AuditsController {
     const page = params.page ?? 1
     const perPage = Math.min(params.perPage ?? 25, MAX_PER_PAGE)
 
-    const { action, appEnv, actorId, outcome, targetType, targetId } = request.qs()
-
-    const query = AdminAction.query()
-
-    /** The scope decision, applied before any request filter can widen it. */
-    if (!canReadAllAudits(user)) {
-      query.where('actorId', user.id)
-    } else if (typeof actorId === 'string' && actorId) {
-      query.where('actorId', actorId)
-    }
-
-    if (typeof action === 'string' && action) query.where('action', action)
-    if (appEnv === 'dev' || appEnv === 'prod') query.where('appEnv', appEnv)
-    if (outcome === 'success' || outcome === 'failed') query.where('outcome', outcome)
-    if (typeof targetType === 'string' && targetType) query.where('targetType', targetType)
-    if (typeof targetId === 'string' && targetId) query.where('targetId', targetId)
-    if (params.startDate && params.endDate) {
-      query.whereBetween('createdAt', [
-        `${params.startDate} 00:00:00`,
-        `${params.endDate} 23:59:59`,
-      ])
-    }
-    if (params.search) {
-      const term = `%${params.search}%`
-      query.where((sub) => {
-        sub
-          .whereILike('actorEmail', term)
-          .orWhereILike('targetLabel', term)
-          .orWhereILike('reason', term)
-      })
-    }
+    /** Scope first, then filters — see `applyActionFilters`. */
+    const query = applyActionFilters(AdminAction.query(), user, request.qs(), params)
 
     const results = await query.orderBy('createdAt', 'desc').paginate(page, perPage)
 
@@ -159,8 +203,25 @@ export default class AuditsController {
     return response.ok({ audits })
   }
 
-  /** Scaffold: implemented by the feature branch that owns it. */
-  async export({ response }: HttpContext) {
-    return response.notImplemented({ error: 'Not implemented' })
+  /**
+   * The operator action log as a CSV, under exactly the scope and filters `actions`
+   * applies. The export itself is recorded, so the trail shows who took a copy of it.
+   */
+  async export(ctx: HttpContext) {
+    const { auth, request } = ctx
+    const user = auth.getUserOrFail()
+    await request.validateUsing(auditsExportValidator)
+    const params = await request.paginationQs()
+
+    const rows = await applyActionFilters(AdminAction.query(), user, request.qs(), params)
+      .orderBy('createdAt', 'desc')
+      .limit(MAX_EXPORT_ROWS + 1)
+
+    return sendCsv(ctx, {
+      name: 'admin-actions',
+      rows,
+      columns: ADMIN_ACTION_EXPORT_COLUMNS,
+      targetType: 'AdminAction',
+    })
   }
 }

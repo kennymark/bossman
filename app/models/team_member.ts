@@ -28,6 +28,10 @@ export default class TeamMember extends compose(SuperBaseModel, Auditable) {
   @column.dateTime({ columnName: 'prod_access_expires_at', serializeAs: 'prodAccessExpiresAt' })
   declare prodAccessExpiresAt: DateTime | null
 
+  /** `read` = may look at production but not change it. Edited on the member page. */
+  @column({ columnName: 'prod_access_mode', serializeAs: 'prodAccessMode' })
+  declare prodAccessMode: 'read' | 'write'
+
   /** Data access: 'all' = full access; 'selected' = only allowed properties/leases (legacy, prefer per-resource modes). */
   @column()
   declare dataAccessMode: 'all' | 'selected'

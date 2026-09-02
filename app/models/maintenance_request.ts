@@ -5,6 +5,8 @@ import type { DateTime } from 'luxon'
 
 import Lease from './lease.js'
 import LeaseableEntity from './leaseable_entity.js'
+import Org from './org.js'
+import Property from './property.js'
 import SuperBaseModel from './super_base.js'
 import Tenant from './tenant.js'
 
@@ -19,8 +21,8 @@ export default class MaintenanceRequest extends SuperBaseModel {
   @column() declare severity: MaintenanceRequestSeverity
   @column() declare type: string
   @column() declare reportedBy: 'tenant' | string
-  @column() declare dueDate: DateTime
-  @column() declare completionDate: DateTime
+  @column.dateTime() declare dueDate: DateTime | null
+  @column.dateTime() declare completionDate: DateTime | null
   @column() declare cost: number
   @column() declare orgId: string
   @column() declare contactId: string | null
@@ -31,6 +33,7 @@ export default class MaintenanceRequest extends SuperBaseModel {
   @column({ prepare: (value) => JSON.stringify(value) }) declare availableDays: string[]
   @column.dateTime() declare agreedRepairDate: DateTime
   @column() declare propertyId: string
+  @column.dateTime() declare archivedAt: DateTime | null
 
   @column() declare leaseableEntityId: string
 
@@ -38,6 +41,8 @@ export default class MaintenanceRequest extends SuperBaseModel {
 
   @belongsTo(() => Tenant) declare tenant: BelongsTo<typeof Tenant>
   @belongsTo(() => Lease) declare lease: BelongsTo<typeof Lease>
+  @belongsTo(() => Org) declare org: BelongsTo<typeof Org>
+  @belongsTo(() => Property) declare property: BelongsTo<typeof Property>
   // @hasMany(() => Note) declare notes: HasMany<typeof Note>
   // @belongsTo(() => Contact) declare contact: BelongsTo<typeof Contact>
   // @hasMany(() => Photo, { foreignKey: 'maintenanceId' }) declare photos: HasMany<typeof Photo>

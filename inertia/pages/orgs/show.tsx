@@ -1,13 +1,15 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, Link, router, usePage } from '@inertiajs/react'
 import {
   IconBuildingStore,
   IconFlask,
   IconPencil,
+  IconShieldLock,
   IconStar,
   IconStarOff,
   IconTrash,
   IconUserCheck,
+  IconUserShield,
   IconUserX,
 } from '@tabler/icons-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -16,6 +18,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import * as Yup from 'yup'
 
+import type { AppEnv } from '#types/env'
 import type { RawOrg } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
 import { timeAgo } from '#utils/date'
@@ -40,8 +43,13 @@ import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
 import api from '@/lib/http'
 
 import { ActivitiesTab } from './components/activities-tab'
+import { BillingTab } from './components/billing-tab'
+import { DocumentsTab } from './components/documents-tab'
+import { FeatureFlagsTab } from './components/feature-flags-tab'
+import { ImpersonateDialog } from './components/impersonate-dialog'
 import { InvoicesTab } from './components/invoices-tab'
 import { LeasesTab } from './components/leases-tab'
+import { MaintenanceTab } from './components/maintenance-tab'
 import { PropertiesTab } from './components/properties-tab'
 
 interface OrgShowProps extends SharedProps {
@@ -69,6 +77,14 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
   const currentTab = qs.tab ?? 'details'
   const [banUserSheetOpen, setBanUserSheetOpen] = useState(false)
   const [requestDeleteDialogOpen, setRequestDeleteDialogOpen] = useState(false)
+  const [impersonateOpen, setImpersonateOpen] = useState(false)
+
+  const page = usePage<SharedProps>()
+  const appEnv = ((page.props as { appEnv?: AppEnv }).appEnv ?? 'dev') as AppEnv
+  const isGodAdmin = Boolean(page.props.isGodAdmin)
+  const pageAccess = (page.props as { pageAccess?: string[] | null }).pageAccess
+  /** Tabs that read another page's data are hidden from members without that grant. */
+  const canSee = (key: string) => !pageAccess || pageAccess.includes(key)
 
   const id = String(org.id ?? '')
   const cleanName = String(org.cleanName ?? org.companyName ?? org.name ?? 'Organisation')
@@ -251,6 +267,12 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
       dontShowIf: !org.isSalesOrg,
     },
     {
+      title: 'Log in as customer',
+      description: "Open the Togetha app signed in as one of this org's users.",
+      icon: IconUserShield,
+      onClick: () => setImpersonateOpen(true),
+    },
+    {
       title: 'Request delete user',
       description: 'Send an email to the user so they can accept or decline account deletion.',
       icon: IconTrash,
@@ -273,6 +295,12 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
           </Button>
           <Button variant='outline' size='md' asChild>
             <Link href={`/orgs/${id}/invoices/create`}>Create invoice</Link>
+          </Button>
+          <Button variant='outline' size='md' asChild>
+            <Link href={`/audits?targetType=Org&targetId=${id}`}>
+              <IconShieldLock className='mr-2 h-4 w-4' />
+              Audit trail
+            </Link>
           </Button>
           <QuickActions options={quickActions} />
         </div>
@@ -377,6 +405,14 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
         onSecondaryAction={() => setRequestDeleteDialogOpen(false)}
       />
 
+      <ImpersonateDialog
+        open={impersonateOpen}
+        onOpenChange={setImpersonateOpen}
+        orgId={id}
+        appEnv={appEnv}
+        isGodAdmin={isGodAdmin}
+      />
+
       <Tabs value={currentTab} onValueChange={handleTabChange} className='space-y-6'>
         <TabsList>
           <TabsTrigger value='details'>Details</TabsTrigger>
@@ -384,6 +420,10 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
           <TabsTrigger value='properties'>Properties</TabsTrigger>
           <TabsTrigger value='activities'>Activities</TabsTrigger>
           <TabsTrigger value='invoices'>Invoices</TabsTrigger>
+          <TabsTrigger value='billing'>Billing</TabsTrigger>
+          <TabsTrigger value='feature-flags'>Feature flags</TabsTrigger>
+          {canSee('maintenance') && <TabsTrigger value='maintenance'>Maintenance</TabsTrigger>}
+          {canSee('documents') && <TabsTrigger value='documents'>Documents</TabsTrigger>}
         </TabsList>
 
         <TabsContent value='details' className='space-y-6'>
@@ -604,6 +644,26 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
         <TabsContent value='invoices' className='space-y-6'>
           <InvoicesTab orgId={id} />
         </TabsContent>
+
+        <TabsContent value='billing' className='space-y-6'>
+          <BillingTab orgId={id} />
+        </TabsContent>
+
+        <TabsContent value='feature-flags' className='space-y-6'>
+          <FeatureFlagsTab orgId={id} orgName={cleanName} isGodAdmin={isGodAdmin} appEnv={appEnv} />
+        </TabsContent>
+
+        {canSee('maintenance') && (
+          <TabsContent value='maintenance' className='space-y-6'>
+            <MaintenanceTab orgId={id} />
+          </TabsContent>
+        )}
+
+        {canSee('documents') && (
+          <TabsContent value='documents' className='space-y-6'>
+            <DocumentsTab orgId={id} />
+          </TabsContent>
+        )}
       </Tabs>
     </DashboardPage>
   )

@@ -16,12 +16,15 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { EmptyState } from '@/components/ui/empty-state'
 import { FormField } from '@/components/ui/form_field'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup } from '@/components/ui/radio-group'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
 import api from '@/lib/http'
+
+type ProdAccessMode = 'read' | 'write'
 
 interface MemberShowProps extends SharedProps {
   member: RawTeamMember
@@ -30,6 +33,19 @@ interface MemberShowProps extends SharedProps {
 const accessModeOptions = [
   { value: 'all', label: 'All', description: 'Member can see all' },
   { value: 'selected', label: 'Selected', description: 'Member can only see items you choose' },
+]
+
+const prodAccessModeOptions = [
+  {
+    value: 'read',
+    label: 'Read-only',
+    description: 'Can view production data; every change to it is refused.',
+  },
+  {
+    value: 'write',
+    label: 'Read & write',
+    description: 'Can view and change production data.',
+  },
 ]
 
 interface UpdateMemberPayload {
@@ -42,8 +58,10 @@ interface UpdateMemberPayload {
   dataAccessExpiresAt: string
   /** Optional time limit on production database access; empty = no limit. */
   prodAccessExpiresAt: string
-  /** Required when switching production access on; recorded in the audit log. */
+  /** Required when switching production access on or changing its mode; audited. */
   prodAccessReason?: string
+  /** Read-only lets the member look at production without being able to change it. */
+  prodAccessMode: ProdAccessMode
 }
 export default function MemberShow({ member }: MemberShowProps) {
   const [activeTab, setActiveTab] = useState<'properties' | 'leases'>('properties')
@@ -64,9 +82,16 @@ export default function MemberShow({ member }: MemberShowProps) {
     member.prodAccessExpiresAt ? new Date(member.prodAccessExpiresAt).toISOString() : '',
   )
   const [prodAccessReason, setProdAccessReason] = useState('')
+  const [prodAccessMode, setProdAccessMode] = useState<ProdAccessMode>(
+    member.prodAccessMode === 'read' ? 'read' : 'write',
+  )
 
   /** Turning the grant on is what needs justifying; turning it off never does. */
   const grantingProdAccess = enableProdAccess && !member.enableProdAccess
+  /** So does changing the mode: read-only to read & write widens what they can do. */
+  const changingProdAccessMode =
+    enableProdAccess && prodAccessMode !== (member.prodAccessMode === 'read' ? 'read' : 'write')
+  const prodReasonRequired = grantingProdAccess || changingProdAccessMode
   const [dataAccessExpiresAt, setDataAccessExpiresAt] = useState<string>(
     member.dataAccessExpiresAt ? new Date(member.dataAccessExpiresAt).toISOString() : '',
   )
@@ -120,6 +145,7 @@ export default function MemberShow({ member }: MemberShowProps) {
       dataAccessExpiresAt: dataAccessExpiresAt.trim() || '',
       prodAccessExpiresAt: prodAccessExpiresAt.trim() || '',
       prodAccessReason: prodAccessReason.trim() || undefined,
+      prodAccessMode,
     })
   }
 
@@ -161,11 +187,27 @@ export default function MemberShow({ member }: MemberShowProps) {
                 onClick={handleSave}
                 isLoading={updateMutation.isPending}
                 loadingText='Saving…'
-                disabled={grantingProdAccess && prodAccessReason.trim().length < 8}>
+                disabled={prodReasonRequired && prodAccessReason.trim().length < 8}>
                 Save
               </Button>
             </div>
           </div>
+
+          {enableProdAccess && (
+            <div className='space-y-3 border-t border-border pt-4'>
+              <Label>Production access mode</Label>
+              <RadioGroup
+                value={prodAccessMode}
+                onChange={(v) => setProdAccessMode(v === 'read' ? 'read' : 'write')}
+                options={prodAccessModeOptions}
+                cols={2}
+              />
+              <p className='text-xs text-muted-foreground'>
+                Read-only still shows everything in production; only changes to customer data are
+                refused. Team, blog, email and server pages are unaffected.
+              </p>
+            </div>
+          )}
 
           {enableProdAccess && (
             <div className='grid gap-4 sm:grid-cols-2 border-t border-border pt-4'>
@@ -191,9 +233,11 @@ export default function MemberShow({ member }: MemberShowProps) {
                 </p>
               </div>
 
-              {grantingProdAccess && (
+              {prodReasonRequired && (
                 <div className='space-y-2'>
-                  <Label htmlFor='member-prod-reason'>Reason for granting</Label>
+                  <Label htmlFor='member-prod-reason'>
+                    {grantingProdAccess ? 'Reason for granting' : 'Reason for changing the mode'}
+                  </Label>
                   <Input
                     id='member-prod-reason'
                     value={prodAccessReason}

@@ -13,11 +13,13 @@ import type DbBackupTransformer from '#transformers/db_backup_transformer'
 import type DocumentTransformer from '#transformers/document_transformer'
 import type LeaseTransformer from '#transformers/lease_transformer'
 import type LeaseableEntityTransformer from '#transformers/leaseable_entity_transformer'
+import type MaintenanceRequestTransformer from '#transformers/maintenance_request_transformer'
 import type NotificationTransformer from '#transformers/notification_transformer'
 import type OrgTransformer from '#transformers/org_transformer'
 import type PaymentTransformer from '#transformers/payment_transformer'
 import type PropertyTransformer from '#transformers/property_transformer'
 import type PushNotificationTransformer from '#transformers/push_notification_transformer'
+import type RelatedSummaryTransformersTransformer from '#transformers/related_summary_transformers'
 import type SessionTransformer from '#transformers/session_transformer'
 import type TeamInvitationTransformer from '#transformers/team_invitation_transformer'
 import type TeamMemberTransformer from '#transformers/team_member_transformer'
@@ -54,6 +56,10 @@ export namespace Data {
   export namespace LeaseableEntity {
     export type Variants = InferVariants<LeaseableEntityTransformer>
   }
+  export type MaintenanceRequest = InferData<MaintenanceRequestTransformer>
+  export namespace MaintenanceRequest {
+    export type Variants = InferVariants<MaintenanceRequestTransformer>
+  }
   export type Notification = InferData<NotificationTransformer>
   export namespace Notification {
     export type Variants = InferVariants<NotificationTransformer>
@@ -73,6 +79,10 @@ export namespace Data {
   export type PushNotification = InferData<PushNotificationTransformer>
   export namespace PushNotification {
     export type Variants = InferVariants<PushNotificationTransformer>
+  }
+  export type RelatedSummaryTransformers = InferData<RelatedSummaryTransformersTransformer>
+  export namespace RelatedSummaryTransformers {
+    export type Variants = InferVariants<RelatedSummaryTransformersTransformer>
   }
   export type Session = InferData<SessionTransformer>
   export namespace Session {

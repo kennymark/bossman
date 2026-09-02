@@ -10,6 +10,7 @@ import { formatNumber } from '#utils/functions'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { DataAccessExpiredAlert } from '@/components/dashboard/data-access-expired-alert'
 import { DataTable } from '@/components/dashboard/data-table'
+import { ExportButton } from '@/components/dashboard/export-button'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
@@ -123,7 +124,21 @@ export default function LeaseableEntitiesIndex({
 
       <Deferred data='leaseableEntities' fallback={<LoadingSkeleton type='table' />}>
         <AppCard
-          title='All properties'
+          title={
+            <div className='flex items-center justify-between gap-2'>
+              <span>All properties</span>
+              <ExportButton
+                href='/api/v1/leaseable-entities/export'
+                query={{
+                  search: String(query.search || ''),
+                  sortBy: query.sortBy ? String(query.sortBy) : '',
+                  sortOrder: query.sortOrder ? String(query.sortOrder) : '',
+                  startDate: query.startDate ? String(query.startDate) : '',
+                  endDate: query.endDate ? String(query.endDate) : '',
+                }}
+              />
+            </div>
+          }
           description={`${leaseableEntities?.meta?.total ?? 0} total`}>
           <DataTable
             columns={columns}

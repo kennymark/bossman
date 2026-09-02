@@ -12,6 +12,7 @@ export default class UserTransformer extends BaseTransformer<User> {
       'role',
       'isAdminOrSuperAdmin',
       'enableProdAccess',
+      'prodAccessMode',
       'pendingEmail',
       'avatar',
       'emailVerified',

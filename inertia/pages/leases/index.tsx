@@ -12,6 +12,7 @@ import { formatNumber } from '#utils/functions'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { DataAccessExpiredAlert } from '@/components/dashboard/data-access-expired-alert'
 import { DataTable } from '@/components/dashboard/data-table'
+import { ExportButton } from '@/components/dashboard/export-button'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { LeaseStatusBadge } from '@/components/leases/status-badge'
 import { LoadingSkeleton, Stack } from '@/components/ui'
@@ -135,7 +136,22 @@ export default function LeasesIndex({
       )}
 
       <Deferred data='leases' fallback={<LoadingSkeleton type='table' />}>
-        <AppCard title='All leases'>
+        <AppCard
+          title={
+            <div className='flex items-center justify-between gap-2'>
+              <span>All leases</span>
+              <ExportButton
+                href='/api/v1/leases/export'
+                query={{
+                  search: String(query.search || ''),
+                  sortBy: query.sortBy ? String(query.sortBy) : '',
+                  sortOrder: query.sortOrder ? String(query.sortOrder) : '',
+                  startDate: query.startDate ? String(query.startDate) : '',
+                  endDate: query.endDate ? String(query.endDate) : '',
+                }}
+              />
+            </div>
+          }>
           <DataTable
             columns={columns}
             data={leases?.data}

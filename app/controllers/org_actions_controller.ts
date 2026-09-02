@@ -298,6 +298,11 @@ export default class OrgActionsController {
     const connection = request.appEnv()
     const { orgIds, confirm, reason } = payload
 
+    /** Checked before the org lookup: a bulk change with no stated reason is not recorded well enough to be allowed. */
+    if (!reasonIsValid(reason)) {
+      return response.badRequest({ error: 'A reason of at least 8 characters is required.' })
+    }
+
     const matched = await Org.query({ connection }).whereIn('id', orgIds).select('id')
     const expected = CONFIRMATION_PHRASES['org.bulk'](matched.length)
 

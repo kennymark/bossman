@@ -16,6 +16,7 @@ declare module '@adonisjs/inertia/types' {
     'addons/create': ExtractProps<(typeof import('../../inertia/pages/addons/create.tsx'))['default']>
     'addons/edit': ExtractProps<(typeof import('../../inertia/pages/addons/edit.tsx'))['default']>
     'addons/index': ExtractProps<(typeof import('../../inertia/pages/addons/index.tsx'))['default']>
+    'analytics/components/revenue-section': ExtractProps<(typeof import('../../inertia/pages/analytics/components/revenue-section.tsx'))['default']>
     'analytics/index': ExtractProps<(typeof import('../../inertia/pages/analytics/index.tsx'))['default']>
     'api-access/index': ExtractProps<(typeof import('../../inertia/pages/api-access/index.tsx'))['default']>
     'audits/index': ExtractProps<(typeof import('../../inertia/pages/audits/index.tsx'))['default']>
@@ -25,15 +26,23 @@ declare module '@adonisjs/inertia/types' {
     'blog/manage/edit': ExtractProps<(typeof import('../../inertia/pages/blog/manage/edit.tsx'))['default']>
     'blog/manage/index': ExtractProps<(typeof import('../../inertia/pages/blog/manage/index.tsx'))['default']>
     'blog/show': ExtractProps<(typeof import('../../inertia/pages/blog/show.tsx'))['default']>
+    'dashboard/components/attention-card': ExtractProps<(typeof import('../../inertia/pages/dashboard/components/attention-card.tsx'))['default']>
     'dashboard/components/team-invitations': ExtractProps<(typeof import('../../inertia/pages/dashboard/components/team-invitations.tsx'))['default']>
     'dashboard/index': ExtractProps<(typeof import('../../inertia/pages/dashboard/index.tsx'))['default']>
     'db-backups/components/backup-health': ExtractProps<(typeof import('../../inertia/pages/db-backups/components/backup-health.tsx'))['default']>
     'db-backups/components/restore-dialog': ExtractProps<(typeof import('../../inertia/pages/db-backups/components/restore-dialog.tsx'))['default']>
     'db-backups/index': ExtractProps<(typeof import('../../inertia/pages/db-backups/index.tsx'))['default']>
+    'documents/index': ExtractProps<(typeof import('../../inertia/pages/documents/index.tsx'))['default']>
     'emails/index': ExtractProps<(typeof import('../../inertia/pages/emails/index.tsx'))['default']>
     'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.tsx'))['default']>
     'errors/server_error': ExtractProps<(typeof import('../../inertia/pages/errors/server_error.tsx'))['default']>
     'forgot-password': ExtractProps<(typeof import('../../inertia/pages/forgot-password.tsx'))['default']>
+    'jobs/components/job-action-dialogs': ExtractProps<(typeof import('../../inertia/pages/jobs/components/job-action-dialogs.tsx'))['default']>
+    'jobs/components/job-history-chart': ExtractProps<(typeof import('../../inertia/pages/jobs/components/job-history-chart.tsx'))['default']>
+    'jobs/components/job-status-badge': ExtractProps<(typeof import('../../inertia/pages/jobs/components/job-status-badge.tsx'))['default']>
+    'jobs/components/store-state': ExtractProps<(typeof import('../../inertia/pages/jobs/components/store-state.tsx'))['default']>
+    'jobs/index': ExtractProps<(typeof import('../../inertia/pages/jobs/index.tsx'))['default']>
+    'jobs/show': ExtractProps<(typeof import('../../inertia/pages/jobs/show.tsx'))['default']>
     'leases/components/activity-tab': ExtractProps<(typeof import('../../inertia/pages/leases/components/activity-tab.tsx'))['default']>
     'leases/components/payments-tab': ExtractProps<(typeof import('../../inertia/pages/leases/components/payments-tab.tsx'))['default']>
     'leases/index': ExtractProps<(typeof import('../../inertia/pages/leases/index.tsx'))['default']>
@@ -41,12 +50,19 @@ declare module '@adonisjs/inertia/types' {
     'login': ExtractProps<(typeof import('../../inertia/pages/login.tsx'))['default']>
     'logs/components/logs-filters': ExtractProps<(typeof import('../../inertia/pages/logs/components/logs-filters.tsx'))['default']>
     'logs/index': ExtractProps<(typeof import('../../inertia/pages/logs/index.tsx'))['default']>
+    'maintenance/index': ExtractProps<(typeof import('../../inertia/pages/maintenance/index.tsx'))['default']>
+    'maintenance/show': ExtractProps<(typeof import('../../inertia/pages/maintenance/show.tsx'))['default']>
     'orgs/components/activities-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/activities-tab.tsx'))['default']>
+    'orgs/components/billing-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/billing-tab.tsx'))['default']>
     'orgs/components/create-customer-step-one': ExtractProps<(typeof import('../../inertia/pages/orgs/components/create-customer-step-one.tsx'))['default']>
     'orgs/components/create-customer-step-two': ExtractProps<(typeof import('../../inertia/pages/orgs/components/create-customer-step-two.tsx'))['default']>
     'orgs/components/create-customer-summary': ExtractProps<(typeof import('../../inertia/pages/orgs/components/create-customer-summary.tsx'))['default']>
+    'orgs/components/documents-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/documents-tab.tsx'))['default']>
+    'orgs/components/feature-flags-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/feature-flags-tab.tsx'))['default']>
+    'orgs/components/impersonate-dialog': ExtractProps<(typeof import('../../inertia/pages/orgs/components/impersonate-dialog.tsx'))['default']>
     'orgs/components/invoices-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/invoices-tab.tsx'))['default']>
     'orgs/components/leases-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/leases-tab.tsx'))['default']>
+    'orgs/components/maintenance-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/maintenance-tab.tsx'))['default']>
     'orgs/components/page-options': ExtractProps<(typeof import('../../inertia/pages/orgs/components/page-options.tsx'))['default']>
     'orgs/components/properties-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/properties-tab.tsx'))['default']>
     'orgs/create-form': ExtractProps<(typeof import('../../inertia/pages/orgs/create-form.ts'))['default']>

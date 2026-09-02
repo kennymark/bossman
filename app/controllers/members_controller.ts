@@ -7,7 +7,7 @@ import TeamInvitation from '#models/team_invitation'
 import TeamMember from '#models/team_member'
 import User from '#models/user'
 import { recordAdminAction } from '#services/admin_audit_service'
-import { CONFIRMATION_PHRASES, confirmationMatches } from '#utils/confirmation'
+import { CONFIRMATION_PHRASES, confirmationMatches, reasonIsValid } from '#utils/confirmation'
 import { updateMemberValidator } from '#validators/team'
 
 /** Columns `?sortBy=` may name. An arbitrary identifier must never reach ORDER BY. */
@@ -81,19 +81,43 @@ export default class MembersController {
     const member = await TeamMember.query().where('id', memberId).firstOrFail()
     const body = await request.validateUsing(updateMemberValidator)
     const hadProdAccess = member.enableProdAccess
+    const previousMode = member.prodAccessMode ?? 'write'
+
+    const granting = body.enableProdAccess === true && !hadProdAccess
+    /** A fresh grant is read & write unless asked otherwise — what every older grant is. */
+    const requestedMode = body.prodAccessMode ?? (granting ? 'write' : undefined)
+    const modeChanging = requestedMode !== undefined && requestedMode !== previousMode
 
     /**
      * Granting production access is not an ordinary settings change: it decides whether
      * this person reads live customer data. It needs a stated reason, and only a god
      * admin may hand it out.
      */
-    if (body.enableProdAccess === true && !hadProdAccess) {
+    if (granting) {
       if (!actor.isGodAdmin) {
         return response.forbidden({ error: 'Only a god admin may grant production access.' })
       }
       if (!body.prodAccessReason?.trim()) {
         return response.badRequest({
           error: 'A reason is required when granting production access.',
+        })
+      }
+    }
+
+    /**
+     * Changing the mode on its own is the same class of decision — read-only to
+     * read & write widens what this person can do to live customer data — so it has
+     * the same gate and lands in the audit trail with a reason.
+     */
+    if (modeChanging && !granting) {
+      if (!actor.isGodAdmin) {
+        return response.forbidden({
+          error: 'Only a god admin may change production access mode.',
+        })
+      }
+      if (!body.prodAccessReason?.trim()) {
+        return response.badRequest({
+          error: 'A reason is required when changing production access mode.',
         })
       }
     }
@@ -108,7 +132,9 @@ export default class MembersController {
       allowedLeaseIds: string[] | null
       dataAccessExpiresAt: DateTime | null
       prodAccessExpiresAt: DateTime | null
+      prodAccessMode: 'read' | 'write'
     }> = {}
+    if (requestedMode !== undefined) updates.prodAccessMode = requestedMode
     if (body.allowedPages !== undefined) {
       const resolved = Array.isArray(body.allowedPages) ? [...body.allowedPages] : []
       if (resolved.length && !resolved.includes('dashboard')) resolved.unshift('dashboard')
@@ -144,6 +170,8 @@ export default class MembersController {
     const memberUser = await User.find(member.userId)
     if (memberUser) {
       memberUser.enableProdAccess = member.enableProdAccess
+      /** Both records carry the mode; the middleware takes the stricter of the two. */
+      memberUser.prodAccessMode = member.prodAccessMode ?? 'write'
       /** The expiry lives on both records so `resolveAppEnv` can read it off the user. */
       if (body.prodAccessExpiresAt !== undefined) {
         memberUser.prodAccessExpiresAt = member.prodAccessExpiresAt
@@ -169,7 +197,19 @@ export default class MembersController {
         targetId: member.id,
         targetLabel: memberUser?.email ?? member.userId,
         reason: body.prodAccessReason?.trim() ?? null,
-        metadata: { expiresAt: member.prodAccessExpiresAt?.toISO() ?? null },
+        metadata: {
+          expiresAt: member.prodAccessExpiresAt?.toISO() ?? null,
+          mode: member.prodAccessMode ?? 'write',
+        },
+      })
+    } else if (modeChanging) {
+      await recordAdminAction(ctx, {
+        action: 'member.prod_access_mode',
+        targetType: 'TeamMember',
+        targetId: member.id,
+        targetLabel: memberUser?.email ?? member.userId,
+        reason: body.prodAccessReason?.trim() ?? null,
+        metadata: { from: previousMode, to: member.prodAccessMode ?? 'write' },
       })
     } else {
       await recordAdminAction(ctx, {
@@ -204,6 +244,12 @@ export default class MembersController {
       })
     }
 
+    /** The phrase was checked; the reason was not, although the audit trail expects one. */
+    const reason = request.input('reason')
+    if (!reasonIsValid(reason)) {
+      return response.badRequest({ error: 'A reason of at least 8 characters is required.' })
+    }
+
     await member.delete()
 
     await recordAdminAction(ctx, {
@@ -211,7 +257,7 @@ export default class MembersController {
       targetType: 'TeamMember',
       targetId: memberId,
       targetLabel: label,
-      reason: request.input('reason') ?? null,
+      reason,
     })
 
     return response.ok({ message: 'Member removed.' })

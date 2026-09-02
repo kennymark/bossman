@@ -6,8 +6,10 @@ import type Addon from '#models/addon'
 import type BlogCategory from '#models/blog_category'
 import type BlogPost from '#models/blog_post'
 import type DbBackup from '#models/db_backup'
+import type Document from '#models/document'
 import type Lease from '#models/lease'
 import type LeaseableEntity from '#models/leaseable_entity'
+import type MaintenanceRequest from '#models/maintenance_request'
 import type Org from '#models/org'
 import type Payment from '#models/payment'
 import type Property from '#models/property'
@@ -70,3 +72,5 @@ export type RawActivity = ExtractModelType<Activity>
 export type RawOrg = ExtractModelType<Org>
 export type RawDbBackup = ExtractModelType<DbBackup>
 export type RawAddon = ExtractModelType<Addon>
+export type RawMaintenanceRequest = ExtractModelType<MaintenanceRequest>
+export type RawDocument = ExtractModelType<Document>

@@ -33,6 +33,7 @@ import {
 import type { RawUser } from '#types/model-types'
 import { startCase } from '#utils/functions'
 import { CommandPalette } from '@/components/command-palette'
+import { GlobalSearchButton } from '@/components/dashboard/global-search-button'
 import { NotificationCenter } from '@/components/notifications/notification-center'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { BaseSheet } from '@/components/ui/base-sheet'
@@ -144,6 +145,8 @@ export function Sidebar({ children }: SidebarProps) {
   const enableProdAccess = (page.props as { enableProdAccess?: boolean }).enableProdAccess ?? true
   const showEnvironmentSwitcher =
     (page.props as { showEnvironmentSwitcher?: boolean }).showEnvironmentSwitcher ?? false
+  /** 'read' means production is visible but every write to customer data is refused. */
+  const prodAccessMode = (page.props as { prodAccessMode?: 'read' | 'write' | null }).prodAccessMode
 
   /** Maps nav href to the page key used in pageAccess (must match backend PAGE_KEY_TO_PATH). */
   const pathToPageKey = (href: string): string | null => {
@@ -324,6 +327,11 @@ export function Sidebar({ children }: SidebarProps) {
             className={`text-xs font-bold text-center text-${environment === 'prod' ? 'green' : 'red'}-500`}>
             {startCase(environment)}{' '}
           </span>
+          {environment === 'prod' && prodAccessMode === 'read' && (
+            <span className='ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'>
+              Read-only
+            </span>
+          )}
         </div>
       )}
       {/* User section */}
@@ -476,7 +484,8 @@ export function Sidebar({ children }: SidebarProps) {
                 </Button>
               )}
             </div>
-            <div className='flex items-center'>
+            <div className='flex items-center gap-2'>
+              <GlobalSearchButton />
               {user?.id && <NotificationCenter userId={user.id} />}
             </div>
           </div>

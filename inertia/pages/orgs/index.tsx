@@ -19,6 +19,7 @@ import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { DataTable } from '@/components/dashboard/data-table'
+import { ExportButton } from '@/components/dashboard/export-button'
 import { FilterSortBar } from '@/components/dashboard/filter-sort-bar'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { LoadingSkeleton } from '@/components/ui'
@@ -337,7 +338,24 @@ export default function OrgsIndex({ orgs, stats }: OrgsIndexProps) {
       )}
 
       <Deferred data='orgs' fallback={<LoadingSkeleton type='table' />}>
-        <AppCard title='All customers' description={`${orgs?.meta?.total ?? 0} total`}>
+        <AppCard
+          title={
+            <div className='flex items-center justify-between gap-2'>
+              <span>All customers</span>
+              <ExportButton
+                href='/api/v1/orgs/export'
+                query={{
+                  search: String(query.search || ''),
+                  includeTestAccounts,
+                  favouritesOnly: favouritesOnly === true,
+                  ownerRole: ownerRole ? String(ownerRole) : '',
+                  sortBy,
+                  sortOrder: String(sortOrder),
+                }}
+              />
+            </div>
+          }
+          description={`${orgs?.meta?.total ?? 0} total`}>
           <div className='space-y-4'>
             <FilterSortBar
               filters={filterSortFields}

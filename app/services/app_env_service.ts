@@ -1,4 +1,5 @@
 import type { AppEnv } from '#types/env'
+import { effectiveProdAccessMode, type ProdModeMember } from '#utils/prod_access'
 
 /**
  * Minimal shape of the fields that decide environment access. Declared structurally
@@ -14,6 +15,8 @@ export interface EnvCapableUser {
    * from middleware without importing Lucid or Luxon.
    */
   prodAccessExpiresAt?: { toMillis(): number } | Date | string | null
+  /** `read` may look at production but not change it. Missing counts as `write`. */
+  prodAccessMode?: 'read' | 'write' | string | null
 }
 
 /** Millisecond timestamp for any of the shapes `prodAccessExpiresAt` may hold. */
@@ -51,6 +54,22 @@ export function canAccessProd(
   if (!user) return false
   if (user.isGodAdmin) return true
   return Boolean(user.enableProdAccess) && !prodAccessExpired(user, now)
+}
+
+/**
+ * Whether the user may *change* production, not merely read it.
+ *
+ * Requires a live grant first — a read-only mode on a lapsed grant is still no access.
+ * God admins always may. For members the stricter of the user's and the team member's
+ * mode applies, so either record can narrow the grant and neither can widen it.
+ */
+export function canWriteProd(
+  user: EnvCapableUser | undefined | null,
+  member?: ProdModeMember | null,
+  now: number = Date.now(),
+): boolean {
+  if (!canAccessProd(user, now)) return false
+  return effectiveProdAccessMode(user, member) === 'write'
 }
 
 /**

@@ -20,37 +20,85 @@ import OrgService from '#services/org_service'
 import PermissionService from '#services/permission_service'
 import StripeService from '#services/stripe_service'
 import OrgTransformer from '#transformers/org_transformer'
+import type { AppEnv } from '#types/env'
 import type { AppCountries } from '#types/extra'
+import type { CsvColumn } from '#utils/csv'
+import { MAX_EXPORT_ROWS, sendCsv } from '#utils/csv_response'
+import type { QueryParams } from '#utils/vine'
+import { orgsExportValidator } from '#validators/exports'
 import { createCustomerUserValidator, updateOrgValidator } from '#validators/org'
 import { paginationQueryValidator } from '#validators/query'
+
+/** Columns `?sortBy=` may name on the customers list. Identifiers, so never request input. */
+const ORG_SORTABLE_COLUMNS = [
+  'name',
+  'owner_role',
+  'country',
+  'has_active_subscription',
+  'created_at',
+] as const
+
+/**
+ * The customers list, filtered and sorted exactly as the index shows it.
+ *
+ * Shared by `index` and `export` so the file an operator downloads is the list they
+ * were looking at: the same test-account, favourite, type and name filters, in the
+ * same order. Keeping one builder is what stops the two from drifting apart.
+ */
+function buildOrgsListQuery(params: QueryParams, appEnv: AppEnv) {
+  const includeTestAccounts = params.includeTestAccounts === true
+  const favouritesOnly = params.favouritesOnly === true
+  const ownerRole =
+    params.ownerRole === 'landlord' || params.ownerRole === 'agency' ? params.ownerRole : null
+
+  const sortBy = ORG_SORTABLE_COLUMNS.includes(params.sortBy as (typeof ORG_SORTABLE_COLUMNS)[0])
+    ? params.sortBy!
+    : 'created_at'
+  const sortOrder =
+    params.sortOrder === 'asc' || params.sortOrder === 'desc' ? params.sortOrder : 'desc'
+
+  const baseQuery = Org.query({ connection: appEnv })
+    .if(!includeTestAccounts, (q) => q.where('isTestAccount', false))
+    .if(favouritesOnly, (q) => q.where('isFavourite', true))
+    .if(ownerRole, (q) => q.where('owner_role', ownerRole!))
+    .if(params.search, (q) => q.whereILike('name', `%${params.search}%`))
+
+  return { baseQuery, sortBy, sortOrder }
+}
+
+/**
+ * What an operator gets when they export customers.
+ *
+ * Identifiers, contact details and flags only. Nothing from the Plaid, Xero or Stripe
+ * Connect columns, and none of the JSON blobs (settings, pages, feature lists) —
+ * those are for the org page, not a spreadsheet.
+ */
+const ORG_EXPORT_COLUMNS: readonly CsvColumn<Org>[] = [
+  { header: 'ID', value: (org) => org.id },
+  { header: 'Name', value: (org) => org.cleanName },
+  { header: 'Company', value: (org) => org.companyName },
+  { header: 'Type', value: (org) => org.ownerRole },
+  { header: 'Country', value: (org) => org.country },
+  { header: 'Owner email', value: (org) => org.creatorEmail },
+  { header: 'Company email', value: (org) => org.companyEmail },
+  { header: 'Website', value: (org) => org.companyWebsite },
+  { header: 'Active subscription', value: (org) => Boolean(org.hasActiveSubscription) },
+  { header: 'Plan ID', value: (org) => org.planId },
+  { header: 'Stripe customer', value: (org) => org.paymentCustomerId },
+  { header: 'Favourite', value: (org) => Boolean(org.isFavourite) },
+  { header: 'Test account', value: (org) => Boolean(org.isTestAccount) },
+  { header: 'Sales account', value: (org) => Boolean(org.isSalesOrg) },
+  { header: 'Main org', value: (org) => Boolean(org.isMainOrg) },
+  { header: 'White label', value: (org) => Boolean(org.isWhiteLabelEnabled) },
+  { header: 'Parent org ID', value: (org) => org.parentOrgId },
+  { header: 'Created at', value: (org) => org.createdAt?.toISO() ?? null },
+  { header: 'Updated at', value: (org) => org.updatedAt?.toISO() ?? null },
+]
 
 export default class OrgsController {
   async index({ request, inertia }: HttpContext) {
     const params = await request.paginationQs()
-    const includeTestAccounts = params.includeTestAccounts === true
-    const favouritesOnly = params.favouritesOnly === true
-    const ownerRole =
-      params.ownerRole === 'landlord' || params.ownerRole === 'agency' ? params.ownerRole : null
-
-    const allowedSortColumns = [
-      'name',
-      'owner_role',
-      'country',
-      'has_active_subscription',
-      'created_at',
-    ] as const
-    const sortBy = allowedSortColumns.includes(params.sortBy as (typeof allowedSortColumns)[0])
-      ? params.sortBy
-      : 'created_at'
-    const sortOrder =
-      params.sortOrder === 'asc' || params.sortOrder === 'desc' ? params.sortOrder : 'desc'
-
-    const appEnv = request.appEnv()
-    const baseQuery = Org.query({ connection: appEnv })
-      .if(!includeTestAccounts, (q) => q.where('isTestAccount', false))
-      .if(favouritesOnly, (q) => q.where('isFavourite', true))
-      .if(ownerRole, (q) => q.where('owner_role', ownerRole!))
-      .if(params.search, (q) => q.whereILike('name', `%${params.search}%`))
+    const { baseQuery, sortBy, sortOrder } = buildOrgsListQuery(params, request.appEnv())
 
     const [orgs, totalResult, landlordsResult, agenciesResult] = await Promise.all([
       baseQuery
@@ -529,8 +577,15 @@ export default class OrgsController {
     }
   }
 
-  /** Scaffold: implemented by the feature branch that owns it. */
-  async export({ response }: HttpContext) {
-    return response.notImplemented({ error: 'Not implemented' })
+  /** The customers list as a CSV, filtered and ordered exactly as `index` shows it. */
+  async export(ctx: HttpContext) {
+    await ctx.request.validateUsing(orgsExportValidator)
+    const params = await ctx.request.paginationQs()
+    const { baseQuery, sortBy, sortOrder } = buildOrgsListQuery(params, ctx.request.appEnv())
+
+    /** One past the cap: `sendCsv` trims to the cap and records that it did. */
+    const rows = await baseQuery.sortBy(sortBy, sortOrder).limit(MAX_EXPORT_ROWS + 1)
+
+    return sendCsv(ctx, { name: 'orgs', rows, columns: ORG_EXPORT_COLUMNS, targetType: 'Org' })
   }
 }

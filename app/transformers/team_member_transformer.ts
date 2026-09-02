@@ -11,6 +11,7 @@ export default class TeamMemberTransformer extends BaseTransformer<TeamMember> {
         'userId',
         'role',
         'enableProdAccess',
+        'prodAccessMode',
         'dataAccessMode',
         'propertiesAccessMode',
         'leasesAccessMode',

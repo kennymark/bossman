@@ -3,6 +3,7 @@ import type { NextFn } from '@adonisjs/core/types/http'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
 
 import { getPageAccessForRequest } from '#services/page_access_service'
+import { getProdAccessModeForRequest } from '#services/prod_access_service'
 import env from '#start/env'
 import UserTransformer from '#transformers/user_transformer'
 
@@ -31,6 +32,12 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       isGodAdmin: ctx.inertia.always(Boolean(user?.isGodAdmin)),
       /** Surfaced so the UI can warn before a production grant lapses. */
       prodAccessExpiresAt: user?.prodAccessExpiresAt?.toISO() ?? null,
+      /**
+       * `read` means production is visible but not writable, so pages can hide write
+       * actions and the sidebar can badge the environment. `null` when the user cannot
+       * reach production at all. The middleware enforces it regardless.
+       */
+      prodAccessMode: user ? await getProdAccessModeForRequest(ctx) : null,
       pageAccess: ctx.inertia.always(pageAccess ?? undefined),
       params: ctx.request.params(),
       qs,

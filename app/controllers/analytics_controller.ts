@@ -6,6 +6,8 @@ import Lease from '#models/lease'
 import MaintenanceRequest from '#models/maintenance_request'
 import Org from '#models/org'
 import TogethaUser from '#models/togetha_user'
+import { RevenueService } from '#services/revenue_service'
+import { revenueRangeValidator } from '#validators/analytics'
 import { analyticsEntitiesValidator, analyticsRangeValidator } from '#validators/query'
 
 type DateRange = { startDate: string; endDate: string }
@@ -310,8 +312,20 @@ export default class AnalyticsController {
     return response.ok(list)
   }
 
-  /** Scaffold: implemented by the feature branch that owns it. */
-  async revenueStats({ response }: HttpContext) {
-    return response.notImplemented({ error: 'Not implemented' })
+  /**
+   * Stripe revenue for the current environment: MRR, plan mix, trials ending, churn in
+   * the requested range, six months of movement and signup-cohort retention.
+   */
+  async revenueStats({ request, response, logger }: HttpContext) {
+    const appEnv = request.appEnv()
+    await request.validateUsing(revenueRangeValidator)
+    const range = parseDateRange(request)
+
+    try {
+      return response.ok(await RevenueService.stats(appEnv, range))
+    } catch (err) {
+      logger.error({ err, appEnv }, 'Revenue stats unavailable')
+      return response.badGateway({ error: 'Stripe is unavailable right now. Try again shortly.' })
+    }
   }
 }

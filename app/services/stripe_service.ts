@@ -8,7 +8,10 @@ import type { CustomSubscriptionInfo } from '#extensions/event'
 import Org from '#models/org'
 import SubscriptionPlan from '#models/subscription_plan'
 import env from '#start/env'
+import type { AppEnv } from '#types/env'
 import type { CreateCustomUserPayload } from '#validators/org'
+
+import { getPlanName, getTrialPeriod } from '../data/subscription.js'
 
 function getStripeKey(): string {
   if (app.inProduction) {
@@ -32,6 +35,98 @@ interface Customer {
   email: string
   name: string
   togethaUserId: string
+}
+
+export interface StripeTrial {
+  startedAt: string
+  endsAt: string
+  isActive: boolean
+  isExpired: boolean
+}
+
+export interface SubscriptionSummary {
+  configured: true
+  id: string
+  customerId: string | null
+  status: Stripe.Subscription.Status
+  currentPeriodStart: string | null
+  currentPeriodEnd: string | null
+  cancelAtPeriodEnd: boolean
+  cancelAt: string | null
+  canceledAt: string | null
+  trial: StripeTrial | null
+  priceId: string | null
+  /** `standard_monthly` etc. when the price is a known catalogue price. */
+  planName: string | null
+  plan: { plan: string; frequency: string } | null
+  /** Minor units (pence), per unit and in total for the quantity. */
+  unitAmount: number | null
+  amount: number | null
+  quantity: number
+  currency: string | null
+  interval: string | null
+  intervalCount: number | null
+  paymentMethod: { brand: string | null; last4: string | null; type: string } | null
+  latestInvoice: { id: string; status: string | null; hostedInvoiceUrl: string | null } | null
+  createdAt: string
+}
+
+export interface SubscriptionUnavailable {
+  configured: false
+  /** `no_subscription_id`: the org never subscribed; `not_found`: Stripe does not know the id. */
+  reason: 'no_subscription_id' | 'not_found'
+}
+
+export interface InvoiceSummary {
+  id: string
+  number: string | null
+  status: string | null
+  total: number
+  amountDue: number
+  amountPaid: number
+  currency: string
+  created: string | null
+  hostedInvoiceUrl: string | null
+  invoicePdf: string | null
+  paid: boolean
+}
+
+export interface UpcomingInvoiceSummary {
+  total: number
+  amountDue: number
+  currency: string
+  /** When Stripe expects to bill it. */
+  nextPaymentAttempt: string | null
+  periodEnd: string | null
+}
+
+function isoFromUnix(seconds: number | null | undefined): string | null {
+  return typeof seconds === 'number' ? new Date(seconds * 1000).toISOString() : null
+}
+
+function isMissingResource(err: unknown): boolean {
+  return (
+    err instanceof Stripe.errors.StripeInvalidRequestError &&
+    (err.code === 'resource_missing' ||
+      err.code === 'invoice_upcoming_none' ||
+      err.statusCode === 404)
+  )
+}
+
+function toInvoiceSummary(invoice: Stripe.Invoice): InvoiceSummary {
+  return {
+    id: invoice.id,
+    number: invoice.number ?? null,
+    status: invoice.status ?? null,
+    total: invoice.total,
+    amountDue: invoice.amount_due,
+    amountPaid: invoice.amount_paid,
+    currency: invoice.currency,
+    created: isoFromUnix(invoice.created),
+    hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+    invoicePdf: invoice.invoice_pdf ?? null,
+    paid: invoice.status === 'paid',
+  }
 }
 class StripeService {
   public static async getSubscription(subscriptionId: string) {
@@ -248,6 +343,131 @@ class StripeService {
       description: params.description || undefined,
     })
     return item
+  }
+
+  /**
+   * A read-only picture of an org's subscription for the billing tab.
+   *
+   * `appEnv` decides which price-id table names the plan: the dev database subscribes
+   * against Stripe test prices, production against live ones. The key itself is still
+   * chosen by `getStripeKey`; nothing here logs or returns it.
+   */
+  public static async getSubscriptionSummary(
+    subscriptionId: string | null | undefined,
+    appEnv: AppEnv,
+  ): Promise<SubscriptionSummary | SubscriptionUnavailable> {
+    if (!subscriptionId) return { configured: false, reason: 'no_subscription_id' }
+
+    let subscription: Stripe.Subscription
+    try {
+      subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+        expand: ['default_payment_method', 'latest_invoice'],
+      })
+    } catch (err) {
+      if (isMissingResource(err)) return { configured: false, reason: 'not_found' }
+      throw err
+    }
+
+    const item = subscription.items.data[0]
+    const price = item?.price ?? null
+    const plan = price ? getPlanName(price.id, appEnv) : null
+    const trial = getTrialPeriod(subscription)
+    const quantity = item?.quantity ?? 1
+    const unitAmount = price?.unit_amount ?? null
+
+    const paymentMethod =
+      subscription.default_payment_method && typeof subscription.default_payment_method === 'object'
+        ? subscription.default_payment_method
+        : null
+    const latestInvoice =
+      subscription.latest_invoice && typeof subscription.latest_invoice === 'object'
+        ? subscription.latest_invoice
+        : null
+
+    return {
+      configured: true,
+      id: subscription.id,
+      customerId:
+        typeof subscription.customer === 'string'
+          ? subscription.customer
+          : subscription.customer.id,
+      status: subscription.status,
+      currentPeriodStart: isoFromUnix(item?.current_period_start),
+      currentPeriodEnd: isoFromUnix(item?.current_period_end),
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      cancelAt: isoFromUnix(subscription.cancel_at),
+      canceledAt: isoFromUnix(subscription.canceled_at),
+      trial: trial
+        ? {
+            startedAt: trial.startedAt.toISOString(),
+            endsAt: trial.endsAt.toISOString(),
+            isActive: trial.isActive,
+            isExpired: trial.isExpired,
+          }
+        : null,
+      priceId: price?.id ?? null,
+      planName: plan?.fullName ?? price?.nickname ?? null,
+      plan: plan ? { plan: plan.plan, frequency: plan.frequency } : null,
+      unitAmount,
+      amount: unitAmount === null ? null : unitAmount * quantity,
+      quantity,
+      currency: price?.currency ?? subscription.currency ?? null,
+      interval: price?.recurring?.interval ?? null,
+      intervalCount: price?.recurring?.interval_count ?? null,
+      paymentMethod: paymentMethod
+        ? {
+            type: paymentMethod.type,
+            brand: paymentMethod.card?.brand ?? null,
+            last4: paymentMethod.card?.last4 ?? null,
+          }
+        : null,
+      latestInvoice: latestInvoice
+        ? {
+            id: latestInvoice.id,
+            status: latestInvoice.status ?? null,
+            hostedInvoiceUrl: latestInvoice.hosted_invoice_url ?? null,
+          }
+        : null,
+      createdAt: new Date(subscription.created * 1000).toISOString(),
+    }
+  }
+
+  /** The most recent invoices for a customer, newest first. */
+  public static async listInvoices(
+    customerId: string | null | undefined,
+    limit = 12,
+  ): Promise<InvoiceSummary[]> {
+    if (!customerId) return []
+    const result = await stripe.invoices.list({
+      customer: customerId,
+      limit: Math.min(Math.max(limit, 1), 100),
+    })
+    return result.data.map(toInvoiceSummary)
+  }
+
+  /**
+   * What Stripe would bill next, or null when there is nothing scheduled.
+   *
+   * Stripe answers a customer with no active subscription with a 404, which is a
+   * normal state for a churned org rather than an error.
+   */
+  public static async getUpcomingInvoice(
+    customerId: string | null | undefined,
+  ): Promise<UpcomingInvoiceSummary | null> {
+    if (!customerId) return null
+    try {
+      const invoice = await stripe.invoices.createPreview({ customer: customerId })
+      return {
+        total: invoice.total,
+        amountDue: invoice.amount_due,
+        currency: invoice.currency,
+        nextPaymentAttempt: isoFromUnix(invoice.next_payment_attempt),
+        periodEnd: isoFromUnix(invoice.period_end),
+      }
+    } catch (err) {
+      if (isMissingResource(err)) return null
+      throw err
+    }
   }
 }
 

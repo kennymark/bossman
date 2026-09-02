@@ -1,5 +1,5 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
-import { Link } from '@inertiajs/react'
+import { Link, usePage } from '@inertiajs/react'
 import {
   IconActivity,
   IconBriefcase,
@@ -29,6 +29,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { SimpleGrid } from '@/components/ui/simplegrid'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import api, { paginated } from '@/lib/http'
+
+import { RevenueSection, type RevenueStats } from './components/revenue-section'
 
 const ANALYTICS_DATE_PRESETS = [
   { label: 'Last 7 days', getRange: () => ({ start: subDays(new Date(), 6), end: new Date() }) },
@@ -71,6 +73,8 @@ type EntityType = 'orgs' | 'users' | 'leases' | 'maintenance' | 'activity'
 interface AnalyticsIndexProps extends SharedProps {}
 
 export default function AnalyticsIndex(_props: AnalyticsIndexProps) {
+  const page = usePage()
+  const appEnv = (page.props.appEnv as string | undefined) ?? 'dev'
   const [startDate, setStartDate] = useState(toYMD(defaultStart))
   const [endDate, setEndDate] = useState(toYMD(defaultEnd))
   const [entitiesSheetOpen, setEntitiesSheetOpen] = useState(false)
@@ -82,6 +86,20 @@ export default function AnalyticsIndex(_props: AnalyticsIndexProps) {
   } | null>(null)
 
   const dateRange = useMemo(() => ({ startDate, endDate }), [startDate, endDate])
+
+  const {
+    data: revenueStats,
+    isPending: revenueLoading,
+    isError: revenueError,
+  } = useQuery({
+    queryKey: ['analytics-revenue-stats', appEnv, dateRange.startDate, dateRange.endDate],
+    queryFn: async () => {
+      /** The registry still types the stub; the service defines the payload. */
+      return (await api.analytics.revenueStats({
+        query: dateRange as never,
+      })) as unknown as RevenueStats
+    },
+  })
 
   const { data: orgsStats, isPending: orgsStatsLoading } = useQuery({
     queryKey: ['analytics-orgs-stats', dateRange.startDate, dateRange.endDate],
@@ -364,6 +382,13 @@ export default function AnalyticsIndex(_props: AnalyticsIndexProps) {
           buttonSize='sm'
         />
       }>
+      <RevenueSection
+        data={revenueStats}
+        loading={revenueLoading}
+        error={revenueError}
+        appEnv={appEnv}
+      />
+
       <Tabs defaultValue='orgs' className='space-y-6'>
         <TabsList className='w-fit h-auto flex-wrap gap-1'>
           <TabsTrigger value='orgs' className='gap-2 rounded-md'>

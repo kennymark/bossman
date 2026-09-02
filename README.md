@@ -145,7 +145,35 @@ Drop a file in `boss/jobs/` and it is picked up automatically. Register recurrin
 | `start/kernel.ts`        | Middleware stacks and ordering                     |
 | `start/extensions.ts`    | Registers request/context macros                   |
 
-Notable environment variables beyond the obvious: `ADMIN_DB`, `DEV_DB`, `PROD_DB`, `APP_URL`, and the optional `HEALTH_CHECK_SECRET`.
+Notable environment variables beyond the obvious: `ADMIN_DB`, `DEV_DB`, `PROD_DB`, `APP_URL`, and the optional `HEALTH_CHECK_SECRET`, `MONGO_URL_DEV` / `MONGO_URL_PROD` (job monitor), `IMPERSONATION_SECRET`, `TOGETHA_DEV_URL` / `TOGETHA_PROD_URL` (impersonation handoff).
+
+## Customer pages
+
+Beyond orgs, leases and properties, the console reads these customer-data areas (all page-gated, all on the selected environment):
+
+- `/maintenance` — maintenance requests with status/severity/overdue filters and a detail page.
+- `/documents` — documents with compliance and expiry filters (expired, expiring in 30/90 days).
+- Org page tabs — **Billing** (live Stripe subscription, invoices, plan limits versus usage), **Feature flags** (effective plan features with god-admin overrides), Maintenance and Documents.
+
+Every index page has an **Export CSV** button. Exports apply the same filters as the page, stop at 5,000 rows, and are recorded in the audit trail as `export.csv`.
+
+## Global search
+
+`⌘K` searches records, not just pages: orgs (name, company, creator email, Stripe ids), users, tenants, leases, properties and maintenance requests. Trigram search uses the `<table>_search_text` columns the Togetha app maintains; the rest is ILIKE over an allow-list. Result groups are filtered by the caller's page grants.
+
+## Impersonation ("Log in as customer")
+
+The org page's **Log in as customer** action mints a signed, single-use handoff token (HMAC, 90-second expiry, nonce) and opens the Togetha app at `/auth/impersonate?token=…`, where the app verifies it, signs the user in, records an activity on the org and marks the session. The operator must give a reason and retype the target's email; production requires a god admin; every handoff is recorded as `org.impersonate`.
+
+Both sides share one secret: `IMPERSONATION_SECRET` here, `ADMIN_IMPERSONATION_SECRET` in the Togetha app. Leave it unset to disable the feature.
+
+## Job monitor
+
+`/jobs` reads the Togetha app's Pulse job store in MongoDB (`agendaJobs`) for the selected environment: stats, a 14-day history chart, queue tabs, search by name or id, re-run and delete. Configure `MONGO_URL_DEV` / `MONGO_URL_PROD`; an environment without a URL shows as unconfigured. Re-run and delete require a reason (delete also a typed confirmation), are god-admin-only against production, and are recorded as `job.rerun` / `job.delete`.
+
+## Read-only production access
+
+A production grant can be **read-only**: the member sees production but every mutating request against customer data (orgs, leases, properties, maintenance, documents, push notifications, jobs, backup restores, dashboard/analytics) is refused with 403. Team, blog, email, server and settings pages are unaffected. The mode is set per member on the Teams page, requires a reason, and is recorded as `member.prod_access_mode`; god admins are always read-write.
 
 ## API documentation
 

@@ -48,6 +48,12 @@ router.use([
    */
   () => import('#middleware/app_env_middleware'),
   () => import('#middleware/enable_prod_access_middleware'),
+  /**
+   * Needs `request.appEnv()` from app_env_middleware. Refuses production writes from a
+   * read-only grant before the route-level guards run; it never lets anything through
+   * that those guards would refuse.
+   */
+  () => import('#middleware/prod_read_only_middleware'),
 ])
 
 /**

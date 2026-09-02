@@ -1,6 +1,7 @@
 import vine from '@vinejs/vine'
 
 import { PAGE_KEYS } from '#utils/page_access'
+import { PROD_ACCESS_MODES } from '#utils/prod_access'
 
 const email = vine.string().toLowerCase().trim().email()
 
@@ -43,6 +44,8 @@ export const updateMemberValidator = vine.create(
     prodAccessExpiresAt: vine.string().optional(),
     /** Required when turning production access on, so the grant is justified in the log. */
     prodAccessReason: vine.string().trim().maxLength(500).optional(),
+    /** `read` may look at production but not change it. Defaults to `write` on grant. */
+    prodAccessMode: vine.enum(PROD_ACCESS_MODES).optional(),
   }),
 )
 

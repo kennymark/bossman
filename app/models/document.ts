@@ -27,6 +27,7 @@ export default class Document extends SuperBaseModel {
   @column({ isPrimary: true }) declare id: string
   @column() declare name: string
   @column() declare fileName: string
+  @column() declare description: string | null
   @column() declare leaseableEntityId: string
   @column() declare externalFileUrl: string
   @column() declare uploaderId: string
@@ -69,7 +70,8 @@ export default class Document extends SuperBaseModel {
     isProofOfAddress: boolean
     referenceId: string
   }>
-  @column() declare expiresAt: DateTime
+  @column.dateTime() declare expiresAt: DateTime | null
+  @column.dateTime() declare archivedAt: DateTime | null
 
   @manyToMany(() => User, { pivotTable: 'document_users' })
   declare visibleToUsers: ManyToMany<typeof User>

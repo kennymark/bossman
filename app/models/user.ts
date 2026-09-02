@@ -61,6 +61,14 @@ export default class User extends compose(SuperBaseModel, AuthFinder) {
   @column.dateTime({ columnName: 'prod_access_granted_at', serializeAs: 'prodAccessGrantedAt' })
   declare prodAccessGrantedAt: DateTime | null
 
+  /**
+   * Whether a production grant may write. `read` lets the member look at live customer
+   * data but refuses every mutating request against it. Synced from the team member;
+   * the stricter of the two records wins.
+   */
+  @column({ columnName: 'prod_access_mode', serializeAs: 'prodAccessMode' })
+  declare prodAccessMode: 'read' | 'write'
+
   @computed()
   public get isAdminOrSuperAdmin() {
     return this.role === 'admin' || this.role === 'super_admin'
