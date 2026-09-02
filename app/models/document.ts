@@ -53,7 +53,13 @@ export default class Document extends SuperBaseModel {
     | 'contract'
     | 'other'
 
-  @attachment({ preComputeUrl: true, folder: FileStoreRoutes.DOCUMENTS, disk: 'r2' })
+  /**
+   * URLs are never precomputed here: the file lives on the Togetha app's own disk,
+   * which this console does not configure, and a fetch hook that tries to sign a URL
+   * for it took the whole documents page down. The admin lists documents; it does
+   * not serve them.
+   */
+  @attachment({ preComputeUrl: false, folder: FileStoreRoutes.DOCUMENTS, disk: 'r2' })
   declare file: Attachment | null
 
   @belongsTo(() => User) declare user: BelongsTo<typeof User>

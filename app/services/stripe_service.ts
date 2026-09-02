@@ -453,10 +453,19 @@ class StripeService {
    */
   public static async getUpcomingInvoice(
     customerId: string | null | undefined,
+    subscriptionId?: string | null,
   ): Promise<UpcomingInvoiceSummary | null> {
-    if (!customerId) return null
+    /**
+     * A preview needs something to bill: Stripe rejects a bare customer with an
+     * invalid-request error, so an org with no subscription simply has no upcoming
+     * invoice rather than a failed page.
+     */
+    if (!customerId || !subscriptionId) return null
     try {
-      const invoice = await stripe.invoices.createPreview({ customer: customerId })
+      const invoice = await stripe.invoices.createPreview({
+        customer: customerId,
+        subscription: subscriptionId,
+      })
       return {
         total: invoice.total,
         amountDue: invoice.amount_due,

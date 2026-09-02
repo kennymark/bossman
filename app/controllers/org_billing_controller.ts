@@ -60,7 +60,7 @@ export default class OrgBillingController {
     try {
       const [data, upcoming] = await Promise.all([
         StripeService.listInvoices(org.paymentCustomerId, 12),
-        StripeService.getUpcomingInvoice(org.paymentCustomerId),
+        StripeService.getUpcomingInvoice(org.paymentCustomerId, org.subscriptionId),
       ])
       return response.ok({ configured: true, data, upcoming })
     } catch (err) {
