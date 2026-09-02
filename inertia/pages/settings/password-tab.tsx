@@ -23,7 +23,7 @@ export function PasswordTab() {
   }
   // Password update mutation
   const { mutate: updatePasswordMutation, isPending: isUpdatingPassword } = useMutation({
-    mutationFn: (values: PasswordValues) => api.put('/user/password', values),
+    mutationFn: (values: PasswordValues) => api.users.updatePassword({ body: values }),
     onSuccess: () => {
       toast.success('Password updated successfully!')
       passwordFormik.resetForm()

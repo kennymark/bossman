@@ -169,7 +169,18 @@ export default function OrgsEdit({ org }: OrgsEditProps) {
   const { values, handleChange, setFieldValue, touched, errors } = formik
 
   const { mutate: updateOrgMutation, isPending } = useMutation({
-    mutationFn: (values: EditOrgFormValues) => api.put(`/orgs/${id}`, values),
+    /**
+     * The cast covers a genuine mismatch, not a typing gap: every field inside the
+     * server's `featureList` is required, while the Yup schema above marks each one
+     * optional. A form submitted with `customPlanFeatures` only partly filled is
+     * rejected with a 422 today — tightening the form (or loosening the validator) is
+     * a behaviour change, so it is left as-is and called out here.
+     */
+    mutationFn: (values: EditOrgFormValues) =>
+      api.orgs.update({
+        params: { id },
+        body: values as Parameters<typeof api.orgs.update>[0]['body'],
+      }),
     onSuccess: () => {
       toast.success('Organisation updated successfully.')
       router.visit(`/orgs/${id}`)

@@ -127,8 +127,7 @@ export function InvoicesTab({ orgId }: InvoicesTabProps) {
   const { data: invoices, isPending } = useQuery({
     queryKey: ['org-invoices', orgId],
     queryFn: async () => {
-      const res = await api.get<{ data: RawOrgInvoice[] }>(`/orgs/${orgId}/invoices`)
-      return res.data
+      return (await api.orgs.invoices({ params: { id: orgId } })) as { data: RawOrgInvoice[] }
     },
   })
 

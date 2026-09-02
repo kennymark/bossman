@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/react'
 import { TokenVerificationShell } from '@/components/auth/token_verification_shell'
 import { PublicLayout } from '@/components/layouts/public'
 import { Button } from '@/components/ui/button'
+import api from '@/lib/http'
 
 export default function VerifyEmail({ qs }: { qs: { token: string } }) {
   const token = qs?.token
@@ -12,7 +13,7 @@ export default function VerifyEmail({ qs }: { qs: { token: string } }) {
       <Head title='Verify Email - Friars Technologies' />
       <TokenVerificationShell
         token={token}
-        endpoint='/auth/verify-email'
+        verify={api.auth.verifyEmail}
         pendingTitle='Verifying Your Email'
         successTitle='Email Verified!'
         errorTitle='Verification Failed'

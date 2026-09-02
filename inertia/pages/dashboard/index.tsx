@@ -14,7 +14,7 @@ import { StatCard } from '@/components/dashboard/stat-card'
 import { AppCard } from '@/components/ui/app-card'
 import type { ChartConfig } from '@/components/ui/chart'
 import { SimpleGrid } from '@/components/ui/simplegrid'
-import api from '@/lib/http'
+import api, { paginated } from '@/lib/http'
 import { tablePaginationFromMeta } from '@/lib/pagination'
 
 type DashboardStats = {
@@ -49,19 +49,19 @@ export default function DashboardIndex(_props: DashboardIndexProps) {
   const { data: statsData } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const res = await api.get<{ data: DashboardStats }>('/dashboard/stats')
-      return res.data
+      return await api.dashboard.stats({})
     },
-    select: (data) => data?.data,
+    select: (res) => res?.data,
   })
 
   const { data: activityData, isPending: activityLoading } = useQuery({
     queryKey: ['dashboard-activity', activityPage, activityPerPage],
     queryFn: async () => {
-      const res = await api.get<PaginatedResponse<RawActivity>>('/dashboard/activity', {
-        params: { page: activityPage, perPage: activityPerPage },
+      const res = await api.dashboard.recentActivity({
+        query: { page: String(activityPage), perPage: String(activityPerPage) },
       })
-      return res.data
+      /** Serialized on the wire; the inferred row type is the Lucid model. */
+      return paginated(res) as unknown as PaginatedResponse<RawActivity>
     },
   })
 

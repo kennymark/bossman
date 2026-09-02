@@ -13,11 +13,15 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
-import api from '@/lib/http'
 
 interface TokenVerificationShellProps {
   token?: string
-  endpoint: string
+  /**
+   * The endpoint to hand the token to, passed as the typed client's own function
+   * rather than a URL string — the two callers verify different things at different
+   * routes, and a string here could not be checked against either.
+   */
+  verify: (args: { query: { token?: string } }) => Promise<unknown>
   pendingTitle: string
   successTitle: string
   errorTitle: string
@@ -35,7 +39,7 @@ interface TokenVerificationShellProps {
 
 export function TokenVerificationShell({
   token,
-  endpoint,
+  verify,
   pendingTitle,
   successTitle,
   errorTitle,
@@ -51,7 +55,7 @@ export function TokenVerificationShell({
   errorActions,
 }: TokenVerificationShellProps) {
   const { mutate, isPending, isSuccess, isError, error } = useMutation({
-    mutationFn: async () => api.get(endpoint, { params: { token } }),
+    mutationFn: async () => verify({ query: { token } }),
     onSuccess: () => {
       toast.success(successToastTitle, {
         description: successToastDescription,

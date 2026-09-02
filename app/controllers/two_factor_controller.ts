@@ -2,6 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
 
 import twoFactorService from '#services/two_factor_service'
+import { enableTwoFactorValidator } from '#validators/auth'
+import { passwordConfirmationValidator } from '#validators/user'
 
 export default class TwoFactorController {
   async setup({ auth, response }: HttpContext) {
@@ -31,7 +33,7 @@ export default class TwoFactorController {
 
   async enable({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { token } = request.only(['token'])
+    const { token } = await request.validateUsing(enableTwoFactorValidator)
 
     const secret = twoFactorService.decryptSecret(user.twoFactorSecret)
     if (!secret) {
@@ -68,7 +70,7 @@ export default class TwoFactorController {
 
   async disable({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { password } = request.only(['password'])
+    const { password } = await request.validateUsing(passwordConfirmationValidator)
 
     if (!user.twoFactorEnabled) {
       return response.badRequest({ error: '2FA is not enabled' })
@@ -144,7 +146,7 @@ export default class TwoFactorController {
 
   async regenerateRecoveryCodes({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { password } = request.only(['password'])
+    const { password } = await request.validateUsing(passwordConfirmationValidator)
 
     if (!user.twoFactorEnabled) {
       return response.badRequest({ error: '2FA is not enabled' })

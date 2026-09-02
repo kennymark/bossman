@@ -27,10 +27,7 @@ export function RuntimeLogsSheet({ open, onOpenChange, deploymentId }: RuntimeLo
     queryKey: ['railway', 'deployment-logs', deploymentId],
     queryFn: async () => {
       if (!deploymentId) return []
-      const res = await api.get<RailwayLog[]>(
-        `/railway/deployments/${deploymentId}/logs/runtime` as Parameters<typeof api.get>[0],
-      )
-      return res.data ?? []
+      return (await api.railway.deploymentLogs({ params: { id: deploymentId } })) ?? []
     },
     enabled: !!deploymentId && open,
     refetchInterval: open ? 3_000 : false,

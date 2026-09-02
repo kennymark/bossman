@@ -82,16 +82,16 @@ export function RestoreDialog({
   }
 
   const previewMutation = useMutation({
-    mutationFn: () =>
-      api.post<RestorePreview>(`/db-backups/${backupId}/restore-preview`, { target }),
-    onSuccess: (response) => setPreview(response.data as RestorePreview),
+    mutationFn: () => api.dbBackups.restorePreview({ params: { id: backupId }, body: { target } }),
+    onSuccess: (response) => setPreview(response as RestorePreview),
     onError: (err: ServerErrorResponse) => {
       toast.error(serverErrorResponder(err) || 'Could not read that backup')
     },
   })
 
   const restoreMutation = useMutation({
-    mutationFn: () => api.post(`/db-backups/${backupId}/restore`, { target, reason, confirm }),
+    mutationFn: () =>
+      api.dbBackups.restore({ params: { id: backupId }, body: { target, reason, confirm } }),
     onSuccess: () => {
       toast.success('Restore completed successfully')
       setOpen(false)

@@ -224,13 +224,30 @@ export default class OrgActionsController {
     })
   }
 
+  /**
+   * The four bulk entry points each validate in their own body rather than leaving it
+   * to `applyBulkFlag`. The payload is identical either way, but the route scanner
+   * that types these endpoints for the client only looks for a `validateUsing` call
+   * inside the method a route points at — validating one level down left all four
+   * typed as taking no body at all.
+   */
   async bulkMakeFavourite(ctx: HttpContext) {
-    return this.applyBulkFlag(ctx, 'isFavourite', true, 'org.bulk_favourite', 'marked as favourite')
+    const payload = await ctx.request.validateUsing(bulkOrgIdsValidator)
+    return this.applyBulkFlag(
+      ctx,
+      payload,
+      'isFavourite',
+      true,
+      'org.bulk_favourite',
+      'marked as favourite',
+    )
   }
 
   async bulkUndoFavourite(ctx: HttpContext) {
+    const payload = await ctx.request.validateUsing(bulkOrgIdsValidator)
     return this.applyBulkFlag(
       ctx,
+      payload,
       'isFavourite',
       false,
       'org.bulk_favourite',
@@ -239,8 +256,10 @@ export default class OrgActionsController {
   }
 
   async bulkMakeTestAccount(ctx: HttpContext) {
+    const payload = await ctx.request.validateUsing(bulkOrgIdsValidator)
     return this.applyBulkFlag(
       ctx,
+      payload,
       'isTestAccount',
       true,
       'org.bulk_test_account',
@@ -249,8 +268,10 @@ export default class OrgActionsController {
   }
 
   async bulkUndoTestAccount(ctx: HttpContext) {
+    const payload = await ctx.request.validateUsing(bulkOrgIdsValidator)
     return this.applyBulkFlag(
       ctx,
+      payload,
       'isTestAccount',
       false,
       'org.bulk_test_account',
@@ -267,6 +288,7 @@ export default class OrgActionsController {
    */
   private async applyBulkFlag(
     ctx: HttpContext,
+    payload: Awaited<ReturnType<typeof bulkOrgIdsValidator.validate>>,
     field: 'isFavourite' | 'isTestAccount',
     value: boolean,
     action: 'org.bulk_favourite' | 'org.bulk_test_account',
@@ -274,7 +296,7 @@ export default class OrgActionsController {
   ) {
     const { request, response } = ctx
     const connection = request.appEnv()
-    const { orgIds, confirm, reason } = await request.validateUsing(bulkOrgIdsValidator)
+    const { orgIds, confirm, reason } = payload
 
     const matched = await Org.query({ connection }).whereIn('id', orgIds).select('id')
     const expected = CONFIRMATION_PHRASES['org.bulk'](matched.length)

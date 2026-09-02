@@ -93,10 +93,13 @@ export default function TeamsPage({ members }: TeamsPageProps) {
       enableProdAccess,
     }: {
       memberId: string
-      allowedPages: string[]
+      allowedPages: PageKey[]
       enableProdAccess: boolean
     }) => {
-      await api.put(`/members/${memberId}`, { allowedPages, enableProdAccess })
+      await api.members.updateMember({
+        params: { memberId },
+        body: { allowedPages, enableProdAccess },
+      })
     },
     onSuccess: () => {
       setEditMember(null)
@@ -121,7 +124,7 @@ export default function TeamsPage({ members }: TeamsPageProps) {
 
   const deleteMemberMutation = useMutation({
     mutationFn: async (memberId: string) => {
-      await api.delete(`/members/${memberId}`)
+      await api.members.destroy({ params: { memberId } })
     },
     onSuccess: () => {
       toast.success('Member removed')

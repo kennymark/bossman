@@ -42,3 +42,13 @@ export const twoFactorChallengeValidator = vine.create(
     recoveryCode: vine.string().trim().maxLength(64).optional(),
   }),
 )
+
+/** Confirms a TOTP code when turning 2FA on. */
+export const enableTwoFactorValidator = vine.create(
+  vine.object({ token: vine.string().optional() }),
+)
+
+/** `?token=` on the email-verification links. */
+export const verifyEmailTokenValidator = vine.create(
+  vine.object({ token: vine.string().optional() }),
+)

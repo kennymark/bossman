@@ -8,10 +8,12 @@ import { resolveUserIds, sendToRecipients } from '#services/push_notification_se
 import PushNotificationTransformer from '#transformers/push_notification_transformer'
 import { paginatedIndex } from '#utils/paginated_index'
 import { storePushNotificationValidator } from '#validators/push_notification'
+import { pushNotificationUsersValidator } from '#validators/query'
 
 export default class PushNotificationsController {
   async users({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(pushNotificationUsersValidator)
     const search = request.qs().search as string | undefined
     const users = TogethaUser.query({ connection: appEnv })
       .select('id', 'name', 'email', 'landlordId', 'agencyId', 'tenantId')

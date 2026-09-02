@@ -73,6 +73,8 @@ export type ScannedRoutes = {
     'railway.deployment_redeploy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'railway.service_deploy': { paramsTuple: [ParamValue]; params: {'serviceId': ParamValue} }
     'railway.refresh': { paramsTuple?: []; params?: {} }
+    'app_env.show': { paramsTuple?: []; params?: {} }
+    'app_env.update': { paramsTuple?: []; params?: {} }
     'dashboard.index': { paramsTuple?: []; params?: {} }
     'teams_page.index': { paramsTuple?: []; params?: {} }
     'teams_page.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -219,6 +221,7 @@ export type ScannedRoutes = {
     'railway.deployments': { paramsTuple: [ParamValue]; params: {'serviceId': ParamValue} }
     'railway.deployment_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'railway.deployment_build_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'app_env.show': { paramsTuple?: []; params?: {} }
     'dashboard.index': { paramsTuple?: []; params?: {} }
     'teams_page.index': { paramsTuple?: []; params?: {} }
     'teams_page.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -322,6 +325,7 @@ export type ScannedRoutes = {
     'railway.deployments': { paramsTuple: [ParamValue]; params: {'serviceId': ParamValue} }
     'railway.deployment_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'railway.deployment_build_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'app_env.show': { paramsTuple?: []; params?: {} }
     'dashboard.index': { paramsTuple?: []; params?: {} }
     'teams_page.index': { paramsTuple?: []; params?: {} }
     'teams_page.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -430,6 +434,7 @@ export type ScannedRoutes = {
   }
   PUT: {
     'orgs.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'app_env.update': { paramsTuple?: []; params?: {} }
     'addons.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'blog_posts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.update_profile': { paramsTuple?: []; params?: {} }

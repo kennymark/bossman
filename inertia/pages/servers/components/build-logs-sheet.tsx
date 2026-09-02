@@ -27,10 +27,7 @@ export function BuildLogsSheet({ open, onOpenChange, deploymentId }: BuildLogsSh
     queryKey: ['railway', 'deployment-build-logs', deploymentId],
     queryFn: async () => {
       if (!deploymentId) return []
-      const res = await api.get<RailwayLog[]>(
-        `/railway/deployments/${deploymentId}/logs/build` as Parameters<typeof api.get>[0],
-      )
-      return res.data ?? []
+      return (await api.railway.deploymentBuildLogs({ params: { id: deploymentId } })) ?? []
     },
     enabled: !!deploymentId && open,
     refetchInterval: open ? 3_000 : false,

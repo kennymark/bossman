@@ -48,7 +48,7 @@ export default function ResetPassword({ qs }: { qs: { token: string } }) {
   })
   const { mutate: resetPasswordMutation, isPending } = useMutation({
     mutationFn: (values: { token: string; newPassword: string }) =>
-      api.post('/auth/reset-password', values),
+      api.auth.resetPassword({ body: values }),
     onSuccess: () => {
       toast.success('Password reset successfully!', {
         description: 'Redirecting to login...',

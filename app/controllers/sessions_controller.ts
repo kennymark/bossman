@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
 import sessionService from '#services/session_service'
+import { revokeSessionValidator } from '#validators/user'
 
 export default class SessionsController {
   async index({ auth, response, session }: HttpContext) {
@@ -19,7 +20,7 @@ export default class SessionsController {
 
   async revoke({ auth, request, response, session, logger }: HttpContext) {
     const user = auth.getUserOrFail()
-    const body = request.only(['sessionId'])
+    const body = await request.validateUsing(revokeSessionValidator)
 
     if (!body.sessionId) {
       return response.badRequest({ error: 'Session ID is required' })

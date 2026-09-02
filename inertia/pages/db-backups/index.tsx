@@ -143,7 +143,7 @@ export default function DbBackupsIndex({ backups, health }: DbBackupsIndexProps)
   ]
 
   const createBackupMutation = useMutation({
-    mutationFn: () => api.post('/db-backups', {}),
+    mutationFn: () => api.api.dbBackups.store({}),
     onSuccess: () => {
       toast.success('Backup created')
       router.reload()

@@ -4,7 +4,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import type { PaginatedResponse } from '#types/extra'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -13,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import api from '@/lib/http'
+import api, { paginated } from '@/lib/http'
 import { useRealTimeClient } from '@/lib/transmit'
 import { cn } from '@/lib/utils'
 
@@ -48,25 +47,22 @@ export function NotificationCenter({ userId, initialUnreadCount = 0 }: Notificat
   const { data: notificationsData, refetch: refetchNotifications } = useQuery({
     queryKey: notificationsQueryKey,
     queryFn: async () => {
-      return await api.get<{
-        notifications: PaginatedResponse<Notification>
-        unreadCount: number
-      }>('/notifications', { params: { perPage: 10 } })
+      const res = await api.notifications.index({ query: { perPage: '10' } })
+      return { ...res, notifications: paginated(res.notifications) }
     },
     enabled: isOpen,
     staleTime: 30000, // 30 seconds
   })
 
-  const notifications = notificationsData?.data?.notifications.data || []
-  const unreadCount = notificationsData?.data?.unreadCount ?? initialUnreadCount
+  const notifications = notificationsData?.notifications.data || []
+  const unreadCount = notificationsData?.unreadCount ?? initialUnreadCount
 
   // Fetch unread count separately (can be used independently)
   const { data: unreadCountData } = useQuery({
     queryKey: unreadCountQueryKey,
     queryFn: async () => {
-      const res = await api.get('/notifications/unread-count')
-      const data = res.data as { unreadCount: number }
-      return data.unreadCount || 0
+      const res = await api.notifications.unreadCount({})
+      return res.count || 0
     },
     enabled: !isOpen, // Only fetch when dropdown is closed
     refetchInterval: 30000, // Refetch every 30 seconds when dropdown is closed
@@ -78,19 +74,20 @@ export function NotificationCenter({ userId, initialUnreadCount = 0 }: Notificat
   // Mark as read mutation
   const { mutate: markAsReadMutation } = useMutation({
     mutationFn: (notificationId: string) =>
-      api.post('/notifications/mark-as-read', { notificationId }),
+      api.notifications.markAsRead({ body: { notificationId } }),
     onSuccess: () => refetchNotifications(),
   })
 
   // Mark all as read mutation
   const { mutate: markAllAsReadMutation } = useMutation({
-    mutationFn: () => api.post('/notifications/mark-all-as-read'),
+    mutationFn: () => api.notifications.markAllAsRead({}),
     onSuccess: () => refetchNotifications(),
   })
 
   // Delete notification mutation
   const { mutate: deleteNotificationMutation } = useMutation({
-    mutationFn: (notificationId: string) => api.delete(`/notifications/${notificationId}`),
+    mutationFn: (notificationId: string) =>
+      api.notifications.delete({ params: { id: notificationId } }),
     onSuccess: () => refetchNotifications(),
   })
 

@@ -156,16 +156,22 @@ export default function AuditsIndex({ canReadAll, actions }: AuditsIndexProps) {
   const query = useQuery({
     queryKey: ['admin-actions', page, perPage, action, appEnv, outcome, search],
     queryFn: async () => {
-      const params = new URLSearchParams({ page: String(page), perPage: String(perPage) })
-      if (action !== ALL) params.set('action', action)
-      if (appEnv !== ALL) params.set('appEnv', appEnv)
-      if (outcome !== ALL) params.set('outcome', outcome)
-      if (search.trim()) params.set('search', search.trim())
-
-      const response = await api.get<ActionsResponse>(
-        `/audits/actions?${params.toString()}` as never,
-      )
-      return response.data as ActionsResponse
+      const response = await api.audits.actions({
+        query: {
+          page: String(page),
+          perPage: String(perPage),
+          ...(action !== ALL && { action }),
+          ...(appEnv !== ALL && { appEnv }),
+          ...(outcome !== ALL && { outcome }),
+          ...(search.trim() && { search: search.trim() }),
+        },
+      })
+      /**
+       * The rows arrive serialized, but the controller returns Lucid models, so the
+       * inferred row type is the model class (`DateTime` fields and all) rather than
+       * the JSON the client receives. `AdminActionRow` describes the wire shape.
+       */
+      return response as unknown as ActionsResponse
     },
   })
 

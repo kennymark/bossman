@@ -74,19 +74,15 @@ export default function MemberShow({ member }: MemberShowProps) {
   const { data: optionsData, isLoading: optionsLoading } = useQuery({
     queryKey: ['members', 'data-access-options'],
     queryFn: async () => {
-      const res = await api.get<{
-        data: {
-          leaseableEntities: Array<{ id: string; address: string }>
-          leases: Array<{ id: string; name: string }>
-        }
-      }>('/members/data-access-options')
-      return res.data.data
+      const res = await api.members.dataAccessOptions({})
+      return res.data
     },
     enabled: propertiesAccessMode === 'selected' || leasesAccessMode === 'selected',
   })
 
   const updateMutation = useMutation({
-    mutationFn: (payload: UpdateMemberPayload) => api.put(`/members/${member.id}`, payload),
+    mutationFn: (payload: UpdateMemberPayload) =>
+      api.members.updateMember({ params: { memberId: member.id }, body: payload }),
     onSuccess: () => {
       toast.success('Data access updated')
       router.reload()

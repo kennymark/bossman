@@ -6,6 +6,7 @@ import Lease from '#models/lease'
 import Payment from '#models/payment'
 import { getDataAccessForUser } from '#services/data_access_service'
 import LeaseTransformer from '#transformers/lease_transformer'
+import { paginationQueryValidator } from '#validators/query'
 
 /**
  * Columns `?search=` and `?sortBy=` may touch. Named here rather than taken from the
@@ -34,13 +35,20 @@ export default class LeasesController {
       }
     }
 
-    const leasesPromise = baseQuery.withPagination(params, {
-      searchColumns: LEASE_SEARCH_COLUMNS,
-      sortableColumns: LEASE_SORTABLE_COLUMNS,
-    })
     return inertia.render('leases/index', {
+      /**
+       * The query is built *and* awaited inside the callback. Starting it out here and
+       * only awaiting it in the callback left the promise floating on the initial
+       * visit — Inertia sends a placeholder for a deferred prop and never invokes the
+       * callback, so a rejection had nobody to reject to. With the dev database
+       * unreachable that surfaced as an unhandled rejection *after* the 200 had been
+       * sent, which takes the whole process down rather than failing one request.
+       */
       leases: inertia.defer(async () => {
-        const p = await leasesPromise
+        const p = await baseQuery.withPagination(params, {
+          searchColumns: LEASE_SEARCH_COLUMNS,
+          sortableColumns: LEASE_SORTABLE_COLUMNS,
+        })
         return LeaseTransformer.paginate(p.all(), p.getMeta())
       }),
       dataAccessExpired: dataAccess?.dataAccessExpired ?? false,
@@ -79,6 +87,7 @@ export default class LeasesController {
   }
 
   async payments({ response, request, params }: HttpContext) {
+    await request.validateUsing(paginationQueryValidator)
     const appEnv = request.appEnv()
     const paginationParams = await request.paginationQs()
     const payments = await Payment.query({ connection: appEnv })
@@ -91,6 +100,7 @@ export default class LeasesController {
   }
 
   async activity({ response, request, params }: HttpContext) {
+    await request.validateUsing(paginationQueryValidator)
     const paginationParams = await request.paginationQs()
     const appEnv = request.appEnv()
     const activities = await Activity.query({ connection: appEnv })

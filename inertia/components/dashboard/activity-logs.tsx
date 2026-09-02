@@ -42,8 +42,8 @@ export function ActivityLogs() {
   const { data, isLoading, error } = useQuery<{ audits: AuditLog[] }>({
     queryKey: ['recent-audits'],
     queryFn: async () => {
-      const response = await api.get('/audits/recent')
-      return response.data as { audits: AuditLog[] }
+      const response = await api.audits.recent({})
+      return response as { audits: AuditLog[] }
     },
     refetchInterval: 30000, // Refetch every 30 seconds
   })

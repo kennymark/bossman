@@ -20,16 +20,8 @@ import { Label } from '@/components/ui/label'
 import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
 import api from '@/lib/http'
 
-interface Setup2FAResponse {
-  secret: string
-  qrCode: string
-  otpAuthUrl: string
-}
-
-interface Enable2FAResponse {
-  message: string
-  recoveryCodes: string[]
-}
+/** What `/user/2fa/setup` answers with, inferred from the controller that answers it. */
+type Setup2FAResponse = Awaited<ReturnType<typeof api.twoFactor.setup>>
 
 interface TwoFactorModalProps {
   open: boolean
@@ -42,9 +34,9 @@ export function TwoFactorModal({ open, onOpenChange, onEnabled }: TwoFactorModal
   const [setupData, setSetupData] = useState<Setup2FAResponse | null>(null)
 
   const { mutate: setup2FAMutation, isPending: isSettingUp } = useMutation({
-    mutationFn: () => api.post<Setup2FAResponse>('/user/2fa/setup'),
+    mutationFn: () => api.twoFactor.setup({}),
     onSuccess: (response) => {
-      setSetupData(response.data)
+      setSetupData(response)
       toast.success('2FA setup started. Scan the QR code with your authenticator app.')
     },
     onError: (err: ServerErrorResponse) => {
@@ -58,10 +50,8 @@ export function TwoFactorModal({ open, onOpenChange, onEnabled }: TwoFactorModal
   })
 
   const { mutate: enable2FAMutation, isPending: isEnabling } = useMutation({
-    mutationFn: (values: { token: string }) =>
-      api.post<Enable2FAResponse>('/user/2fa/enable', values),
-    onSuccess: (response) => {
-      const data = response.data
+    mutationFn: (values: { token: string }) => api.twoFactor.enable({ body: values }),
+    onSuccess: (data) => {
       onEnabled?.(data.recoveryCodes)
       toast.success('2FA enabled. Save your recovery codes!', {
         description: data.recoveryCodes.join(' '),

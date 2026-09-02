@@ -26,8 +26,8 @@ export function NotificationsTab() {
   const { data: settingsData, isLoading } = useQuery({
     queryKey: ['user-settings'],
     queryFn: async () => {
-      const response = await api.get<{ settings: Record<string, unknown> | null }>('/user/settings')
-      return response.data.settings || {}
+      const response = await api.users.getSettings({})
+      return response.settings || {}
     },
   })
 
@@ -42,15 +42,9 @@ export function NotificationsTab() {
   // Notification settings mutation
   const { mutate: updateNotificationSettingsMutation, isPending } = useMutation({
     mutationFn: async (values: NotificationSettings) => {
-      const response = await api.put<{
-        message: string
-        data: { settings: Record<string, unknown> }
-      }>('/user/settings', {
-        settings: {
-          notifications: values,
-        },
+      return await api.users.updateSettings({
+        body: { settings: { notifications: values } },
       })
-      return response.data
     },
     onSuccess: (data) => {
       // Update the query cache with the new settings

@@ -6,6 +6,7 @@ import Lease from '#models/lease'
 import LeaseableEntity from '#models/leaseable_entity'
 import { getDataAccessForUser } from '#services/data_access_service'
 import LeaseableEntityTransformer from '#transformers/leaseable_entity_transformer'
+import { paginationQueryValidator } from '#validators/query'
 
 /**
  * Columns `?search=` and `?sortBy=` may touch. Named here rather than taken from the
@@ -37,14 +38,14 @@ export default class LeaseableEntitiesController {
       }
     }
 
-    const entitiesPromise = baseQuery.withPagination(params, {
-      searchColumns: ENTITY_SEARCH_COLUMNS,
-      sortableColumns: ENTITY_SORTABLE_COLUMNS,
-      defaultSort: 'address',
-    })
     return inertia.render('properties/index', {
+      /** Built and awaited inside the callback — see the note in `leases_controller`. */
       leaseableEntities: inertia.defer(async () => {
-        const p = await entitiesPromise
+        const p = await baseQuery.withPagination(params, {
+          searchColumns: ENTITY_SEARCH_COLUMNS,
+          sortableColumns: ENTITY_SORTABLE_COLUMNS,
+          defaultSort: 'address',
+        })
         return LeaseableEntityTransformer.paginate(p.all(), p.getMeta())
       }),
       dataAccessExpired: dataAccess?.dataAccessExpired ?? false,
@@ -87,6 +88,7 @@ export default class LeaseableEntitiesController {
   }
 
   async leases({ request, params, response }: HttpContext) {
+    await request.validateUsing(paginationQueryValidator)
     const appEnv = request.appEnv()
     const paginationParams = await request.paginationQs()
     const leases = await Lease.query({ connection: appEnv })
@@ -99,6 +101,7 @@ export default class LeaseableEntitiesController {
   }
 
   async activity({ request, params, response }: HttpContext) {
+    await request.validateUsing(paginationQueryValidator)
     const appEnv = request.appEnv()
     const paginationParams = await request.paginationQs()
     const activities = await Activity.query({ connection: appEnv })

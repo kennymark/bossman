@@ -25,11 +25,6 @@ import { dateTimeFormatter } from '@/lib/date'
 import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
 import api from '@/lib/http'
 
-interface Enable2FAResponse {
-  message: string
-  recoveryCodes: string[]
-}
-
 export function TwoFactorTab() {
   const page = usePage()
   const user = page.props.user as {
@@ -51,7 +46,7 @@ export function TwoFactorTab() {
   })
 
   const { mutate: disable2FAMutation, isPending: isDisabling } = useMutation({
-    mutationFn: (values: { password: string }) => api.post('/user/2fa/disable', values),
+    mutationFn: (values: { password: string }) => api.twoFactor.disable({ body: values }),
     onSuccess: () => {
       disableFormik.resetForm()
       toast.success('2FA disabled successfully')
@@ -73,9 +68,9 @@ export function TwoFactorTab() {
   })
 
   const { mutate: regenerateCodesMutation, isPending: isRegenerating } = useMutation({
-    mutationFn: (values: { password: string }) => api.post('/user/2fa/recovery-codes', values),
-    onSuccess: (response) => {
-      const data = response.data as Enable2FAResponse
+    mutationFn: (values: { password: string }) =>
+      api.twoFactor.regenerateRecoveryCodes({ body: values }),
+    onSuccess: (data) => {
       setShowRecoveryCodes(data.recoveryCodes)
       regenerateFormik.resetForm()
       toast.success('Recovery codes regenerated successfully!')

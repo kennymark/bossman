@@ -110,11 +110,13 @@ export function TeamInvitationsInviteButton() {
       allowedPages: PageKey[]
       enableProdAccess: boolean
     }) =>
-      api.post('/invitations', {
-        email: payload.email,
-        role: payload.role,
-        allowedPages: payload.allowedPages,
-        enableProdAccess: payload.enableProdAccess,
+      api.teamInvitations.invite({
+        body: {
+          email: payload.email,
+          role: payload.role,
+          allowedPages: payload.allowedPages,
+          enableProdAccess: payload.enableProdAccess,
+        },
       }),
     onSuccess: async () => {
       setInviteEmail('')
@@ -276,8 +278,9 @@ export function TeamInvitations() {
   const invitationsQuery = useQuery({
     queryKey: ['dashboard-invitations'],
     queryFn: async () => {
-      const res = await api.get<{ data: { invitations: InvitationRow[] } }>('/members/invitations')
-      return res.data.data
+      const res = await api.members.invitations({})
+      /** Serialized on the wire; the inferred row type is the Lucid model. */
+      return res.data as unknown as { invitations: InvitationRow[] }
     },
   })
 
@@ -293,9 +296,9 @@ export function TeamInvitations() {
       allowedPages: PageKey[]
       enableProdAccess: boolean
     }) => {
-      await api.put(`/invitations/${invitationId}`, {
-        allowedPages,
-        enableProdAccess,
+      await api.teamInvitations.updateInvitation({
+        params: { invitationId },
+        body: { allowedPages, enableProdAccess },
       })
     },
     onSuccess: () => {
@@ -318,10 +321,7 @@ export function TeamInvitations() {
 
   const copyInviteLinkMutation = useMutation({
     mutationFn: async (invitationId: string) => {
-      const res = await api.post<{ inviteLink: string }>(
-        `/invitations/${invitationId}/invite-link` as Parameters<typeof api.post>[0],
-      )
-      return res.data
+      return await api.teamInvitations.inviteLink({ params: { invitationId } })
     },
     onSuccess: async (data) => {
       if (data?.inviteLink) {
@@ -336,7 +336,7 @@ export function TeamInvitations() {
 
   const deleteInvitationMutation = useMutation({
     mutationFn: async (invitationId: string) => {
-      await api.delete(`/invitations/${invitationId}`)
+      await api.teamInvitations.destroy({ params: { invitationId } })
     },
     onSuccess: () => {
       toast.success('Invitation deleted')

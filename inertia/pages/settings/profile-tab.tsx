@@ -38,10 +38,10 @@ export function ProfileTab() {
 
   // Profile update mutation
   const { mutate: updateProfileMutation, isPending: isUpdatingProfile } = useMutation({
-    mutationFn: (values: ProfileValues) => api.put<{ message?: string }>('/user/profile', values),
+    mutationFn: (values: ProfileValues) => api.users.updateProfile({ body: values }),
     onSuccess: (response) => {
       const message =
-        response.data?.message ||
+        response?.message ||
         'Profile updated successfully! A verification email has been sent to your new email address.'
       toast.success(message)
       router.reload()
@@ -54,15 +54,8 @@ export function ProfileTab() {
 
   // Avatar upload mutation
   const { mutate: uploadAvatarMutation, isPending: isUploadingAvatar } = useMutation({
-    mutationFn: (file: File) => {
-      const formData = new FormData()
-      formData.append('avatar', file)
-      return api.post('/user/avatar', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-    },
+    /** Tuyau detects the File and sends the body as multipart on its own. */
+    mutationFn: (file: File) => api.users.uploadAvatar({ body: { avatar: file } }),
     onSuccess: () => {
       toast.success('Avatar uploaded successfully!')
       setAvatarPreview(null)
@@ -76,7 +69,7 @@ export function ProfileTab() {
 
   // Avatar delete mutation
   const { mutate: deleteAvatarMutation, isPending: isDeletingAvatar } = useMutation({
-    mutationFn: () => api.delete('/user/avatar'),
+    mutationFn: () => api.users.deleteAvatar({}),
     onSuccess: () => {
       toast.success('Avatar deleted successfully!')
       setAvatarPreview(null)

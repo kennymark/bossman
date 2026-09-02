@@ -21,7 +21,7 @@ export function RefreshRailwayButton({ onRefreshed }: RefreshRailwayButtonProps)
   const queryClient = useQueryClient()
 
   const { mutate, isPending } = useMutation({
-    mutationFn: () => api.post('/railway/refresh', {}),
+    mutationFn: () => api.railway.refresh({}),
     onSuccess: async () => {
       /** The client holds its own copy too, so both layers have to be dropped. */
       await queryClient.invalidateQueries({ queryKey: ['railway'] })

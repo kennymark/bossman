@@ -1,13 +1,11 @@
 import router from '@adonisjs/core/services/router'
-import vine from '@vinejs/vine'
 
-import { recordAdminAction } from '#services/admin_audit_service'
-import { canSwitchEnv } from '#services/app_env_service'
 import { middleware } from '#start/kernel'
 
 import { apiThrottle } from '../limiter.js'
 
 const AnalyticsController = () => import('#controllers/analytics_controller')
+const AppEnvController = () => import('#controllers/app_env_controller')
 const ApiAccessController = () => import('#controllers/api_access_controller')
 const DashboardController = () => import('#controllers/dashboard_controller')
 const DbBackupsController = () => import('#controllers/db_backups_controller')
@@ -97,46 +95,8 @@ router
     /** Drops the cached Railway reads; the next page load goes back to the API. */
     router.post('/railway/refresh', [RailwayController, 'refresh'])
 
-    router.get('update-env', ({ request, response }) => {
-      return response.ok({ appEnv: request.appEnv() })
-    })
-    router.put('update-env', async (ctx) => {
-      const { request, session, response, auth } = ctx
-      const updateEnvValidator = vine.create(
-        vine.object({
-          appEnv: vine.enum(['dev', 'prod'] as const),
-        }),
-      )
-      const { appEnv: requestedEnv } = await request.validateUsing(updateEnvValidator)
-      const user = auth.getUserOrFail()
-
-      /**
-       * Only god admins may switch. Everyone else is pinned to the environment their
-       * record allows, so asking for one they cannot use is rejected rather than
-       * silently downgraded — a silent downgrade previously hid the fact that any
-       * user could put 'prod' into their own session.
-       */
-      if (!canSwitchEnv(user)) {
-        return response.forbidden({
-          error: 'You are not allowed to change environments.',
-          appEnv: request.appEnv(),
-        })
-      }
-
-      const previous = request.appEnv()
-      session.put('appEnv', requestedEnv)
-
-      /** Switching into prod is worth a line in the log, even for a god admin. */
-      if (previous !== requestedEnv) {
-        await recordAdminAction(ctx, {
-          action: 'env.switch',
-          appEnv: requestedEnv,
-          metadata: { from: previous, to: requestedEnv },
-        })
-      }
-
-      return response.ok({ message: 'Environment updated successfully', appEnv: requestedEnv })
-    })
+    router.get('update-env', [AppEnvController, 'show']).as('app_env.show')
+    router.put('update-env', [AppEnvController, 'update']).as('app_env.update')
   })
   .prefix('api/v1')
   /**

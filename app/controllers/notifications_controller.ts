@@ -1,18 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import vine from '@vinejs/vine'
 
 import Notification from '#models/notification'
 import notificationService from '#services/notification_service'
-
-const markAsReadValidator = vine.create(
-  vine.object({
-    notificationId: vine.string(),
-  }),
-)
+import { markAsReadValidator } from '#validators/notification'
+import { paginationQueryValidator } from '#validators/query'
 
 export default class NotificationsController {
   async index({ auth, request }: HttpContext) {
     const user = auth.getUserOrFail()
+    await request.validateUsing(paginationQueryValidator)
     const params = await request.paginationQs()
     const notifications = await Notification.query()
       .where('userId', user.id)

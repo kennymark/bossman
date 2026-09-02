@@ -96,8 +96,7 @@ export default function LeasesIndex({
 
   const { data: stats } = useQuery({
     queryKey: ['leases-stats2'],
-    queryFn: async () => await api.get<Stats>('/leases/stats'),
-    select: (data) => data?.data,
+    queryFn: async () => await api.leases.stats({}),
     enabled: isGodAdmin,
   })
 

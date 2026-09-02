@@ -28,7 +28,7 @@ import { DatePresetPicker } from '@/components/ui/date-preset-picker'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SimpleGrid } from '@/components/ui/simplegrid'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import api from '@/lib/http'
+import api, { paginated } from '@/lib/http'
 
 const ANALYTICS_DATE_PRESETS = [
   { label: 'Last 7 days', getRange: () => ({ start: subDays(new Date(), 6), end: new Date() }) },
@@ -86,54 +86,52 @@ export default function AnalyticsIndex(_props: AnalyticsIndexProps) {
   const { data: orgsStats, isPending: orgsStatsLoading } = useQuery({
     queryKey: ['analytics-orgs-stats', dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
-      const res = await api.get<OrgsStats>('/analytics/orgs/stats', {
-        params: { startDate: dateRange.startDate, endDate: dateRange.endDate },
-      })
-      return res.data
+      return await api.analytics.orgsStats({ query: dateRange })
     },
   })
 
   const { data: usersStats, isPending: usersStatsLoading } = useQuery({
     queryKey: ['analytics-users-stats', dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
-      const res = await api.get<GrowthStats>('/analytics/users/stats', {
-        params: { startDate: dateRange.startDate, endDate: dateRange.endDate },
-      })
-      return res.data
+      return await api.analytics.usersStats({ query: dateRange })
     },
   })
 
   const { data: leasesStats, isPending: leasesStatsLoading } = useQuery({
     queryKey: ['analytics-leases-stats', dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
-      const res = await api.get<GrowthStats>('/analytics/leases/stats', {
-        params: { startDate: dateRange.startDate, endDate: dateRange.endDate },
-      })
-      return res.data
+      return await api.analytics.leasesStats({ query: dateRange })
     },
   })
 
   const { data: maintenanceStats, isPending: maintenanceStatsLoading } = useQuery({
     queryKey: ['analytics-maintenance-stats', dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
-      const res = await api.get<GrowthStats>('/analytics/maintenance/stats', {
-        params: { startDate: dateRange.startDate, endDate: dateRange.endDate },
-      })
-      return res.data
+      return await api.analytics.maintenanceStats({ query: dateRange })
     },
   })
 
   const { data: activityStats, isPending: activityStatsLoading } = useQuery({
     queryKey: ['analytics-activity-stats', dateRange.startDate, dateRange.endDate],
     queryFn: async () => {
-      const res = await api.get<GrowthStats>('/analytics/activity/stats', {
-        params: { startDate: dateRange.startDate, endDate: dateRange.endDate },
-      })
-      return res.data
+      return await api.analytics.activityStats({ query: dateRange })
     },
   })
 
-  const entitiesEndpoint = entityType && entitiesPeriod ? `/analytics/${entityType}/entities` : null
+  /**
+   * One endpoint per entity, looked up rather than built by string interpolation. The
+   * URL used to be assembled from `entityType` and reached through a `@ts-ignore`,
+   * because a computed path cannot be checked against the route list.
+   */
+  const ENTITY_ENDPOINTS = {
+    orgs: api.analytics.orgsEntities,
+    users: api.analytics.usersEntities,
+    leases: api.analytics.leasesEntities,
+    maintenance: api.analytics.maintenanceEntities,
+    activity: api.analytics.activityEntities,
+  } satisfies Record<EntityType, unknown>
+
+  const entitiesEndpoint = entityType && entitiesPeriod ? ENTITY_ENDPOINTS[entityType] : null
 
   const { data: entitiesData, isPending: entitiesLoading } = useQuery({
     queryKey: [
@@ -143,16 +141,15 @@ export default function AnalyticsIndex(_props: AnalyticsIndexProps) {
       entitiesPeriod?.endDate,
     ],
     queryFn: async () => {
-      if (!entitiesPeriod || !entityType) return null
-      // @ts-ignore
-      const res = await api.get<PaginatedResponse<unknown>>(entitiesEndpoint!, {
-        params: {
+      if (!entitiesPeriod || !entityType || !entitiesEndpoint) return null
+      const res = await entitiesEndpoint({
+        query: {
           startDate: entitiesPeriod.startDate,
           endDate: entitiesPeriod.endDate,
-          perPage: 50,
+          perPage: '50',
         },
       })
-      return res.data
+      return paginated(res) as unknown as PaginatedResponse<unknown>
     },
     enabled: !!entitiesEndpoint && entitiesSheetOpen,
   })

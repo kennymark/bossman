@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 
 import Activity from '#models/activity'
+import { paginationQueryValidator } from '#validators/query'
 
 export default class DashboardController {
   async stats({ request, response, logger }: HttpContext) {
@@ -73,6 +74,7 @@ export default class DashboardController {
 
   async recentActivity({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(paginationQueryValidator)
     const paginationParams = await request.paginationQs()
     const activities = await Activity.query({ connection: appEnv })
       .orderBy('created_at', 'desc')

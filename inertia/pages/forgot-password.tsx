@@ -17,7 +17,7 @@ interface ForgotPasswordValues {
 
 export default function ForgotPassword() {
   const forgotPasswordMutation = useMutation({
-    mutationFn: (values: ForgotPasswordValues) => api.post('/auth/forgot-password', values),
+    mutationFn: (values: ForgotPasswordValues) => api.auth.forgotPassword({ body: values }),
     onSuccess: () => {
       toast.success('Reset email sent!', {
         description: 'Please check your inbox for instructions.',

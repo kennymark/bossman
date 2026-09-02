@@ -22,6 +22,7 @@ import StripeService from '#services/stripe_service'
 import OrgTransformer from '#transformers/org_transformer'
 import type { AppCountries } from '#types/extra'
 import { createCustomerUserValidator, updateOrgValidator } from '#validators/org'
+import { paginationQueryValidator } from '#validators/query'
 
 export default class OrgsController {
   async index({ request, inertia }: HttpContext) {
@@ -362,6 +363,7 @@ export default class OrgsController {
   }
 
   async leases({ request, params, response }: HttpContext) {
+    await request.validateUsing(paginationQueryValidator)
     const appEnv = request.appEnv()
     const paginationParams = await request.paginationQs()
 
@@ -376,6 +378,7 @@ export default class OrgsController {
   }
 
   async properties({ request, params, response }: HttpContext) {
+    await request.validateUsing(paginationQueryValidator)
     const appEnv = request.appEnv()
     const paginationParams = await request.paginationQs()
     const properties = await Property.query({ connection: appEnv })
@@ -386,6 +389,7 @@ export default class OrgsController {
   }
 
   async activities({ request, params, response }: HttpContext) {
+    await request.validateUsing(paginationQueryValidator)
     const appEnv = request.appEnv()
     const paginationParams = await request.paginationQs()
 

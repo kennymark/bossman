@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PasswordInput } from '@/components/ui/password_input'
-import { type ServerErrorResponse, serverErrorResponder } from '@/lib/error'
+import { type ServerErrorResponse, serverErrorBody, serverErrorResponder } from '@/lib/error'
 import api from '@/lib/http'
 
 interface LoginValues {
@@ -59,9 +59,9 @@ export default function Login({ errors, isDev }: LoginProps) {
   }
 
   const { mutate: loginMutation, isPending } = useMutation({
-    mutationFn: (values: LoginValues) => api.post<LoginResponse>('/auth/login', values),
+    mutationFn: (values: LoginValues) => api.auth.login({ body: values }),
     onSuccess: (response) => {
-      const data = (response.data as LoginResponse).data
+      const data = (response as LoginResponse).data
 
       if (data?.requiresTwoFactor) {
         setStep('code')
@@ -81,9 +81,9 @@ export default function Login({ errors, isDev }: LoginProps) {
 
   const { mutate: challengeMutation, isPending: isVerifying } = useMutation({
     mutationFn: (payload: { token?: string; recoveryCode?: string }) =>
-      api.post<ChallengeResponse>('/auth/2fa/challenge', payload),
+      api.auth.twoFactorChallenge({ body: payload }),
     onSuccess: (response) => {
-      const data = (response.data as ChallengeResponse).data
+      const data = (response as ChallengeResponse).data
       const remaining = data?.recoveryCodesRemaining
 
       toast.success('Welcome back!', {
@@ -99,7 +99,7 @@ export default function Login({ errors, isDev }: LoginProps) {
       toast.error(message || 'That code was not accepted')
 
       /** The challenge is spent — send them back to the password step. */
-      if (err.response?.data?.type === 'challenge_expired') {
+      if (serverErrorBody(err)?.type === 'challenge_expired') {
         setStep('password')
         setCode('')
         setUseRecoveryCode(false)

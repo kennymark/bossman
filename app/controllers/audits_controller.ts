@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import AdminAction from '#models/admin_action'
 import { ADMIN_ACTIONS } from '#services/admin_audit_service'
 import { MAX_PER_PAGE } from '#utils/vine'
+import { auditActionsValidator, auditsIndexValidator } from '#validators/query'
 
 /**
  * Who may read other people's actions.
@@ -35,6 +36,7 @@ export default class AuditsController {
    */
   async actions({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
+    await request.validateUsing(auditActionsValidator)
     const params = await request.paginationQs()
     const page = params.page ?? 1
     const perPage = Math.min(params.perPage ?? 25, MAX_PER_PAGE)
@@ -101,6 +103,7 @@ export default class AuditsController {
   /** Model field diffs from adonis-auditing. */
   async index({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
+    await request.validateUsing(auditsIndexValidator)
     const page = Math.max(Number(request.qs().page) || 1, 1)
     /** Clamped so a caller cannot ask for an unbounded result set. */
     const perPage = Math.min(Math.max(Number(request.qs().perPage) || 20, 1), MAX_PER_PAGE)

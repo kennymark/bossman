@@ -27,14 +27,16 @@ interface JoinTeamProps {
   error?: string
 }
 
+type AcceptBody = Parameters<typeof api.teamInvitations.accept>[0]['body']
+
 const INVITE_CONTEXT_NAME = 'the dashboard'
 
 export default function JoinTeam(props: JoinTeamProps) {
   const acceptMutation = useMutation({
-    mutationFn: (payload: Record<string, unknown>) => api.post('/team-invitations/accept', payload),
+    mutationFn: (payload: AcceptBody) => api.teamInvitations.accept({ body: payload }),
     onSuccess: (response) => {
       toast.success('You have joined.')
-      const redirectTo = (response.data as { redirectTo?: string }).redirectTo
+      const redirectTo = (response as { redirectTo?: string }).redirectTo
       router.visit(redirectTo || '/teams')
     },
     onError: (err: ServerErrorResponse) => {
@@ -132,7 +134,14 @@ export default function JoinTeam(props: JoinTeamProps) {
                 className='w-full'
                 isLoading={acceptMutation.isPending}
                 loadingText='Joining…'
-                onClick={() => acceptMutation.mutate({ token: props.token })}>
+                /**
+                 * Sends only the token, while the endpoint's validator also requires
+                 * `fullName`, `password` and `confirmPassword`. The request is dead
+                 * either way: this button renders only when the viewer is signed in,
+                 * and `accept` refuses every authenticated caller before it validates.
+                 * Left behaving exactly as it did rather than quietly changing it.
+                 */
+                onClick={() => acceptMutation.mutate({ token: props.token } as AcceptBody)}>
                 Join {INVITE_CONTEXT_NAME}
               </Button>
             )}

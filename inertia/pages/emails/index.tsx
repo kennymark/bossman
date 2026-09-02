@@ -4,6 +4,7 @@ import { IconChevronLeft, IconChevronRight, IconMail } from '@tabler/icons-react
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import type { ResendEmail, ResendEmailListItem } from '#services/resend_service'
 import type { Column } from '#types/extra'
 import { timeAgo } from '#utils/date'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
@@ -24,52 +25,6 @@ import { dateFormatter } from '@/lib/date'
 import api from '@/lib/http'
 
 /** Resend list item (snake_case from API). */
-type ResendEmailListItem = {
-  id: string
-  to: string[]
-  from: string
-  created_at: string
-  subject: string
-  last_event:
-    | 'delivered'
-    | 'failed'
-    | 'scheduled'
-    | 'sending'
-    | 'sent'
-    | 'bounced'
-    | 'opened'
-    | 'clicked'
-    | 'complained'
-  bcc: string[] | null
-  cc: string[] | null
-  reply_to: string | null
-  scheduled_at: string | null
-}
-
-/** Resend list response. */
-type ResendListResponse = {
-  object: 'list'
-  has_more: boolean
-  data: ResendEmailListItem[]
-}
-
-/** Resend single email (full). */
-type ResendEmail = {
-  object: 'email'
-  id: string
-  to: string[]
-  from: string
-  created_at: string
-  subject: string
-  html: string | null
-  text: string | null
-  last_event: string
-  bcc?: string[]
-  cc?: string[]
-  reply_to?: string | null
-  scheduled_at?: string | null
-}
-
 interface EmailsIndexProps extends SharedProps {
   emailId?: string
 }
@@ -190,14 +145,13 @@ export default function EmailsIndex({ emailId: initialEmailId }: EmailsIndexProp
   const { data: emailsList, isLoading: emailsListLoading } = useQuery({
     queryKey: ['emails', 'list', limit, cursor.after, cursor.before],
     queryFn: async () => {
-      const res = await api.get<ResendListResponse>('/emails', {
-        params: {
-          limit,
+      return await api.emails.index({
+        query: {
+          limit: String(limit),
           ...(cursor.after && { after: cursor.after }),
           ...(cursor.before && { before: cursor.before }),
         },
       })
-      return res.data
     },
   })
 
@@ -205,8 +159,7 @@ export default function EmailsIndex({ emailId: initialEmailId }: EmailsIndexProp
     queryKey: ['emails', selectedEmailId],
     queryFn: async () => {
       if (!selectedEmailId) return null
-      const res = await api.get<ResendEmail>(`/emails/${selectedEmailId}`)
-      return res.data
+      return await api.emails.show({ params: { id: selectedEmailId } })
     },
     enabled: !!selectedEmailId,
   })

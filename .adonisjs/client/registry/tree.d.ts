@@ -128,6 +128,10 @@ export interface ApiDefinition {
     serviceDeploy: typeof routes['railway.service_deploy']
     refresh: typeof routes['railway.refresh']
   }
+  appEnv: {
+    show: typeof routes['app_env.show']
+    update: typeof routes['app_env.update']
+  }
   teamsPage: {
     index: typeof routes['teams_page.index']
     show: typeof routes['teams_page.show']

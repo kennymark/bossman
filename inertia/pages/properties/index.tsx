@@ -82,8 +82,7 @@ export default function LeaseableEntitiesIndex({
   const { data: stats } = useQuery({
     queryKey: ['leaseable-entities-stats'],
     queryFn: async () => {
-      const res = await api.get<LeaseableEntitiesStats>('/leaseable-entities/stats')
-      return res.data
+      return await api.leaseableEntities.stats({})
     },
     enabled: isGodAdmin,
   })

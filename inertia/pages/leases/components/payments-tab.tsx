@@ -5,7 +5,7 @@ import { DataTable } from '@/components/dashboard/data-table'
 import { AppCard } from '@/components/ui/app-card'
 import { usePaginatedTab } from '@/hooks/use-paginated-tab'
 import { dateFormatter } from '@/lib/date'
-import api from '@/lib/http'
+import api, { pageQuery, paginated } from '@/lib/http'
 
 const columns: Column<RawPayment>[] = [
   {
@@ -50,11 +50,9 @@ export function PaymentsTab({ leaseId }: PaymentsTabProps) {
     loading,
     pagination,
   } = usePaginatedTab<RawPayment>(['lease-payments', leaseId], (page, perPage) =>
-    api
-      .get<PaginatedResponse<RawPayment>>(`/leases/${leaseId}/payments`, {
-        params: { page, perPage },
-      })
-      .then((r) => r.data),
+    api.leases
+      .payments({ params: { id: leaseId }, query: pageQuery(page, perPage) })
+      .then((r) => paginated(r) as unknown as PaginatedResponse<RawPayment>),
   )
 
   return (

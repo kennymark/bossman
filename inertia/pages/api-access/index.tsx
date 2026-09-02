@@ -83,7 +83,7 @@ function relative(value: string | null) {
 export default function ApiAccessPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['api-access-stats'],
-    queryFn: async () => (await api.get<ApiAccessStats>('/api-access/stats')).data,
+    queryFn: async () => await api.apiAccess.stats({}),
   })
 
   const totals = data?.totals
@@ -92,7 +92,7 @@ export default function ApiAccessPage() {
     <DashboardPage
       title='API & MCP access'
       description='Applications connected through Togetha Connect, and the access tokens they hold.'>
-      {data?.unavailable && (
+      {Boolean(data && 'unavailable' in data && data.unavailable) && (
         <AppCard title='Not available here'>
           <div className='flex items-center gap-3 text-sm text-muted-foreground'>
             <IconAlertTriangle className='h-4 w-4 text-amber-500' />
@@ -161,7 +161,7 @@ export default function ApiAccessPage() {
             <p className='text-sm text-muted-foreground'>Loading…</p>
           ) : data?.byApplication.length ? (
             <div className='divide-y'>
-              {data.byApplication.map((row) => (
+              {data.byApplication.map((row: ApplicationRow) => (
                 <div key={row.client} className='flex items-center justify-between gap-3 py-3'>
                   <div className='min-w-0'>
                     <p className='truncate text-sm font-medium'>{row.client}</p>
@@ -186,7 +186,7 @@ export default function ApiAccessPage() {
             <p className='text-sm text-muted-foreground'>Loading…</p>
           ) : data?.byScope.length ? (
             <div className='divide-y'>
-              {data.byScope.map((row) => (
+              {data.byScope.map((row: ScopeRow) => (
                 <div key={row.scope} className='flex items-start justify-between gap-3 py-3'>
                   <div className='min-w-0'>
                     <p className='text-sm font-medium'>{row.scope}</p>

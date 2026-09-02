@@ -78,8 +78,7 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
 
   const { data: banStatus, refetch: refetchBanStatus } = useQuery({
     queryKey: ['org', id, 'ban-status'],
-    queryFn: () => api.get<{ isBanned: boolean }>(`/orgs/${id}/ban-status`),
-    select: (res) => res?.data,
+    queryFn: () => api.orgActions.getBanStatus({ params: { orgId: id } }),
   })
 
   const handleTabChange = (value: string) => {
@@ -88,7 +87,7 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
 
   const { mutate: banUser, isPending: isBanning } = useMutation({
     mutationFn: (values: typeof banUserFormik.values) =>
-      api.post(`/orgs/${id}/actions/ban-user`, values),
+      api.orgActions.banUser({ params: { orgId: id }, body: values }),
     onSuccess: () => {
       setBanUserSheetOpen(false)
       banUserFormik.resetForm()
@@ -116,18 +115,18 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
   })
 
   const unbanUserMutation = useMutation({
-    mutationFn: () => api.post(`/orgs/${id}/actions/unban-user`, {}),
+    mutationFn: () => api.orgActions.unbanUser({ params: { orgId: id } }),
     onSuccess: () => {
       refetchBanStatus()
       toast.success('User unbanned successfully.')
     },
-    onError: (err: { response?: { data?: { message?: string } } }) => {
-      toast.error(err?.response?.data?.message ?? 'Failed to unban user.')
+    onError: (err: ServerErrorResponse) => {
+      toast.error(serverErrorResponder(err) || 'Failed to unban user.')
     },
   })
 
   const makeFavouriteMutation = useMutation({
-    mutationFn: () => api.post(`/orgs/${id}/actions/make-favourite`, {}),
+    mutationFn: () => api.orgActions.makeFavourite({ params: { orgId: id } }),
     onSuccess: () => {
       router.reload()
       toast.success('Marked as favourite.')
@@ -138,7 +137,7 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
   })
 
   const undoFavouriteMutation = useMutation({
-    mutationFn: () => api.post(`/orgs/${id}/actions/undo-favourite`, {}),
+    mutationFn: () => api.orgActions.undoFavourite({ params: { orgId: id } }),
     onSuccess: () => {
       router.reload()
       toast.success('Removed from favourites.')
@@ -149,7 +148,7 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
   })
 
   const makeTestAccountMutation = useMutation({
-    mutationFn: () => api.post(`/orgs/${id}/actions/make-test-account`, {}),
+    mutationFn: () => api.orgActions.makeTestAccount({ params: { orgId: id } }),
     onSuccess: () => {
       router.reload()
       toast.success('Marked as test account.')
@@ -160,7 +159,7 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
   })
 
   const undoTestAccountMutation = useMutation({
-    mutationFn: () => api.post(`/orgs/${id}/actions/undo-test-account`, {}),
+    mutationFn: () => api.orgActions.undoTestAccount({ params: { orgId: id } }),
     onSuccess: () => {
       router.reload()
       toast.success('Removed test account flag.')
@@ -171,14 +170,10 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
   })
 
   const toggleSalesAccountMutation = useMutation({
-    mutationFn: () =>
-      api.post<{ message: string; isSalesOrg: boolean }>(
-        `/orgs/${id}/actions/toggle-sales-account`,
-        {},
-      ),
+    mutationFn: () => api.orgActions.toggleSalesAccount({ params: { orgId: id } }),
     onSuccess: (res) => {
       router.reload()
-      toast.success(res?.data?.message ?? 'Updated.')
+      toast.success(res?.message ?? 'Updated.')
     },
     onError: (err: ServerErrorResponse) => {
       toast.error(serverErrorResponder(err) || 'Failed to update.')
@@ -186,7 +181,7 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
   })
 
   const requestDeleteCustomUserMutation = useMutation({
-    mutationFn: () => api.post(`/orgs/${id}/actions/request-delete-custom-user`, {}),
+    mutationFn: () => api.orgActions.requestDeleteCustomUser({ params: { orgId: id } }),
     onSuccess: () => {
       setRequestDeleteDialogOpen(false)
       toast.success(

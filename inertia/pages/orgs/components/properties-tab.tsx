@@ -3,7 +3,7 @@ import type { RawProperty } from '#types/model-types'
 import { DataTable } from '@/components/dashboard/data-table'
 import { AppCard } from '@/components/ui/app-card'
 import { usePaginatedTab } from '@/hooks/use-paginated-tab'
-import api from '@/lib/http'
+import api, { pageQuery, paginated } from '@/lib/http'
 
 const columns: Column<RawProperty>[] = [
   {
@@ -33,11 +33,9 @@ export function PropertiesTab({ orgId }: PropertiesTabProps) {
     loading,
     pagination,
   } = usePaginatedTab<RawProperty>(['org-properties', orgId], (page, perPage) =>
-    api
-      .get<PaginatedResponse<RawProperty>>(`/orgs/${orgId}/properties`, {
-        params: { page, perPage },
-      })
-      .then((r) => r.data),
+    api.orgs
+      .properties({ params: { id: orgId }, query: pageQuery(page, perPage) })
+      .then((r) => paginated(r) as unknown as PaginatedResponse<RawProperty>),
   )
 
   return (

@@ -6,6 +6,7 @@ import Lease from '#models/lease'
 import MaintenanceRequest from '#models/maintenance_request'
 import Org from '#models/org'
 import TogethaUser from '#models/togetha_user'
+import { analyticsEntitiesValidator, analyticsRangeValidator } from '#validators/query'
 
 type DateRange = { startDate: string; endDate: string }
 
@@ -50,6 +51,7 @@ export default class AnalyticsController {
   /** Orgs stats and growth (never includes test accounts). */
   async orgsStats({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsRangeValidator)
     const { startDate, endDate } = parseDateRange(request)
     const conn = db.connection(appEnv)
 
@@ -101,6 +103,7 @@ export default class AnalyticsController {
   /** Orgs created in a date range (for bar click; never includes test accounts). */
   async orgsEntities({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsEntitiesValidator)
     const startDate = request.input('startDate', '')
     const endDate = request.input('endDate', '')
     const page = Number(request.input('page', 1))
@@ -121,6 +124,7 @@ export default class AnalyticsController {
   /** Togetha users stats and growth. */
   async usersStats({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsRangeValidator)
     const { startDate, endDate } = parseDateRange(request)
     const conn = db.connection(appEnv)
 
@@ -149,6 +153,7 @@ export default class AnalyticsController {
 
   async usersEntities({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsEntitiesValidator)
     const startDate = request.input('startDate', '')
     const endDate = request.input('endDate', '')
     const page = Number(request.input('page', 1))
@@ -166,6 +171,7 @@ export default class AnalyticsController {
   /** Leases stats and growth (by created_at). */
   async leasesStats({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsRangeValidator)
     const { startDate, endDate } = parseDateRange(request)
     const conn = db.connection(appEnv)
 
@@ -194,6 +200,7 @@ export default class AnalyticsController {
 
   async leasesEntities({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsEntitiesValidator)
     const startDate = request.input('startDate', '')
     const endDate = request.input('endDate', '')
     const page = Number(request.input('page', 1))
@@ -211,6 +218,7 @@ export default class AnalyticsController {
   /** Maintenance requests stats and growth. */
   async maintenanceStats({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsRangeValidator)
     const { startDate, endDate } = parseDateRange(request)
     const conn = db.connection(appEnv)
 
@@ -239,6 +247,7 @@ export default class AnalyticsController {
 
   async maintenanceEntities({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsEntitiesValidator)
     const startDate = request.input('startDate', '')
     const endDate = request.input('endDate', '')
     const page = Number(request.input('page', 1))
@@ -256,6 +265,7 @@ export default class AnalyticsController {
   /** Activity stats and growth. */
   async activityStats({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsRangeValidator)
     const { startDate, endDate } = parseDateRange(request)
     const conn = db.connection(appEnv)
 
@@ -284,6 +294,7 @@ export default class AnalyticsController {
 
   async activityEntities({ request, response }: HttpContext) {
     const appEnv = request.appEnv()
+    await request.validateUsing(analyticsEntitiesValidator)
     const startDate = request.input('startDate', '')
     const endDate = request.input('endDate', '')
     const page = Number(request.input('page', 1))

@@ -420,6 +420,18 @@ const routes = {
     tokens: [{"old":"/api/v1/railway/refresh","type":0,"val":"api","end":""},{"old":"/api/v1/railway/refresh","type":0,"val":"v1","end":""},{"old":"/api/v1/railway/refresh","type":0,"val":"railway","end":""},{"old":"/api/v1/railway/refresh","type":0,"val":"refresh","end":""}],
     types: placeholder as Registry['railway.refresh']['types'],
   },
+  'app_env.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/update-env',
+    tokens: [{"old":"/api/v1/update-env","type":0,"val":"api","end":""},{"old":"/api/v1/update-env","type":0,"val":"v1","end":""},{"old":"/api/v1/update-env","type":0,"val":"update-env","end":""}],
+    types: placeholder as Registry['app_env.show']['types'],
+  },
+  'app_env.update': {
+    methods: ["PUT"],
+    pattern: '/api/v1/update-env',
+    tokens: [{"old":"/api/v1/update-env","type":0,"val":"api","end":""},{"old":"/api/v1/update-env","type":0,"val":"v1","end":""},{"old":"/api/v1/update-env","type":0,"val":"update-env","end":""}],
+    types: placeholder as Registry['app_env.update']['types'],
+  },
   'dashboard.index': {
     methods: ["GET","HEAD"],
     pattern: '/dashboard',

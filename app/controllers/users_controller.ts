@@ -7,7 +7,13 @@ import User from '#models/user'
 import { generateShortId } from '#services/app.functions'
 import mailer from '#services/email_service'
 import env from '#start/env'
-import { updatePasswordValidator, updateProfileValidator } from '#validators/user'
+import {
+  passwordConfirmationValidator,
+  updatePasswordValidator,
+  updateProfileValidator,
+  updateSettingsValidator,
+  uploadAvatarValidator,
+} from '#validators/user'
 
 import { allowedImageExtensions } from '../data/file.js'
 
@@ -99,6 +105,7 @@ export default class UsersController {
 
   async uploadAvatar({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
+    await request.validateUsing(uploadAvatarValidator)
     const avatar = request.file('avatar', {
       size: '5mb',
       extnames: allowedImageExtensions,
@@ -168,7 +175,7 @@ export default class UsersController {
 
   async deleteAccount({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { password } = request.only(['password'])
+    const { password } = await request.validateUsing(passwordConfirmationValidator)
 
     if (!password) {
       return response.badRequest({ error: 'Password is required to delete account' })
@@ -194,7 +201,7 @@ export default class UsersController {
 
   async updateSettings({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const settings = request.body().settings
+    const { settings } = await request.validateUsing(updateSettingsValidator)
 
     if (typeof settings !== 'object' || settings === null) {
       return response.badRequest({ error: 'Settings must be an object' })

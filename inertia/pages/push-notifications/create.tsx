@@ -61,10 +61,10 @@ export default function PushNotificationsCreate(_props: PushNotificationsCreateP
   const { data: users = [] } = useQuery({
     queryKey: ['push-notifications-users', userSearch],
     queryFn: async () => {
-      const res = await api.get<TogethaUserOption[]>('/push-notifications/users', {
-        params: userSearch ? { search: userSearch } : undefined,
+      const res = await api.pushNotifications.users({
+        query: userSearch ? { search: userSearch } : {},
       })
-      return Array.isArray(res.data) ? res.data : []
+      return Array.isArray(res) ? res : []
     },
   })
 

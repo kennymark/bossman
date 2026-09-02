@@ -37,7 +37,7 @@ export default function OrgsCreate(props: OrgsCreateProps) {
   console.log('errors', formik.errors)
 
   const { mutate: createOrgMutation, isPending } = useMutation({
-    mutationFn: (values: CreateCustomerFormValues) => api.post('/orgs', values),
+    mutationFn: (values: CreateCustomerFormValues) => api.orgs.store({ body: values }),
     onSuccess: () => {
       toast.success('Customer created successfully')
       router.visit('/orgs')

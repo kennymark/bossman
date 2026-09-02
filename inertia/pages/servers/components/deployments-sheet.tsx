@@ -90,18 +90,21 @@ export function DeploymentsSheet({
     queryKey: ['railway', 'deployments', selectedService?.id, selectedService?.environmentId],
     queryFn: async () => {
       if (!selectedService) return []
-      const res = await api.get<RailwayDeployment[]>(
-        `/railway/services/${selectedService.id}/deployments?environmentId=${selectedService.environmentId}&projectId=${selectedService.projectId}` as Parameters<
-          typeof api.get
-        >[0],
-      )
-      return res.data ?? []
+      const res = await api.railway.deployments({
+        params: { serviceId: selectedService.id },
+        query: {
+          environmentId: selectedService.environmentId,
+          projectId: selectedService.projectId,
+        },
+      })
+      return res ?? []
     },
     enabled: !!selectedService && open,
   })
 
   const restartMutation = useMutation({
-    mutationFn: (deploymentId: string) => api.post(`/railway/deployments/${deploymentId}/restart`),
+    mutationFn: (deploymentId: string) =>
+      api.railway.deploymentRestart({ params: { id: deploymentId } }),
     onSuccess: () => {
       toast.success('Restart triggered.')
       if (selectedService) {
@@ -116,7 +119,8 @@ export function DeploymentsSheet({
   })
 
   const redeployMutation = useMutation({
-    mutationFn: (deploymentId: string) => api.post(`/railway/deployments/${deploymentId}/redeploy`),
+    mutationFn: (deploymentId: string) =>
+      api.railway.deploymentRedeploy({ params: { id: deploymentId } }),
     onSuccess: () => {
       toast.success('Redeploy triggered.')
       if (selectedService) {
@@ -133,9 +137,10 @@ export function DeploymentsSheet({
   const deployMutation = useMutation({
     mutationFn: () => {
       if (!selectedService) throw new Error('No service selected')
-      return api.post(
-        `/railway/services/${selectedService.id}/deploy?environmentId=${encodeURIComponent(selectedService.environmentId)}`,
-      )
+      return api.railway.serviceDeploy({
+        params: { serviceId: selectedService.id },
+        body: { environmentId: selectedService.environmentId },
+      })
     },
     onSuccess: () => {
       toast.success('Deploy triggered.')

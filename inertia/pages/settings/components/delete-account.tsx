@@ -19,7 +19,7 @@ interface DeleteAccountValues {
 
 export function AccountTab() {
   const { mutate: deleteAccountMutation, isPending: isDeleting } = useMutation({
-    mutationFn: (values: DeleteAccountValues) => api.delete('/user/account', { data: values }),
+    mutationFn: (values: DeleteAccountValues) => api.users.deleteAccount({ body: values }),
     onSuccess: () => {
       toast.success('Account deleted successfully')
       router.visit('/')

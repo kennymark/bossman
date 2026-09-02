@@ -12,9 +12,9 @@ interface EmailVerificationCardProps {
 
 export function EmailVerificationCard({ emailVerified = false }: EmailVerificationCardProps) {
   const { mutate: resendVerificationMutation, isPending } = useMutation({
-    mutationFn: () => api.post('/auth/verify-email/resend'),
+    mutationFn: () => api.auth.resendVerificationEmail({}),
     onSuccess: (response) => {
-      const message = response.data?.message || 'Verification email sent! Please check your inbox.'
+      const message = response?.message || 'Verification email sent! Please check your inbox.'
       toast.success('Verification email sent!', { description: message })
     },
     onError: (err: ServerErrorResponse) => {

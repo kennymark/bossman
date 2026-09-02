@@ -231,7 +231,7 @@ export default function OrgsIndex({ orgs, stats }: OrgsIndexProps) {
   }, [includeTestAccounts, favouritesOnly, ownerRole, handleFilterChange])
 
   const bulkMakeFavouriteMutation = useMutation({
-    mutationFn: (orgIds: string[]) => api.post('/orgs/actions/bulk-make-favourite', { orgIds }),
+    mutationFn: (orgIds: string[]) => api.orgActions.bulkMakeFavourite({ body: { orgIds } }),
     onSuccess: (_, orgIds) => {
       toast.success(`${orgIds.length} org(s) marked as favourite`)
       setSelectedRows([])
@@ -243,7 +243,7 @@ export default function OrgsIndex({ orgs, stats }: OrgsIndexProps) {
   })
 
   const bulkUndoFavouriteMutation = useMutation({
-    mutationFn: (orgIds: string[]) => api.post('/orgs/actions/bulk-undo-favourite', { orgIds }),
+    mutationFn: (orgIds: string[]) => api.orgActions.bulkUndoFavourite({ body: { orgIds } }),
     onSuccess: (_, orgIds) => {
       toast.success(`${orgIds.length} org(s) removed from favourites`)
       setSelectedRows([])
@@ -255,7 +255,7 @@ export default function OrgsIndex({ orgs, stats }: OrgsIndexProps) {
   })
 
   const bulkMakeTestAccountMutation = useMutation({
-    mutationFn: (orgIds: string[]) => api.post('/orgs/actions/bulk-make-test-account', { orgIds }),
+    mutationFn: (orgIds: string[]) => api.orgActions.bulkMakeTestAccount({ body: { orgIds } }),
     onSuccess: (_, orgIds) => {
       toast.success(`${orgIds.length} org(s) marked as test account`)
       setSelectedRows([])
@@ -267,7 +267,7 @@ export default function OrgsIndex({ orgs, stats }: OrgsIndexProps) {
   })
 
   const bulkUndoTestAccountMutation = useMutation({
-    mutationFn: (orgIds: string[]) => api.post('/orgs/actions/bulk-undo-test-account', { orgIds }),
+    mutationFn: (orgIds: string[]) => api.orgActions.bulkUndoTestAccount({ body: { orgIds } }),
     onSuccess: (_, orgIds) => {
       toast.success(`${orgIds.length} org(s) removed test account flag`)
       setSelectedRows([])

@@ -13,6 +13,7 @@ import {
   loginValidator,
   resetPasswordValidator,
   twoFactorChallengeValidator,
+  verifyEmailTokenValidator,
 } from '#validators/auth'
 
 const appUrl = env.get('APP_URL')
@@ -225,7 +226,7 @@ export default class AuthController {
   }
 
   async verifyEmail({ request, response, now, logger }: HttpContext) {
-    const token = request.qs().token
+    const { token } = await request.validateUsing(verifyEmailTokenValidator)
     logger.info(`Verifying email with token: ${token}`)
 
     if (!token) {
@@ -277,7 +278,7 @@ export default class AuthController {
   }
 
   async verifyEmailChange({ request, response, logger }: HttpContext) {
-    const token = request.qs().token
+    const { token } = await request.validateUsing(verifyEmailTokenValidator)
     logger.info(`Verifying email change with token: ${token}`)
 
     if (!token) {

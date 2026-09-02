@@ -29,18 +29,20 @@ interface SessionRow {
 
 export function SessionsTab() {
   // Fetch sessions
-  const { data, isLoading, error, refetch } = useQuery<{ sessions: RawSession[] }>({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['user-sessions'],
-    queryFn: async () => {
-      const response = await api.get<{ sessions: RawSession[] }>('/user/sessions')
-      return response.data
-    },
+    /**
+     * Cast because the controller spreads `session.serialize()`, which Lucid types as
+     * an opaque object — the rows lose their fields on the way out, so the wire shape
+     * is restated here rather than inferred.
+     */
+    queryFn: async () => (await api.sessions.index({})) as { sessions: RawSession[] },
   })
 
   // Revoke session mutation
   const { mutate: revokeSessionMutation, isPending: isRevoking } = useMutation({
     mutationFn: async (sessionId: string) => {
-      await api.post('/user/sessions/revoke', { sessionId })
+      await api.sessions.revoke({ body: { sessionId } })
     },
     onSuccess: () => {
       refetch()
@@ -54,7 +56,7 @@ export function SessionsTab() {
   // Revoke all sessions mutation
   const { mutate: revokeAllSessionsMutation, isPending: isRevokingAll } = useMutation({
     mutationFn: async () => {
-      await api.post('/user/sessions/revoke-all')
+      await api.sessions.revokeAll({})
     },
     onSuccess: () => {
       refetch()

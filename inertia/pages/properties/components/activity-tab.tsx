@@ -4,7 +4,7 @@ import { activityTabColumns } from '@/components/dashboard/activity-columns'
 import { DataTable } from '@/components/dashboard/data-table'
 import { AppCard } from '@/components/ui/app-card'
 import { usePaginatedTab } from '@/hooks/use-paginated-tab'
-import api from '@/lib/http'
+import api, { pageQuery, paginated } from '@/lib/http'
 
 type ActivityTabProps = {
   propertyId: string
@@ -16,11 +16,9 @@ export function ActivityTab({ propertyId }: ActivityTabProps) {
     loading,
     pagination,
   } = usePaginatedTab<RawActivity>(['property-activity', propertyId], (page, perPage) =>
-    api
-      .get<PaginatedResponse<RawActivity>>(`/leaseable-entities/${propertyId}/activity`, {
-        params: { page, perPage },
-      })
-      .then((r) => r.data),
+    api.leaseableEntities
+      .activity({ params: { id: propertyId }, query: pageQuery(page, perPage) })
+      .then((r) => paginated(r) as unknown as PaginatedResponse<RawActivity>),
   )
 
   return (

@@ -8,8 +8,19 @@ export function convertBytesToMb(bytes: number) {
   return (bytes / 1024 / 1024).toFixed(2)
 }
 
-export function formatNumber(num: number | undefined) {
-  return new Intl.NumberFormat('en-GB').format(num ?? 0)
+/**
+ * Accepts a string because Postgres returns `COUNT(*)` as one — it is a bigint, and
+ * the driver will not silently narrow it to a JS number. The stats endpoints hand
+ * those counts straight to this function, and `Intl.NumberFormat` has always taken a
+ * numeric string; only the signature disagreed.
+ */
+export function formatNumber(num: string | number | undefined) {
+  /**
+   * `format` is typed for `number | bigint | StringNumericLiteral`, and a count read
+   * from Postgres is none of those as far as the compiler is concerned. It formats a
+   * numeric string correctly at runtime, so the cast describes what already happens.
+   */
+  return new Intl.NumberFormat('en-GB').format((num ?? 0) as number)
 }
 
 export function startCase(str?: string): string {

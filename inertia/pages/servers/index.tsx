@@ -39,10 +39,7 @@ export default function ServersIndex({ sort }: ServersIndexProps) {
   } = useQuery({
     queryKey: ['railway', 'projects'],
     queryFn: async () => {
-      const res = await api.get<SortableProject[]>(
-        '/railway/projects' as Parameters<typeof api.get>[0],
-      )
-      return res.data ?? []
+      return (await api.railway.projects({})) ?? []
     },
   })
 

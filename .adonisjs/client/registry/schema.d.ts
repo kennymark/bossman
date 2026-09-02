@@ -168,7 +168,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsRangeValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['orgsStats']>>>
     }
   }
@@ -179,7 +179,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsEntitiesValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['orgsEntities']>>>
     }
   }
@@ -190,7 +190,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsRangeValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['usersStats']>>>
     }
   }
@@ -201,7 +201,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsEntitiesValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['usersEntities']>>>
     }
   }
@@ -212,7 +212,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsRangeValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['leasesStats']>>>
     }
   }
@@ -223,7 +223,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsEntitiesValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['leasesEntities']>>>
     }
   }
@@ -234,7 +234,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsRangeValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['maintenanceStats']>>>
     }
   }
@@ -245,7 +245,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsEntitiesValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['maintenanceEntities']>>>
     }
   }
@@ -256,7 +256,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsRangeValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['activityStats']>>>
     }
   }
@@ -267,7 +267,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').analyticsEntitiesValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['activityEntities']>>>
     }
   }
@@ -289,7 +289,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/dashboard_controller').default['recentActivity']>>>
     }
   }
@@ -311,7 +311,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/leases_controller').default['payments']>>>
     }
   }
@@ -322,7 +322,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/leases_controller').default['activity']>>>
     }
   }
@@ -344,7 +344,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/leaseable_entities_controller').default['leases']>>>
     }
   }
@@ -355,7 +355,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/leaseable_entities_controller').default['activity']>>>
     }
   }
@@ -495,10 +495,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-make-favourite'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkMakeFavourite']>>>
     }
   }
@@ -506,10 +506,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-undo-favourite'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkUndoFavourite']>>>
     }
   }
@@ -517,10 +517,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-make-test-account'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkMakeTestAccount']>>>
     }
   }
@@ -528,10 +528,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/orgs/actions/bulk-undo-test-account'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/org_action').bulkOrgIdsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_actions_controller').default['bulkUndoTestAccount']>>>
     }
   }
@@ -553,7 +553,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/orgs_controller').default['leases']>>>
     }
   }
@@ -564,7 +564,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/orgs_controller').default['properties']>>>
     }
   }
@@ -575,7 +575,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/orgs_controller').default['activities']>>>
     }
   }
@@ -597,7 +597,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').pushNotificationUsersValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/push_notifications_controller').default['users']>>>
     }
   }
@@ -652,7 +652,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').emailsListValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/emails_controller').default['index']>>>
     }
   }
@@ -674,7 +674,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').railwayFreshValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['projects']>>>
     }
   }
@@ -696,7 +696,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { serviceId: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').railwayDeploymentsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['deployments']>>>
     }
   }
@@ -726,10 +726,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/railway/deployments/:id/restart'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/query').railwayActionValidator)>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/query').railwayActionValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['deploymentRestart']>>>
     }
   }
@@ -737,10 +737,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/railway/deployments/:id/redeploy'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/query').railwayActionValidator)>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/query').railwayActionValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['deploymentRedeploy']>>>
     }
   }
@@ -748,10 +748,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/railway/services/:serviceId/deploy'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/query').railwayServiceDeployValidator)>>
       paramsTuple: [ParamValue]
       params: { serviceId: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/query').railwayServiceDeployValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['serviceDeploy']>>>
     }
   }
@@ -764,6 +764,28 @@ export interface Registry {
       params: {}
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['refresh']>>>
+    }
+  }
+  'app_env.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/update-env'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/app_env_controller').default['show']>>>
+    }
+  }
+  'app_env.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/update-env'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/app_env').updateAppEnvValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/app_env').updateAppEnvValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/app_env_controller').default['update']>>>
     }
   }
   'dashboard.index': {
@@ -1367,7 +1389,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/auth').verifyEmailTokenValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth_controller').default['verifyEmail']>>>
     }
   }
@@ -1378,7 +1400,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/auth').verifyEmailTokenValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/auth_controller').default['verifyEmailChange']>>>
     }
   }
@@ -1419,10 +1441,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/user/avatar'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/user').uploadAvatarValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').uploadAvatarValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/users_controller').default['uploadAvatar']>>>
     }
   }
@@ -1452,10 +1474,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/user/sessions/revoke'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/user').revokeSessionValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').revokeSessionValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/sessions_controller').default['revoke']>>>
     }
   }
@@ -1474,10 +1496,10 @@ export interface Registry {
     methods: ["DELETE"]
     pattern: '/api/v1/user/account'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/user').passwordConfirmationValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').passwordConfirmationValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/users_controller').default['deleteAccount']>>>
     }
   }
@@ -1485,10 +1507,10 @@ export interface Registry {
     methods: ["PUT"]
     pattern: '/api/v1/user/settings'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/user').updateSettingsValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').updateSettingsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/users_controller').default['updateSettings']>>>
     }
   }
@@ -1529,10 +1551,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/user/2fa/enable'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/auth').enableTwoFactorValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/auth').enableTwoFactorValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/two_factor_controller').default['enable']>>>
     }
   }
@@ -1540,10 +1562,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/user/2fa/disable'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/user').passwordConfirmationValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').passwordConfirmationValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/two_factor_controller').default['disable']>>>
     }
   }
@@ -1562,10 +1584,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/user/2fa/recovery-codes'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/user').passwordConfirmationValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').passwordConfirmationValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/two_factor_controller').default['regenerateRecoveryCodes']>>>
     }
   }
@@ -1686,7 +1708,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').paginationQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['index']>>>
     }
   }
@@ -1694,10 +1716,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/notifications/mark-as-read'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/notification').markAsReadValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/notification').markAsReadValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications_controller').default['markAsRead']>>>
     }
   }
@@ -1741,7 +1763,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').auditsIndexValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['index']>>>
     }
   }
@@ -1763,7 +1785,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/query').auditActionsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['actions']>>>
     }
   }

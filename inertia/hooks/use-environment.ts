@@ -19,7 +19,7 @@ export function useEnvironment() {
       const next = typeof value === 'function' ? value(environment) : value
       setEnvironmentState(next)
       try {
-        await api.put('/update-env', { appEnv: next })
+        await api.appEnv.update({ body: { appEnv: next } })
         window.location.reload()
       } catch {
         setEnvironmentState(environment)

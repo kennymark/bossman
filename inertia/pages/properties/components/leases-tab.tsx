@@ -4,7 +4,7 @@ import { DataTable } from '@/components/dashboard/data-table'
 import { leasesTableColumns } from '@/components/leases'
 import { AppCard } from '@/components/ui/app-card'
 import { usePaginatedTab } from '@/hooks/use-paginated-tab'
-import api from '@/lib/http'
+import api, { pageQuery, paginated } from '@/lib/http'
 
 type LeasesTabProps = {
   propertyId: string
@@ -16,11 +16,9 @@ export function LeasesTab({ propertyId }: LeasesTabProps) {
     loading,
     pagination,
   } = usePaginatedTab<RawLease>(['property-leases', propertyId], (page, perPage) =>
-    api
-      .get<PaginatedResponse<RawLease>>(`/leaseable-entities/${propertyId}/leases`, {
-        params: { page, perPage },
-      })
-      .then((r) => r.data),
+    api.leaseableEntities
+      .leases({ params: { id: propertyId }, query: pageQuery(page, perPage) })
+      .then((r) => paginated(r) as unknown as PaginatedResponse<RawLease>),
   )
 
   return (

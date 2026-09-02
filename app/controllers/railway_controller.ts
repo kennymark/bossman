@@ -2,6 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 import { recordAdminAction } from '#services/admin_audit_service'
 import { RailwayApiService } from '#services/railway_service'
+import {
+  railwayActionValidator,
+  railwayDeploymentsValidator,
+  railwayFreshValidator,
+  railwayServiceDeployValidator,
+} from '#validators/query'
 
 /** `?refresh=1` bypasses the cache for this one read and refills it. */
 function wantsFresh(ctx: HttpContext): boolean {
@@ -12,6 +18,7 @@ function wantsFresh(ctx: HttpContext): boolean {
 /** Admin role and the `servers` page grant are enforced by the route group. */
 export default class RailwayController {
   async projects(ctx: HttpContext) {
+    await ctx.request.validateUsing(railwayFreshValidator)
     const service = new RailwayApiService()
     try {
       const projects = await service.listProjects({ forceFresh: wantsFresh(ctx) })
@@ -39,8 +46,9 @@ export default class RailwayController {
 
   async deployments(ctx: HttpContext) {
     const { params, request, response } = ctx
-    const environmentId = request.qs().environmentId as string | undefined
-    const projectId = (request.qs().projectId as string | undefined) ?? ''
+    const { environmentId, projectId = '' } = await request.validateUsing(
+      railwayDeploymentsValidator,
+    )
     if (!environmentId) {
       return response.badRequest({ message: 'environmentId is required' })
     }
@@ -93,6 +101,7 @@ export default class RailwayController {
 
   async deploymentRestart(ctx: HttpContext) {
     const { params, response } = ctx
+    await ctx.request.validateUsing(railwayActionValidator)
     const service = new RailwayApiService()
     try {
       await service.deploymentRestart(params.id)
@@ -120,6 +129,7 @@ export default class RailwayController {
 
   async deploymentRedeploy(ctx: HttpContext) {
     const { params, response } = ctx
+    await ctx.request.validateUsing(railwayActionValidator)
     const service = new RailwayApiService()
     try {
       const deploymentId = await service.deploymentRedeploy(params.id)
@@ -153,7 +163,8 @@ export default class RailwayController {
    */
   async serviceDeploy(ctx: HttpContext) {
     const { params, request, response } = ctx
-    const environmentId = request.qs().environmentId as string | undefined
+    /** `validateUsing` reads the merged query and body, so a `?environmentId=` caller still works. */
+    const { environmentId } = await request.validateUsing(railwayServiceDeployValidator)
     if (!environmentId) {
       return response.badRequest({ message: 'environmentId is required' })
     }
