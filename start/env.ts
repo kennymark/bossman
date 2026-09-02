@@ -57,8 +57,22 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
 
-  MEILISEARCH_HOST: Env.schema.string(),
-  MEILISEARCH_API_KEY: Env.schema.string(),
+  /**
+   * Pulse (Agenda) job store of the Togetha app, per environment. Optional: without a
+   * URL the jobs page reports the environment as unconfigured instead of failing.
+   */
+  MONGO_URL_DEV: Env.schema.string.optional(),
+  MONGO_URL_PROD: Env.schema.string.optional(),
+
+  /**
+   * Shared with the Togetha app (ADMIN_IMPERSONATION_SECRET there). Signs the one-shot
+   * handoff token an operator uses to sign in as a customer. Optional: unset disables
+   * impersonation rather than the whole app.
+   */
+  IMPERSONATION_SECRET: Env.schema.string.optional(),
+  /** Where each environment of the Togetha app is served; used to build handoff links. */
+  TOGETHA_DEV_URL: Env.schema.string.optional(),
+  TOGETHA_PROD_URL: Env.schema.string.optional(),
 
   /**
    * Database connections. These were read by config/database.ts and the OTel/mail config

@@ -18,7 +18,6 @@ import Org from '#models/org'
 // import Property, { type CouncilTaxBand } from '#models/property'
 // import Room from '#models/room'
 // import Unit from '#models/unit'
-import meiliSearchClient from '#services/meilisearch_service'
 
 import Document from './document.js'
 // import Document from './document.js'
@@ -96,32 +95,6 @@ export default class LeaseableEntity extends SuperBaseModel {
 
   get meta() {
     return this.$extras
-  }
-
-  @afterSave()
-  public static async updateSearchIndex(entity: LeaseableEntity) {
-    meiliSearchClient
-      .index('leaseable_entities')
-      .updateDocuments([
-        {
-          id: entity.id,
-          address: entity.address,
-          type: entity.type,
-          sub_type: entity.subType,
-          org_id: entity.orgId,
-        },
-      ])
-      .then(() => {
-        logger.info(`Updated search index for leaseable entity ${entity.id}`)
-      })
-      .catch((e) => {
-        logger.error({ err: e }, 'Error updating search index')
-      })
-  }
-
-  @afterDelete()
-  public static async deleteFromSearchIndex(entity: LeaseableEntity) {
-    meiliSearchClient.index('leaseable_entities').deleteDocument(entity.id)
   }
 
   @hasMany(() => Lease) declare leases: HasMany<typeof Lease>

@@ -38,17 +38,20 @@ export interface ApiDefinition {
     maintenanceEntities: typeof routes['analytics.maintenance_entities']
     activityStats: typeof routes['analytics.activity_stats']
     activityEntities: typeof routes['analytics.activity_entities']
+    revenueStats: typeof routes['analytics.revenue_stats']
     index: typeof routes['analytics.index']
   }
   dashboard: {
     stats: typeof routes['dashboard.stats']
     recentActivity: typeof routes['dashboard.recent_activity']
+    attention: typeof routes['dashboard.attention']
     index: typeof routes['dashboard.index']
   }
   leases: {
     stats: typeof routes['leases.stats']
     payments: typeof routes['leases.payments']
     activity: typeof routes['leases.activity']
+    export: typeof routes['leases.export']
     index: typeof routes['leases.index']
     show: typeof routes['leases.show']
   }
@@ -56,6 +59,7 @@ export interface ApiDefinition {
     stats: typeof routes['leaseable_entities.stats']
     leases: typeof routes['leaseable_entities.leases']
     activity: typeof routes['leaseable_entities.activity']
+    export: typeof routes['leaseable_entities.export']
     index: typeof routes['leaseable_entities.index']
     show: typeof routes['leaseable_entities.show']
   }
@@ -67,6 +71,7 @@ export interface ApiDefinition {
     properties: typeof routes['orgs.properties']
     activities: typeof routes['orgs.activities']
     invoices: typeof routes['orgs.invoices']
+    export: typeof routes['orgs.export']
     index: typeof routes['orgs.index']
     create: typeof routes['orgs.create']
     edit: typeof routes['orgs.edit']
@@ -128,6 +133,46 @@ export interface ApiDefinition {
     serviceDeploy: typeof routes['railway.service_deploy']
     refresh: typeof routes['railway.refresh']
   }
+  search: {
+    index: typeof routes['search.index']
+  }
+  orgBilling: {
+    plans: typeof routes['org_billing.plans']
+    subscription: typeof routes['org_billing.subscription']
+    invoices: typeof routes['org_billing.invoices']
+    plan: typeof routes['org_billing.plan']
+    featureFlags: typeof routes['org_billing.feature_flags']
+    updateFeatureFlags: typeof routes['org_billing.update_feature_flags']
+    resetFeatureFlags: typeof routes['org_billing.reset_feature_flags']
+  }
+  impersonation: {
+    targets: typeof routes['impersonation.targets']
+    create: typeof routes['impersonation.create']
+  }
+  maintenance: {
+    stats: typeof routes['maintenance.stats']
+    export: typeof routes['maintenance.export']
+    byOrg: typeof routes['maintenance.by_org']
+    index: typeof routes['maintenance.index']
+    show: typeof routes['maintenance.show']
+  }
+  documents: {
+    stats: typeof routes['documents.stats']
+    export: typeof routes['documents.export']
+    byOrg: typeof routes['documents.by_org']
+    index: typeof routes['documents.index']
+  }
+  jobs: {
+    status: typeof routes['jobs.status']
+    stats: typeof routes['jobs.stats']
+    list: typeof routes['jobs.list']
+    history: typeof routes['jobs.history']
+    detail: typeof routes['jobs.detail']
+    rerun: typeof routes['jobs.rerun']
+    destroy: typeof routes['jobs.destroy']
+    index: typeof routes['jobs.index']
+    show: typeof routes['jobs.show']
+  }
   appEnv: {
     show: typeof routes['app_env.show']
     update: typeof routes['app_env.update']
@@ -160,6 +205,7 @@ export interface ApiDefinition {
     recent: typeof routes['audits.recent']
     actions: typeof routes['audits.actions']
     actors: typeof routes['audits.actors']
+    export: typeof routes['audits.export']
   }
   blogPosts: {
     adminIndex: typeof routes['blog_posts.admin_index']

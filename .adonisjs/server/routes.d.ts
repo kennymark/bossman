@@ -73,6 +73,34 @@ export type ScannedRoutes = {
     'railway.deployment_redeploy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'railway.service_deploy': { paramsTuple: [ParamValue]; params: {'serviceId': ParamValue} }
     'railway.refresh': { paramsTuple?: []; params?: {} }
+    'search.index': { paramsTuple?: []; params?: {} }
+    'org_billing.plans': { paramsTuple?: []; params?: {} }
+    'org_billing.subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.invoices': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.plan': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.feature_flags': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.update_feature_flags': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.reset_feature_flags': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'impersonation.targets': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'impersonation.create': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'orgs.export': { paramsTuple?: []; params?: {} }
+    'leases.export': { paramsTuple?: []; params?: {} }
+    'leaseable_entities.export': { paramsTuple?: []; params?: {} }
+    'maintenance.stats': { paramsTuple?: []; params?: {} }
+    'maintenance.export': { paramsTuple?: []; params?: {} }
+    'maintenance.by_org': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'documents.stats': { paramsTuple?: []; params?: {} }
+    'documents.export': { paramsTuple?: []; params?: {} }
+    'documents.by_org': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'jobs.status': { paramsTuple?: []; params?: {} }
+    'jobs.stats': { paramsTuple?: []; params?: {} }
+    'jobs.list': { paramsTuple?: []; params?: {} }
+    'jobs.history': { paramsTuple?: []; params?: {} }
+    'jobs.detail': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'jobs.rerun': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'jobs.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'analytics.revenue_stats': { paramsTuple?: []; params?: {} }
+    'dashboard.attention': { paramsTuple?: []; params?: {} }
     'app_env.show': { paramsTuple?: []; params?: {} }
     'app_env.update': { paramsTuple?: []; params?: {} }
     'dashboard.index': { paramsTuple?: []; params?: {} }
@@ -111,6 +139,11 @@ export type ScannedRoutes = {
     'db_backups.store': { paramsTuple?: []; params?: {} }
     'db_backups.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'audits.page': { paramsTuple?: []; params?: {} }
+    'maintenance.index': { paramsTuple?: []; params?: {} }
+    'maintenance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'documents.index': { paramsTuple?: []; params?: {} }
+    'jobs.index': { paramsTuple?: []; params?: {} }
+    'jobs.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'blog_posts.admin_index': { paramsTuple?: []; params?: {} }
     'blog_posts.create': { paramsTuple?: []; params?: {} }
     'blog_posts.store': { paramsTuple?: []; params?: {} }
@@ -167,6 +200,7 @@ export type ScannedRoutes = {
     'audits.recent': { paramsTuple?: []; params?: {} }
     'audits.actions': { paramsTuple?: []; params?: {} }
     'audits.actors': { paramsTuple?: []; params?: {} }
+    'audits.export': { paramsTuple?: []; params?: {} }
     'health_checks': { paramsTuple?: []; params?: {} }
     'attachments': { paramsTuple: [ParamValue,ParamValue?]; params: {'key': ParamValue,'name'?: ParamValue} }
     'event_stream': { paramsTuple?: []; params?: {} }
@@ -221,6 +255,29 @@ export type ScannedRoutes = {
     'railway.deployments': { paramsTuple: [ParamValue]; params: {'serviceId': ParamValue} }
     'railway.deployment_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'railway.deployment_build_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'search.index': { paramsTuple?: []; params?: {} }
+    'org_billing.plans': { paramsTuple?: []; params?: {} }
+    'org_billing.subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.invoices': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.plan': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.feature_flags': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'impersonation.targets': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'orgs.export': { paramsTuple?: []; params?: {} }
+    'leases.export': { paramsTuple?: []; params?: {} }
+    'leaseable_entities.export': { paramsTuple?: []; params?: {} }
+    'maintenance.stats': { paramsTuple?: []; params?: {} }
+    'maintenance.export': { paramsTuple?: []; params?: {} }
+    'maintenance.by_org': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'documents.stats': { paramsTuple?: []; params?: {} }
+    'documents.export': { paramsTuple?: []; params?: {} }
+    'documents.by_org': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'jobs.status': { paramsTuple?: []; params?: {} }
+    'jobs.stats': { paramsTuple?: []; params?: {} }
+    'jobs.list': { paramsTuple?: []; params?: {} }
+    'jobs.history': { paramsTuple?: []; params?: {} }
+    'jobs.detail': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'analytics.revenue_stats': { paramsTuple?: []; params?: {} }
+    'dashboard.attention': { paramsTuple?: []; params?: {} }
     'app_env.show': { paramsTuple?: []; params?: {} }
     'dashboard.index': { paramsTuple?: []; params?: {} }
     'teams_page.index': { paramsTuple?: []; params?: {} }
@@ -250,6 +307,11 @@ export type ScannedRoutes = {
     'emails_page.index': { paramsTuple?: []; params?: {} }
     'emails_page.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'audits.page': { paramsTuple?: []; params?: {} }
+    'maintenance.index': { paramsTuple?: []; params?: {} }
+    'maintenance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'documents.index': { paramsTuple?: []; params?: {} }
+    'jobs.index': { paramsTuple?: []; params?: {} }
+    'jobs.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'blog_posts.admin_index': { paramsTuple?: []; params?: {} }
     'blog_posts.create': { paramsTuple?: []; params?: {} }
     'blog_posts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -273,6 +335,7 @@ export type ScannedRoutes = {
     'audits.recent': { paramsTuple?: []; params?: {} }
     'audits.actions': { paramsTuple?: []; params?: {} }
     'audits.actors': { paramsTuple?: []; params?: {} }
+    'audits.export': { paramsTuple?: []; params?: {} }
     'health_checks': { paramsTuple?: []; params?: {} }
     'attachments': { paramsTuple: [ParamValue,ParamValue?]; params: {'key': ParamValue,'name'?: ParamValue} }
     'event_stream': { paramsTuple?: []; params?: {} }
@@ -325,6 +388,29 @@ export type ScannedRoutes = {
     'railway.deployments': { paramsTuple: [ParamValue]; params: {'serviceId': ParamValue} }
     'railway.deployment_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'railway.deployment_build_logs': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'search.index': { paramsTuple?: []; params?: {} }
+    'org_billing.plans': { paramsTuple?: []; params?: {} }
+    'org_billing.subscription': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.invoices': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.plan': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'org_billing.feature_flags': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'impersonation.targets': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'orgs.export': { paramsTuple?: []; params?: {} }
+    'leases.export': { paramsTuple?: []; params?: {} }
+    'leaseable_entities.export': { paramsTuple?: []; params?: {} }
+    'maintenance.stats': { paramsTuple?: []; params?: {} }
+    'maintenance.export': { paramsTuple?: []; params?: {} }
+    'maintenance.by_org': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'documents.stats': { paramsTuple?: []; params?: {} }
+    'documents.export': { paramsTuple?: []; params?: {} }
+    'documents.by_org': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'jobs.status': { paramsTuple?: []; params?: {} }
+    'jobs.stats': { paramsTuple?: []; params?: {} }
+    'jobs.list': { paramsTuple?: []; params?: {} }
+    'jobs.history': { paramsTuple?: []; params?: {} }
+    'jobs.detail': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'analytics.revenue_stats': { paramsTuple?: []; params?: {} }
+    'dashboard.attention': { paramsTuple?: []; params?: {} }
     'app_env.show': { paramsTuple?: []; params?: {} }
     'dashboard.index': { paramsTuple?: []; params?: {} }
     'teams_page.index': { paramsTuple?: []; params?: {} }
@@ -354,6 +440,11 @@ export type ScannedRoutes = {
     'emails_page.index': { paramsTuple?: []; params?: {} }
     'emails_page.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'audits.page': { paramsTuple?: []; params?: {} }
+    'maintenance.index': { paramsTuple?: []; params?: {} }
+    'maintenance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'documents.index': { paramsTuple?: []; params?: {} }
+    'jobs.index': { paramsTuple?: []; params?: {} }
+    'jobs.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'blog_posts.admin_index': { paramsTuple?: []; params?: {} }
     'blog_posts.create': { paramsTuple?: []; params?: {} }
     'blog_posts.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -377,6 +468,7 @@ export type ScannedRoutes = {
     'audits.recent': { paramsTuple?: []; params?: {} }
     'audits.actions': { paramsTuple?: []; params?: {} }
     'audits.actors': { paramsTuple?: []; params?: {} }
+    'audits.export': { paramsTuple?: []; params?: {} }
     'health_checks': { paramsTuple?: []; params?: {} }
     'attachments': { paramsTuple: [ParamValue,ParamValue?]; params: {'key': ParamValue,'name'?: ParamValue} }
     'event_stream': { paramsTuple?: []; params?: {} }
@@ -403,6 +495,9 @@ export type ScannedRoutes = {
     'railway.deployment_redeploy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'railway.service_deploy': { paramsTuple: [ParamValue]; params: {'serviceId': ParamValue} }
     'railway.refresh': { paramsTuple?: []; params?: {} }
+    'org_billing.reset_feature_flags': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'impersonation.create': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
+    'jobs.rerun': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.store_invoice': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.store_invoice_line_item': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'invoiceId': ParamValue} }
     'push_notifications.store': { paramsTuple?: []; params?: {} }
@@ -434,6 +529,7 @@ export type ScannedRoutes = {
   }
   PUT: {
     'orgs.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'org_billing.update_feature_flags': { paramsTuple: [ParamValue]; params: {'orgId': ParamValue} }
     'app_env.update': { paramsTuple?: []; params?: {} }
     'addons.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'blog_posts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -444,6 +540,7 @@ export type ScannedRoutes = {
     'team_invitations.update_invitation': { paramsTuple: [ParamValue]; params: {'invitationId': ParamValue} }
   }
   DELETE: {
+    'jobs.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'db_backups.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'blog_posts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'blog_categories.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

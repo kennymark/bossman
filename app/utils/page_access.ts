@@ -13,6 +13,9 @@ export const PAGE_KEYS = [
   'servers',
   'addons',
   'apiAccess',
+  'maintenance',
+  'documents',
+  'jobs',
 ] as const
 
 export type PageKey = (typeof PAGE_KEYS)[number]
@@ -32,6 +35,9 @@ export const PAGE_KEY_TO_PATH: Record<PageKey, string> = {
   servers: '/servers',
   addons: '/addons',
   apiAccess: '/api-access',
+  maintenance: '/maintenance',
+  documents: '/documents',
+  jobs: '/jobs',
 }
 
 /**
@@ -61,6 +67,9 @@ const PATH_RULES: ReadonlyArray<readonly [string, PageKey]> = [
   ['/railway', 'servers'],
   ['/addons', 'addons'],
   ['/api-access', 'apiAccess'],
+  ['/maintenance', 'maintenance'],
+  ['/documents', 'documents'],
+  ['/jobs', 'jobs'],
 ]
 
 /** Strips a trailing slash and any `/api/v1` prefix so one rule table covers both. */

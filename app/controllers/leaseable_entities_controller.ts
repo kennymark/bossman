@@ -111,4 +111,9 @@ export default class LeaseableEntitiesController {
       .paginate(paginationParams.page ?? 1, paginationParams.perPage ?? 10)
     return response.ok(activities)
   }
+
+  /** Scaffold: implemented by the feature branch that owns it. */
+  async export({ response }: HttpContext) {
+    return response.notImplemented({ error: 'Not implemented' })
+  }
 }

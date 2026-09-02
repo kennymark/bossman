@@ -8,7 +8,6 @@ import type { DateTime } from 'luxon'
 
 import Landlord from '#models/landlord'
 import Lease from '#models/lease'
-import meiliSearchClient from '#services/meilisearch_service'
 import DateService from '#utils/date'
 
 import type { formData } from '../data/form-data.js'
@@ -76,30 +75,5 @@ export default class Payment extends SuperBaseModel {
 
   @computed() amountRemaining() {
     return this.amountDue - this.amountPaid
-  }
-
-  @afterSave()
-  public static async updateSearchIndex(payment: Payment) {
-    meiliSearchClient
-      .index('payments')
-      .updateDocuments([
-        {
-          id: payment.id,
-          category: payment.category,
-          description: payment.description,
-          payment_method: payment.paymentMethod,
-          payment_provider: payment.paymentProvider,
-          org_id: payment.orgId,
-        },
-      ])
-      .catch((err) => logger.error({ err }, 'Failed to index payments'))
-  }
-
-  @afterDelete()
-  public static async deleteFromSearchIndex(payment: Payment) {
-    meiliSearchClient
-      .index('payments')
-      .deleteDocument(payment.id)
-      .catch((err) => logger.error({ err }, 'Failed to remove from payments index'))
   }
 }

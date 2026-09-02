@@ -82,4 +82,9 @@ export default class DashboardController {
       .paginate(paginationParams.page ?? 1, paginationParams.perPage ?? 20)
     return response.ok(activities)
   }
+
+  /** Scaffold: implemented by the feature branch that owns it. */
+  async attention({ response }: HttpContext) {
+    return response.notImplemented({ error: 'Not implemented' })
+  }
 }

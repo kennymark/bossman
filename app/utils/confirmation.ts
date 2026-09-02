@@ -14,6 +14,9 @@ export const CONFIRMATION_PHRASES = {
   'backup.delete': () => 'delete backup',
   'member.remove': (label: string) => `remove ${label}`,
   'org.bulk': (count: number | string) => `apply to ${count}`,
+  'org.impersonate': (label: string) => `impersonate ${label}`,
+  'org.feature_flags_reset': (label: string) => `reset ${label}`,
+  'job.delete': (label: string) => `delete ${label}`,
 } as const
 
 /**

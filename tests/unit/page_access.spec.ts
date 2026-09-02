@@ -42,3 +42,27 @@ test.group('requiredPageKeyForPath', () => {
     assert.equal(requiredPageKeyForPath('/orgs'), 'orgs')
   })
 })
+
+test.group('Page access (new pages)', () => {
+  test('gates maintenance, documents and jobs pages and their APIs', ({ assert }) => {
+    assert.equal(requiredPageKeyForPath('/maintenance'), 'maintenance')
+    assert.equal(requiredPageKeyForPath('/maintenance/abc'), 'maintenance')
+    assert.equal(requiredPageKeyForPath('/api/v1/maintenance/stats'), 'maintenance')
+    assert.equal(requiredPageKeyForPath('/documents'), 'documents')
+    assert.equal(requiredPageKeyForPath('/api/v1/documents/export'), 'documents')
+    assert.equal(requiredPageKeyForPath('/jobs'), 'jobs')
+    assert.equal(requiredPageKeyForPath('/api/v1/jobs/abc/rerun'), 'jobs')
+  })
+
+  test('keeps org billing, feature flags and impersonation under the orgs grant', ({ assert }) => {
+    assert.equal(requiredPageKeyForPath('/api/v1/orgs/1/billing/subscription'), 'orgs')
+    assert.equal(requiredPageKeyForPath('/api/v1/orgs/1/feature-flags'), 'orgs')
+    assert.equal(requiredPageKeyForPath('/api/v1/orgs/1/actions/impersonate'), 'orgs')
+    assert.equal(requiredPageKeyForPath('/api/v1/orgs/export'), 'orgs')
+  })
+
+  test('leaves search and the plan catalogue open to every admin', ({ assert }) => {
+    assert.isNull(requiredPageKeyForPath('/api/v1/search'))
+    assert.isNull(requiredPageKeyForPath('/api/v1/billing/plans'))
+  })
+})

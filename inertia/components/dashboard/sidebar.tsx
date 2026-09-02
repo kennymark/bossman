@@ -2,6 +2,9 @@ import { Link, router, usePage } from '@inertiajs/react'
 import {
   IconChartBar,
   IconBell,
+  IconClockPlay,
+  IconFiles,
+  IconTool,
   IconBuilding,
   IconSelector,
   IconDatabase,
@@ -78,6 +81,8 @@ const appNavSections: NavSection[] = [
         icon: <IconStack className='h-4 w-4' />,
       },
       { title: 'Customers', href: '/orgs', icon: <IconBuilding className='h-4 w-4' /> },
+      { title: 'Maintenance', href: '/maintenance', icon: <IconTool className='h-4 w-4' /> },
+      { title: 'Documents', href: '/documents', icon: <IconFiles className='h-4 w-4' /> },
     ],
   },
 ]
@@ -106,6 +111,7 @@ const developerNavSections: NavSection[] = [
     items: [
       { title: 'Servers', href: '/servers', icon: <IconServer className='h-4 w-4' /> },
       { title: 'Backups', href: '/db-backups', icon: <IconDatabase className='h-4 w-4' /> },
+      { title: 'Jobs', href: '/jobs', icon: <IconClockPlay className='h-4 w-4' /> },
       { title: 'API & MCP', href: '/api-access', icon: <IconPlugConnected className='h-4 w-4' /> },
       /**
        * Not page-gated: every admin can read their own trail, and the controller widens
@@ -158,6 +164,9 @@ export function Sidebar({ children }: SidebarProps) {
     if (path.startsWith('/emails')) return 'emails'
     if (path.startsWith('/servers')) return 'servers'
     if (path.startsWith('/addons')) return 'addons'
+    if (path.startsWith('/maintenance')) return 'maintenance'
+    if (path.startsWith('/documents')) return 'documents'
+    if (path.startsWith('/jobs')) return 'jobs'
     return null
   }
 

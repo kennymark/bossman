@@ -4,7 +4,6 @@ import { beforeDelete, beforeSave, belongsTo, column, hasOne } from '@adonisjs/l
 import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
 import { Auditable } from '@stouder-io/adonis-auditing'
 
-import meiliSearchClient from '#services/meilisearch_service'
 import { convertBytesToMb } from '#utils/functions'
 
 import Document from './document.js'
@@ -46,30 +45,5 @@ export default class FileUpload extends compose(SuperBaseModel, Auditable) {
     if (file.$dirty.password) {
       file.size = Number(convertBytesToMb(file.size))
     }
-  }
-
-  @beforeSave()
-  public static async updateSearchIndex(upload: FileUpload) {
-    meiliSearchClient
-      .index('file_uploads')
-      .updateDocuments([
-        {
-          id: upload.id,
-          name: upload.name,
-          file_extension: upload.fileExtension,
-          document_id: upload.documentId,
-          photo_id: upload.photoId,
-          org_id: upload.orgId,
-        },
-      ])
-      .catch((err) => logger.error({ err }, 'Failed to index file_uploads'))
-  }
-
-  @beforeDelete()
-  public static async deleteFromSearchIndex(upload: FileUpload) {
-    meiliSearchClient
-      .index('file_uploads')
-      .deleteDocument(upload.id)
-      .catch((err) => logger.error({ err }, 'Failed to remove from file_uploads index'))
   }
 }

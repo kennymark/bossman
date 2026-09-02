@@ -9,6 +9,12 @@ const AppEnvController = () => import('#controllers/app_env_controller')
 const ApiAccessController = () => import('#controllers/api_access_controller')
 const DashboardController = () => import('#controllers/dashboard_controller')
 const DbBackupsController = () => import('#controllers/db_backups_controller')
+const DocumentsController = () => import('#controllers/documents_controller')
+const ImpersonationController = () => import('#controllers/impersonation_controller')
+const JobsController = () => import('#controllers/jobs_controller')
+const MaintenanceController = () => import('#controllers/maintenance_controller')
+const OrgBillingController = () => import('#controllers/org_billing_controller')
+const SearchController = () => import('#controllers/search_controller')
 const EmailsController = () => import('#controllers/emails_controller')
 const LeasesController = () => import('#controllers/leases_controller')
 const LeaseableEntitiesController = () => import('#controllers/leaseable_entities_controller')
@@ -94,6 +100,43 @@ router
     router.post('/railway/services/:serviceId/deploy', [RailwayController, 'serviceDeploy'])
     /** Drops the cached Railway reads; the next page load goes back to the API. */
     router.post('/railway/refresh', [RailwayController, 'refresh'])
+
+    /** Record search behind the command palette; results are filtered by page grant. */
+    router.get('/search', [SearchController, 'index'])
+
+    router.get('/billing/plans', [OrgBillingController, 'plans'])
+    router.get('/orgs/:orgId/billing/subscription', [OrgBillingController, 'subscription'])
+    router.get('/orgs/:orgId/billing/invoices', [OrgBillingController, 'invoices'])
+    router.get('/orgs/:orgId/billing/plan', [OrgBillingController, 'plan'])
+    router.get('/orgs/:orgId/feature-flags', [OrgBillingController, 'featureFlags'])
+    router.put('/orgs/:orgId/feature-flags', [OrgBillingController, 'updateFeatureFlags'])
+    router.post('/orgs/:orgId/feature-flags/reset', [OrgBillingController, 'resetFeatureFlags'])
+
+    router.get('/orgs/:orgId/impersonation-targets', [ImpersonationController, 'targets'])
+    router.post('/orgs/:orgId/actions/impersonate', [ImpersonationController, 'create'])
+
+    router.get('/orgs/export', [OrgsController, 'export'])
+    router.get('/leases/export', [LeasesController, 'export'])
+    router.get('/leaseable-entities/export', [LeaseableEntitiesController, 'export'])
+
+    router.get('/maintenance/stats', [MaintenanceController, 'stats'])
+    router.get('/maintenance/export', [MaintenanceController, 'export'])
+    router.get('/maintenance/by-org/:orgId', [MaintenanceController, 'byOrg'])
+
+    router.get('/documents/stats', [DocumentsController, 'stats'])
+    router.get('/documents/export', [DocumentsController, 'export'])
+    router.get('/documents/by-org/:orgId', [DocumentsController, 'byOrg'])
+
+    router.get('/jobs/status', [JobsController, 'status'])
+    router.get('/jobs/stats', [JobsController, 'stats'])
+    router.get('/jobs/list', [JobsController, 'list'])
+    router.get('/jobs/history', [JobsController, 'history'])
+    router.get('/jobs/:id', [JobsController, 'detail'])
+    router.post('/jobs/:id/rerun', [JobsController, 'rerun'])
+    router.delete('/jobs/:id', [JobsController, 'destroy'])
+
+    router.get('/analytics/revenue/stats', [AnalyticsController, 'revenueStats'])
+    router.get('/dashboard/attention', [DashboardController, 'attention'])
 
     router.get('update-env', [AppEnvController, 'show']).as('app_env.show')
     router.put('update-env', [AppEnvController, 'update']).as('app_env.update')

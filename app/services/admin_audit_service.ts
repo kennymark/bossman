@@ -38,6 +38,13 @@ export const ADMIN_ACTIONS = [
   'env.switch',
   'server.deploy',
   'server.restart',
+  'org.impersonate',
+  'org.feature_flags_update',
+  'org.feature_flags_reset',
+  'job.rerun',
+  'job.delete',
+  'member.prod_access_mode',
+  'export.csv',
 ] as const
 
 export type AdminActionKey = (typeof ADMIN_ACTIONS)[number]

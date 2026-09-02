@@ -3,8 +3,6 @@ import { afterDelete, afterSave, beforeSave, belongsTo, column, hasMany } from '
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import type { DateTime } from 'luxon'
 
-import meiliSearchClient from '#services/meilisearch_service'
-
 import Lease from './lease.js'
 import LeaseableEntity from './leaseable_entity.js'
 import SuperBaseModel from './super_base.js'
@@ -49,31 +47,5 @@ export default class MaintenanceRequest extends SuperBaseModel {
     if (!req.severity) req.severity = 'low'
     if (!req.status) req.status = 'todo'
     if (!req.type) req.type = 'general_maintenance'
-  }
-
-  @afterSave()
-  public static async updateSearchIndex(request: MaintenanceRequest) {
-    meiliSearchClient
-      .index('maintenance_requests')
-      .updateDocuments([
-        {
-          id: request.id,
-          title: request.title,
-          severity: request.severity,
-          status: request.status,
-          reported_by: request.reportedBy,
-          description: request.description,
-          org_id: request.orgId,
-        },
-      ])
-      .catch((err) => logger.error({ err }, 'Failed to index maintenance_requests'))
-  }
-
-  @afterDelete()
-  public static async deleteFromSearchIndex(request: MaintenanceRequest) {
-    meiliSearchClient
-      .index('maintenance_requests')
-      .deleteDocument(request.id)
-      .catch((err) => logger.error({ err }, 'Failed to remove from maintenance_requests index'))
   }
 }

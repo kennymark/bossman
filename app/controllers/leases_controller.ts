@@ -111,4 +111,9 @@ export default class LeasesController {
 
     return response.ok(activities)
   }
+
+  /** Scaffold: implemented by the feature branch that owns it. */
+  async export({ response }: HttpContext) {
+    return response.notImplemented({ error: 'Not implemented' })
+  }
 }

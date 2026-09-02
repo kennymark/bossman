@@ -528,4 +528,9 @@ export default class OrgsController {
       return response.redirect().back()
     }
   }
+
+  /** Scaffold: implemented by the feature branch that owns it. */
+  async export({ response }: HttpContext) {
+    return response.notImplemented({ error: 'Not implemented' })
+  }
 }

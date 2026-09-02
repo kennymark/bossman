@@ -158,4 +158,9 @@ export default class AuditsController {
 
     return response.ok({ audits })
   }
+
+  /** Scaffold: implemented by the feature branch that owns it. */
+  async export({ response }: HttpContext) {
+    return response.notImplemented({ error: 'Not implemented' })
+  }
 }

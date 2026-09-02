@@ -309,4 +309,9 @@ export default class AnalyticsController {
       .paginate(page, perPage)
     return response.ok(list)
   }
+
+  /** Scaffold: implemented by the feature branch that owns it. */
+  async revenueStats({ response }: HttpContext) {
+    return response.notImplemented({ error: 'Not implemented' })
+  }
 }

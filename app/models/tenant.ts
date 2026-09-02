@@ -14,7 +14,6 @@ import Document from '#models/document'
 import Lease from '#models/lease'
 import TogethaActivity from '#models/togetha_activity'
 import User from '#models/user'
-import meiliSearchClient from '#services/meilisearch_service'
 
 import SuperBaseModel from './super_base.js'
 
@@ -109,21 +108,5 @@ export default class Tenant extends SuperBaseModel {
   @beforeSave()
   public static async assignSex(tenant: Tenant) {
     if (!tenant.sex) tenant.sex = 'male'
-  }
-
-  @afterSave()
-  public static async updateSearchIndex(tenant: Tenant) {
-    meiliSearchClient.index('tenants').updateDocuments([
-      {
-        id: tenant.id,
-        name: tenant.name,
-        email: tenant.email,
-      },
-    ])
-  }
-
-  @afterSave()
-  public static async deleteFromSearchIndex(tenant: Tenant) {
-    meiliSearchClient.index('tenants').deleteDocument(tenant.id)
   }
 }

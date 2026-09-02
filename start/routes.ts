@@ -70,6 +70,11 @@ router
     router.post('/db-backups', [controllers.DbBackups, 'store'])
     router.delete('/db-backups/:id', [controllers.DbBackups, 'destroy'])
     router.get('/audits', [controllers.Audits, 'page'])
+    router.get('/maintenance', [controllers.Maintenance, 'index'])
+    router.get('/maintenance/:id', [controllers.Maintenance, 'show'])
+    router.get('/documents', [controllers.Documents, 'index'])
+    router.get('/jobs', [controllers.Jobs, 'index'])
+    router.get('/jobs/:id', [controllers.Jobs, 'show'])
 
     router
       .group(() => {
@@ -221,6 +226,7 @@ router
     /** Operator action log — scope is decided per user inside the controller. */
     router.get('/actions', [controllers.Audits, 'actions'])
     router.get('/actors', [controllers.Audits, 'actors'])
+    router.get('/export', [controllers.Audits, 'export'])
   })
   .prefix('api/v1/audits')
   .use([apiThrottle, middleware.auth()])

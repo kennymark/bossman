@@ -15,7 +15,6 @@ import { Auditable } from '@stouder-io/adonis-auditing'
 import { DateTime } from 'luxon'
 
 import Tenant from '#models/tenant'
-import meiliSearchClient from '#services/meilisearch_service'
 import type { TogethaCurrencies } from '#utils/currency'
 import DateService from '#utils/date'
 import LeaseUtils from '#utils/lease_utils'
@@ -190,25 +189,6 @@ export default class Lease extends compose(SuperBaseModel, Auditable) {
   declare tenants: ManyToMany<typeof Tenant>
 
   @hasMany(() => LeaseTenants) declare leaseTenants: HasMany<typeof LeaseTenants>
-
-  @afterSave()
-  public static async updateSearchIndex(lease: Lease) {
-    meiliSearchClient.index('leases').updateDocuments([
-      {
-        id: lease.id,
-        name: lease.name,
-        isArchived: !!lease.archivedAt,
-        endDate: lease.endDate ? DateService.formatDate(lease.endDate) : null,
-        isPermanentlyRolling: lease.isPermanentlyRolling,
-        org_id: lease.orgId,
-      },
-    ])
-  }
-
-  @afterDelete()
-  public static async deleteFromSearchIndex(lease: Lease) {
-    meiliSearchClient.index('leases').deleteDocument(lease.id)
-  }
 }
 
 export interface LeaseOptions {

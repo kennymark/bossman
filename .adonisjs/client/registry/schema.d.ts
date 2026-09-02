@@ -766,6 +766,314 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/railway_controller').default['refresh']>>>
     }
   }
+  'search.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/search'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/search_controller').default['index']>>>
+    }
+  }
+  'org_billing.plans': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/billing/plans'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_billing_controller').default['plans']>>>
+    }
+  }
+  'org_billing.subscription': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/:orgId/billing/subscription'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_billing_controller').default['subscription']>>>
+    }
+  }
+  'org_billing.invoices': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/:orgId/billing/invoices'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_billing_controller').default['invoices']>>>
+    }
+  }
+  'org_billing.plan': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/:orgId/billing/plan'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_billing_controller').default['plan']>>>
+    }
+  }
+  'org_billing.feature_flags': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/:orgId/feature-flags'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_billing_controller').default['featureFlags']>>>
+    }
+  }
+  'org_billing.update_feature_flags': {
+    methods: ["PUT"]
+    pattern: '/api/v1/orgs/:orgId/feature-flags'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_billing_controller').default['updateFeatureFlags']>>>
+    }
+  }
+  'org_billing.reset_feature_flags': {
+    methods: ["POST"]
+    pattern: '/api/v1/orgs/:orgId/feature-flags/reset'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/org_billing_controller').default['resetFeatureFlags']>>>
+    }
+  }
+  'impersonation.targets': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/:orgId/impersonation-targets'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/impersonation_controller').default['targets']>>>
+    }
+  }
+  'impersonation.create': {
+    methods: ["POST"]
+    pattern: '/api/v1/orgs/:orgId/actions/impersonate'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/impersonation_controller').default['create']>>>
+    }
+  }
+  'orgs.export': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/export'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/orgs_controller').default['export']>>>
+    }
+  }
+  'leases.export': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/leases/export'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/leases_controller').default['export']>>>
+    }
+  }
+  'leaseable_entities.export': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/leaseable-entities/export'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/leaseable_entities_controller').default['export']>>>
+    }
+  }
+  'maintenance.stats': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/maintenance/stats'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/maintenance_controller').default['stats']>>>
+    }
+  }
+  'maintenance.export': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/maintenance/export'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/maintenance_controller').default['export']>>>
+    }
+  }
+  'maintenance.by_org': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/maintenance/by-org/:orgId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/maintenance_controller').default['byOrg']>>>
+    }
+  }
+  'documents.stats': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/documents/stats'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/documents_controller').default['stats']>>>
+    }
+  }
+  'documents.export': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/documents/export'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/documents_controller').default['export']>>>
+    }
+  }
+  'documents.by_org': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/documents/by-org/:orgId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { orgId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/documents_controller').default['byOrg']>>>
+    }
+  }
+  'jobs.status': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/jobs/status'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['status']>>>
+    }
+  }
+  'jobs.stats': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/jobs/stats'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['stats']>>>
+    }
+  }
+  'jobs.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/jobs/list'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['list']>>>
+    }
+  }
+  'jobs.history': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/jobs/history'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['history']>>>
+    }
+  }
+  'jobs.detail': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/jobs/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['detail']>>>
+    }
+  }
+  'jobs.rerun': {
+    methods: ["POST"]
+    pattern: '/api/v1/jobs/:id/rerun'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['rerun']>>>
+    }
+  }
+  'jobs.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/jobs/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['destroy']>>>
+    }
+  }
+  'analytics.revenue_stats': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/analytics/revenue/stats'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics_controller').default['revenueStats']>>>
+    }
+  }
+  'dashboard.attention': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/dashboard/attention'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/dashboard_controller').default['attention']>>>
+    }
+  }
   'app_env.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/update-env'
@@ -1182,6 +1490,61 @@ export interface Registry {
       params: {}
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['page']>>>
+    }
+  }
+  'maintenance.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/maintenance'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/maintenance_controller').default['index']>>>
+    }
+  }
+  'maintenance.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/maintenance/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/maintenance_controller').default['show']>>>
+    }
+  }
+  'documents.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/documents'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/documents_controller').default['index']>>>
+    }
+  }
+  'jobs.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/jobs'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['index']>>>
+    }
+  }
+  'jobs.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/jobs/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/jobs_controller').default['show']>>>
     }
   }
   'blog_posts.admin_index': {
@@ -1798,6 +2161,17 @@ export interface Registry {
       params: {}
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['actors']>>>
+    }
+  }
+  'audits.export': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/audits/export'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/audits_controller').default['export']>>>
     }
   }
   'health_checks': {

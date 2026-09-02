@@ -4,7 +4,6 @@ import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import Org from '#models/org'
 import Property from '#models/property'
 import TogethaUser from '#models/togetha_user'
-import meiliSearchClient from '#services/meilisearch_service'
 
 export default class Agency extends BaseModel {
   @column({ isPrimary: true }) declare id: string
@@ -28,21 +27,4 @@ export default class Agency extends BaseModel {
       managementFee: number
     }
   }>
-
-  @beforeSave()
-  public static async updateSearchIndex(agency: Agency) {
-    meiliSearchClient.index('agencies').updateDocuments([
-      {
-        id: agency.id,
-        name: agency.name,
-        email: agency.email,
-        org_id: agency.orgId,
-      },
-    ])
-  }
-
-  @beforeDelete()
-  public static async deleteFromSearchIndex(agency: Agency) {
-    meiliSearchClient.index('agencies').deleteDocument(agency.id)
-  }
 }

@@ -7,7 +7,6 @@ import Org from '#models/org'
 import Property from '#models/property'
 import Tenant from '#models/tenant'
 import User from '#models/user'
-import meiliSearchClient from '#services/meilisearch_service'
 
 import SuperBaseModel from './super_base.js'
 
@@ -51,21 +50,4 @@ export default class Landlord extends SuperBaseModel {
       managementFee: number
     }
   }>
-
-  @afterSave()
-  public static async updateSearchIndex(landlord: Landlord) {
-    meiliSearchClient.index('landlords').updateDocuments([
-      {
-        id: landlord.id,
-        name: landlord.name,
-        email: landlord.email,
-        org_id: landlord.orgId,
-      },
-    ])
-  }
-
-  @afterDelete()
-  public static async deleteFromSearchIndex(landlord: Landlord) {
-    meiliSearchClient.index('landlords').deleteDocument(landlord.id)
-  }
 }
