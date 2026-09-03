@@ -86,6 +86,20 @@ export function ImpersonateDialog({
     },
   })
 
+  /**
+   * Opens on the customer themselves.
+   *
+   * This dialog is only reached from one customer's page, so the owner is who the
+   * operator came here to sign in as. Making them pick that person out of a list of
+   * their own tenants and team members was busywork. The picker stays for the times
+   * they want somebody else.
+   */
+  useEffect(() => {
+    if (!open || userId || !targets.data?.length) return
+    const owner = targets.data.find((target) => target.isOwner)
+    setUserId((owner ?? targets.data[0]).id)
+  }, [open, userId, targets.data])
+
   const selected = targets.data?.find((target) => target.id === userId)
   const expectedPhrase = selected ? CONFIRMATION_PHRASES['org.impersonate'](selected.email) : ''
   const isReasonValid = reasonIsValid(reason)
@@ -152,7 +166,7 @@ export function ImpersonateDialog({
             label='User'
             htmlFor='impersonate-user'
             required
-            description='The org owner and anyone whose primary org is this one.'
+            description='Starts on the org owner. Also lists anyone whose primary org is this one.'
             error={targets.isError ? 'Could not load the users for this org.' : undefined}>
             <Select
               id='impersonate-user'
@@ -163,15 +177,20 @@ export function ImpersonateDialog({
               }}
               disabled={targets.isLoading || !targets.data?.length}>
               <SelectTrigger className='w-full'>
-                <SelectValue
-                  placeholder={
-                    targets.isLoading
-                      ? 'Loading users…'
-                      : targets.data?.length
-                        ? 'Choose a user'
-                        : 'No users found for this org'
-                  }
-                />
+                {/* Given nothing to show, Base UI renders the raw value — here a user id. */}
+                {selected ? (
+                  <SelectValue>{selected.email}</SelectValue>
+                ) : (
+                  <SelectValue
+                    placeholder={
+                      targets.isLoading
+                        ? 'Loading users…'
+                        : targets.data?.length
+                          ? 'Choose a user'
+                          : 'No users found for this org'
+                    }
+                  />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {targets.data?.map((target) => (

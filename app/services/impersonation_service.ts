@@ -50,7 +50,13 @@ export function toImpersonationTarget(user: TogethaUser, org: Org): Impersonatio
     email: user.email,
     role: user.role ?? null,
     lastLoginAt: user.lastLoginAt?.toISO() ?? null,
-    isOwner: !!org.creatorEmail && user.email === org.creatorEmail.toLowerCase(),
+    /**
+     * Compared with both sides folded: only the org side used to be lowercased, so an
+     * owner stored as `Name@example.com` did not match their own org and the dialog
+     * offered no owner to open on.
+     */
+    isOwner:
+      !!org.creatorEmail && user.email?.toLowerCase() === org.creatorEmail.trim().toLowerCase(),
   }
 }
 
@@ -63,7 +69,14 @@ export async function listImpersonationTargets(
     .orderBy('email', 'asc')
     .limit(MAX_TARGETS)
 
-  return users.map((user) => toImpersonationTarget(user, org))
+  /**
+   * Owner first. The dialog is reached from one customer's page and opens on the first
+   * target, which should be the customer themselves rather than whoever sorts first
+   * alphabetically among their tenants and team members.
+   */
+  return users
+    .map((user) => toImpersonationTarget(user, org))
+    .sort((a, b) => Number(b.isOwner) - Number(a.isOwner))
 }
 
 /** Null when the user does not exist *in this org* — the caller treats both alike. */
