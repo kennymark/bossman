@@ -23,10 +23,10 @@ import type {
 import {
   buildRerunPayload,
   deriveJobStatus,
-  escapeRegex,
   isJobId,
   type JobQueue,
   MAX_HISTORY_DAYS,
+  nameSearchPattern,
 } from '#utils/jobs'
 import { MAX_PER_PAGE } from '#utils/vine'
 
@@ -201,7 +201,9 @@ function searchFilter(search: string | undefined): Filter<JobDocument> {
   const term = search?.trim()
   if (!term) return {}
   if (isJobId(term)) return { _id: new ObjectId(term) }
-  return { name: { $regex: escapeRegex(term), $options: 'i' } }
+
+  const pattern = nameSearchPattern(term)
+  return pattern ? { name: { $regex: pattern, $options: 'i' } } : {}
 }
 
 function combine(...filters: Filter<JobDocument>[]): Filter<JobDocument> {
@@ -394,12 +396,31 @@ export async function list(appEnv: AppEnv, options: ListOptions = {}): Promise<J
       col
         .aggregate<JobDocument>([
           { $match: filter },
-          { $sort: { lastRunAt: -1, _id: -1 } },
-          { $group: { _id: '$name', doc: { $first: '$$ROOT' } } },
-          { $replaceRoot: { newRoot: '$doc' } },
-          { $sort: { lastRunAt: -1, _id: -1 } },
+          /**
+           * `$top` picks each name's most recent run inside the group, so the server
+           * holds one document per job name — 71 of them here — rather than the whole
+           * collection.
+           *
+           * Sorting first and taking `$first` per group, which is how the standalone
+           * jobs dashboard did it, asks the server to sort every matching document
+           * with `$$ROOT` attached. Past roughly 33k jobs that exceeds the 32MB
+           * in-memory sort limit and the whole page fails with
+           * QueryExceededMemoryLimitNoDiskUseAllowed. `allowDiskUse` would also lift
+           * the ceiling, but it is refused on shared Atlas tiers and only defers the
+           * cost; this keeps the sort small enough not to need it.
+           *
+           * Needs MongoDB 5.2+. Dev is on 8.0 and production on 7.0.
+           */
+          {
+            $group: {
+              _id: '$name',
+              doc: { $top: { output: '$$ROOT', sortBy: { lastRunAt: -1, _id: -1 } } },
+            },
+          },
+          { $sort: { 'doc.lastRunAt': -1, _id: -1 } },
           { $skip: skip },
           { $limit: perPage },
+          { $replaceRoot: { newRoot: '$doc' } },
         ])
         .toArray(),
       countUnique(col, filter),

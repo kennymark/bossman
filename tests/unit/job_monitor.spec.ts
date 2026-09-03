@@ -1,6 +1,14 @@
 import { test } from '@japa/runner'
 
-import { buildRerunPayload, deriveJobStatus, escapeRegex, isJobId, RERUN_SOURCE } from '#utils/jobs'
+import {
+  buildRerunPayload,
+  deriveJobStatus,
+  escapeRegex,
+  isJobId,
+  jobDisplayName,
+  nameSearchPattern,
+  RERUN_SOURCE,
+} from '#utils/jobs'
 
 /**
  * The pure half of the job monitor: everything that decides what a request means
@@ -165,5 +173,46 @@ test.group('re-run payload', () => {
     assert.isTrue(payload.data.reEnqueue)
     assert.isTrue(payload.data.enqueuedFromAdmin)
     assert.equal(payload.data.previousJobId, previousJobId)
+  })
+})
+
+/**
+ * Names are stored as the product registered them — camelCase for most jobs, spaced
+ * words for a few — and shown title-cased. Search has to accept either, or an operator
+ * cannot search for what the table is showing them.
+ */
+test.group('Job names', () => {
+  test('titles a stored name for display', ({ assert }) => {
+    assert.equal(jobDisplayName('nudgeReference'), 'Nudge Reference')
+    assert.equal(jobDisplayName('process-payment'), 'Process Payment')
+    assert.equal(jobDisplayName('send_email'), 'Send Email')
+    assert.equal(jobDisplayName('Auto Archive Leases'), 'Auto Archive Leases')
+    assert.equal(jobDisplayName('log'), 'Log')
+  })
+
+  test('names an unnamed job rather than rendering nothing', ({ assert }) => {
+    assert.equal(jobDisplayName(''), 'Unnamed')
+    assert.equal(jobDisplayName(null), 'Unnamed')
+    assert.equal(jobDisplayName(undefined), 'Unnamed')
+  })
+
+  test('matches a stored name from what the table shows', ({ assert }) => {
+    const pattern = new RegExp(nameSearchPattern('Nudge Reference'), 'i')
+    assert.isTrue(pattern.test('nudgeReference'))
+    assert.isTrue(pattern.test('nudge-reference'))
+    assert.isTrue(pattern.test('Nudge Reference'))
+    assert.isFalse(pattern.test('processPayment'))
+  })
+
+  test('still matches a partial term', ({ assert }) => {
+    assert.isTrue(new RegExp(nameSearchPattern('payment'), 'i').test('processPayment'))
+    assert.isTrue(new RegExp(nameSearchPattern('archive leases'), 'i').test('Auto Archive Leases'))
+  })
+
+  test('keeps regex metacharacters literal', ({ assert }) => {
+    const pattern = new RegExp(nameSearchPattern('.*'), 'i')
+    assert.isFalse(pattern.test('anything'))
+    assert.isTrue(pattern.test('a.*b'))
+    assert.equal(nameSearchPattern('   '), '')
   })
 })

@@ -7,6 +7,7 @@ import { useState } from 'react'
 
 import type { JobDetail } from '#types/jobs'
 import { timeAgo } from '#utils/date'
+import { jobDisplayName } from '#utils/jobs'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import DetailRow from '@/components/dashboard/detail-row'
 import { AppCard } from '@/components/ui/app-card'
@@ -81,7 +82,7 @@ export default function JobShow({ jobId }: JobShowProps) {
 
   return (
     <DashboardPage
-      title={job?.name || 'Job'}
+      title={job ? jobDisplayName(job.name) : 'Job'}
       description={<code className='text-xs'>{jobId}</code>}
       backHref='/jobs'
       actions={

@@ -57,6 +57,40 @@ export function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')
 }
 
+/**
+ * A job name as a person reads it: `nudgeReference` becomes "Nudge Reference".
+ *
+ * The queue stores whatever the product registered, which is camelCase for most jobs
+ * and spaced words for a few. This is display only — the raw name is what the store
+ * matches on and what the delete confirmation checks against.
+ */
+export function jobDisplayName(name: string | null | undefined): string {
+  if (!name) return 'Unnamed'
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
+/**
+ * A name search that accepts what the table shows.
+ *
+ * Names are displayed title-cased, so an operator searches "Nudge Reference" for a job
+ * stored as `nudgeReference`. Each word is matched in order with any separator — or
+ * none — allowed between them, which finds the stored name either way.
+ */
+export function nameSearchPattern(term: string): string {
+  const words = term
+    .trim()
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map(escapeRegex)
+
+  return words.length === 0 ? '' : words.join('[\\s_-]*')
+}
+
 type DateLike = string | number | Date | null | undefined
 
 function toDate(value: DateLike): Date | null {

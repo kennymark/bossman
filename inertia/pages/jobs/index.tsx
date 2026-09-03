@@ -24,7 +24,7 @@ import type {
 } from '#types/jobs'
 import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
-import { DEFAULT_HISTORY_DAYS, JOB_QUEUES, type JobQueue } from '#utils/jobs'
+import { DEFAULT_HISTORY_DAYS, JOB_QUEUES, jobDisplayName, type JobQueue } from '#utils/jobs'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { DataTable } from '@/components/dashboard/data-table'
 import { StatCard } from '@/components/dashboard/stat-card'
@@ -128,7 +128,7 @@ export default function JobsIndex() {
         cell: (row) => (
           <div className='flex flex-wrap items-center gap-2'>
             <Link href={`/jobs/${row.id}`} className='font-medium hover:underline'>
-              {row.name || 'Unnamed'}
+              {jobDisplayName(row.name)}
             </Link>
             {row.isRerun && <Badge variant='indigo'>Re-run</Badge>}
             {row.disabled && <Badge variant='outline'>Disabled</Badge>}

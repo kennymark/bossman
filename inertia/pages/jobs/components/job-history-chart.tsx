@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts'
 
 import type { JobHistory, JobHistoryPoint } from '#types/jobs'
-import { DEFAULT_HISTORY_DAYS } from '#utils/jobs'
+import { DEFAULT_HISTORY_DAYS, jobDisplayName } from '#utils/jobs'
 import { AppCard } from '@/components/ui/app-card'
 import { type ChartConfig, ChartContainer } from '@/components/ui/chart'
 import { LoadingSkeleton } from '@/components/ui/loading'
@@ -78,7 +78,7 @@ export function JobHistoryChart({ history, isLoading }: JobHistoryChartProps) {
                     </p>
                     {point?.topJob && (
                       <p className='mt-1 text-xs text-muted-foreground'>
-                        Busiest: {point.topJob.name} ({point.topJob.count})
+                        Busiest: {jobDisplayName(point.topJob.name)} ({point.topJob.count})
                       </p>
                     )}
                   </div>

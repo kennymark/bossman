@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 
 import type { JobRerunResult } from '#types/jobs'
 import { CONFIRMATION_PHRASES, MIN_REASON_LENGTH, confirmationMatches } from '#utils/confirmation'
+import { jobDisplayName } from '#utils/jobs'
 import { BaseModal } from '@/components/ui/base-modal'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -117,7 +118,7 @@ export function RerunJobDialog({ job, onOpenChange, onDone }: RerunJobDialogProp
       title='Re-run job'
       description={
         job
-          ? `A new "${job.name}" job will be queued to run immediately in ${appEnv}. The original stays as it is.`
+          ? `A new "${jobDisplayName(job.name)}" job will be queued to run immediately in ${appEnv}. The original stays as it is.`
           : undefined
       }
       primaryText='Re-run'
