@@ -86,7 +86,13 @@ TOTP secrets are stored encrypted and recovery codes hashed; both readers tolera
 
 `package.json` maps `#generated/*` to `.adonisjs/server/*.js`. A compiled `controllers.js` once sat next to `controllers.ts` in git and won the resolution, so every new controller was `undefined` at route registration (`Cannot read properties of undefined (reading 'name')`). Only the `.ts` sources belong in `.adonisjs/server`; delete any `.js` or `.d.ts` that reappears.
 
-### 14. Parallel test runs need their own database and port
+### 14. The shared query schema is revalidated on every page render
+
+`paginationQs()` validates the _whole_ query string against `queryParamsSchema` in `app/utils/vine.ts`, and `InertiaMiddleware.share` calls it on every Inertia response. A page-specific vocabulary in that schema therefore rejects every other page's filters: a `status` enum listing only the blog's values answered 400 for `/maintenance?status=todo` and for the customer page's payment filter.
+
+Keep that schema generic. A filter value that reaches SQL belongs in the owning controller's own validator, against its own `vine.enum`.
+
+### 15. Parallel test runs need their own database and port
 
 `tests/bootstrap.ts` migrates the database at setup and rolls it back at teardown, and the functional suite binds `PORT`. Two runs against the same database drop each other's tables mid-run. Process environment beats `.env.test`, so isolate a run with
 
