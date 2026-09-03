@@ -586,8 +586,30 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/org_payments').orgInvoicesValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/orgs_controller').default['invoices']>>>
+    }
+  }
+  'orgs.payments': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/:id/payments'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/org_payments').orgPaymentsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/orgs_controller').default['payments']>>>
+    }
+  }
+  'orgs.payment_users': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/orgs/:id/payment-users'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/orgs_controller').default['paymentUsers']>>>
     }
   }
   'push_notifications.users': {

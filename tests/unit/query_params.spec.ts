@@ -44,3 +44,22 @@ test.group('pagination query params', () => {
     assert.equal(params.startDate, '2026-01-01')
   })
 })
+
+/**
+ * `paginationQs()` validates the whole query string, and `InertiaMiddleware.share`
+ * calls it on every Inertia render. A page-specific vocabulary here therefore rejects
+ * every other page's filter: the blog's status enum used to 400 `/maintenance?status=todo`
+ * and the customer page's payment filter.
+ */
+test.group('Shared query params: status', () => {
+  test("accepts any page's status vocabulary", async ({ assert }) => {
+    for (const status of ['all', 'published', 'draft', 'todo', 'in_progress', 'paid', 'unpaid']) {
+      const params = await validateQueryParams({ status })
+      assert.equal(params.status, status)
+    }
+  })
+
+  test('still bounds the value', async ({ assert }) => {
+    await assert.rejects(() => validateQueryParams({ status: 'x'.repeat(65) }))
+  })
+})

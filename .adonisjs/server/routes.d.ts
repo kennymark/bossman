@@ -57,6 +57,8 @@ export type ScannedRoutes = {
     'orgs.properties': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.activities': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.invoices': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'orgs.payments': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'orgs.payment_users': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'push_notifications.users': { paramsTuple?: []; params?: {} }
     'api.db_backups.store': { paramsTuple?: []; params?: {} }
     'db_backups.health': { paramsTuple?: []; params?: {} }
@@ -246,6 +248,8 @@ export type ScannedRoutes = {
     'orgs.properties': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.activities': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.invoices': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'orgs.payments': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'orgs.payment_users': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'push_notifications.users': { paramsTuple?: []; params?: {} }
     'db_backups.health': { paramsTuple?: []; params?: {} }
     'emails.index': { paramsTuple?: []; params?: {} }
@@ -379,6 +383,8 @@ export type ScannedRoutes = {
     'orgs.properties': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.activities': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'orgs.invoices': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'orgs.payments': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'orgs.payment_users': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'push_notifications.users': { paramsTuple?: []; params?: {} }
     'db_backups.health': { paramsTuple?: []; params?: {} }
     'emails.index': { paramsTuple?: []; params?: {} }

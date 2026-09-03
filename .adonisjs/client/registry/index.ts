@@ -324,6 +324,18 @@ const routes = {
     tokens: [{"old":"/api/v1/orgs/:id/invoices","type":0,"val":"api","end":""},{"old":"/api/v1/orgs/:id/invoices","type":0,"val":"v1","end":""},{"old":"/api/v1/orgs/:id/invoices","type":0,"val":"orgs","end":""},{"old":"/api/v1/orgs/:id/invoices","type":1,"val":"id","end":""},{"old":"/api/v1/orgs/:id/invoices","type":0,"val":"invoices","end":""}],
     types: placeholder as Registry['orgs.invoices']['types'],
   },
+  'orgs.payments': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/orgs/:id/payments',
+    tokens: [{"old":"/api/v1/orgs/:id/payments","type":0,"val":"api","end":""},{"old":"/api/v1/orgs/:id/payments","type":0,"val":"v1","end":""},{"old":"/api/v1/orgs/:id/payments","type":0,"val":"orgs","end":""},{"old":"/api/v1/orgs/:id/payments","type":1,"val":"id","end":""},{"old":"/api/v1/orgs/:id/payments","type":0,"val":"payments","end":""}],
+    types: placeholder as Registry['orgs.payments']['types'],
+  },
+  'orgs.payment_users': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/orgs/:id/payment-users',
+    tokens: [{"old":"/api/v1/orgs/:id/payment-users","type":0,"val":"api","end":""},{"old":"/api/v1/orgs/:id/payment-users","type":0,"val":"v1","end":""},{"old":"/api/v1/orgs/:id/payment-users","type":0,"val":"orgs","end":""},{"old":"/api/v1/orgs/:id/payment-users","type":1,"val":"id","end":""},{"old":"/api/v1/orgs/:id/payment-users","type":0,"val":"payment-users","end":""}],
+    types: placeholder as Registry['orgs.payment_users']['types'],
+  },
   'push_notifications.users': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/push-notifications/users',

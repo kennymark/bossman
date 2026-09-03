@@ -54,8 +54,21 @@ export const queryParamsSchema = vine.create(
     email: vine.string().maxLength(320).optional(),
     tab: vine.string().maxLength(64).optional(),
 
-    /** Blog manage: 'all' | 'published' | 'scheduled' | 'draft' */
-    status: vine.enum(['all', 'published', 'scheduled', 'draft']).optional(),
+    /**
+     * Every page's status filter passes through here, so this cannot name one page's
+     * vocabulary.
+     *
+     * It used to be `vine.enum(['all', 'published', 'scheduled', 'draft'])` — the blog
+     * manage filter. `InertiaMiddleware.share` runs `paginationQs()` on every Inertia
+     * render and several controllers call it directly, so any other page carrying a
+     * `?status=` it did not recognise answered 400: `/maintenance?status=todo` and the
+     * customer page's payment filter both failed that way.
+     *
+     * A status that reaches SQL is validated by the owning controller's own validator
+     * against its own enum (see `#validators/maintenance`, `#validators/org_payments`);
+     * the blog compares this value rather than querying with it.
+     */
+    status: vine.string().maxLength(64).optional(),
   }),
 )
 

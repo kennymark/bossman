@@ -9,6 +9,7 @@ import Org from '#models/org'
 import SubscriptionPlan from '#models/subscription_plan'
 import env from '#start/env'
 import type { AppEnv } from '#types/env'
+import type { InvoiceStatus } from '#utils/payments'
 import type { CreateCustomUserPayload } from '#validators/org'
 
 import { getPlanName, getTrialPeriod } from '../data/subscription.js'
@@ -299,7 +300,13 @@ class StripeService {
     return price
   }
 
-  public async viewInvoices(orgId: string, env: string) {
+  /**
+   * The org's invoices, optionally narrowed to one Stripe status.
+   *
+   * `status` is filtered by Stripe rather than after the fact: asking for 100 invoices
+   * and then dropping most of them locally would page past the ones the caller wanted.
+   */
+  public async viewInvoices(orgId: string, env: string, status?: InvoiceStatus | null) {
     const org = await Org.query({ connection: env }).where('id', orgId).firstOrFail()
     if (!org.paymentCustomerId) {
       return { data: [] }
@@ -307,6 +314,7 @@ class StripeService {
     const result = await stripe.invoices.list({
       customer: org.paymentCustomerId,
       limit: 100,
+      ...(status ? { status } : {}),
     })
     return result
   }

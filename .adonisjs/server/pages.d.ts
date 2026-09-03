@@ -64,6 +64,7 @@ declare module '@adonisjs/inertia/types' {
     'orgs/components/leases-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/leases-tab.tsx'))['default']>
     'orgs/components/maintenance-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/maintenance-tab.tsx'))['default']>
     'orgs/components/page-options': ExtractProps<(typeof import('../../inertia/pages/orgs/components/page-options.tsx'))['default']>
+    'orgs/components/payments-card': ExtractProps<(typeof import('../../inertia/pages/orgs/components/payments-card.tsx'))['default']>
     'orgs/components/properties-tab': ExtractProps<(typeof import('../../inertia/pages/orgs/components/properties-tab.tsx'))['default']>
     'orgs/create-form': ExtractProps<(typeof import('../../inertia/pages/orgs/create-form.ts'))['default']>
     'orgs/create': ExtractProps<(typeof import('../../inertia/pages/orgs/create.tsx'))['default']>

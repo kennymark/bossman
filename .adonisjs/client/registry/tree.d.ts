@@ -71,6 +71,8 @@ export interface ApiDefinition {
     properties: typeof routes['orgs.properties']
     activities: typeof routes['orgs.activities']
     invoices: typeof routes['orgs.invoices']
+    payments: typeof routes['orgs.payments']
+    paymentUsers: typeof routes['orgs.payment_users']
     export: typeof routes['orgs.export']
     index: typeof routes['orgs.index']
     create: typeof routes['orgs.create']

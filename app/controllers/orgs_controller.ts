@@ -10,6 +10,7 @@ import Agency from '#models/agency'
 import Landlord from '#models/landlord'
 import Lease from '#models/lease'
 import Org from '#models/org'
+import Payment from '#models/payment'
 import Property from '#models/property'
 import SubscriptionPlan from '#models/subscription_plan'
 import TogethaTeam from '#models/togetha_teams'
@@ -24,9 +25,11 @@ import type { AppEnv } from '#types/env'
 import type { AppCountries } from '#types/extra'
 import type { CsvColumn } from '#utils/csv'
 import { MAX_EXPORT_ROWS, sendCsv } from '#utils/csv_response'
+import { resolveInvoiceStatus, resolvePaymentStatus } from '#utils/payments'
 import type { QueryParams } from '#utils/vine'
 import { orgsExportValidator } from '#validators/exports'
 import { createCustomerUserValidator, updateOrgValidator } from '#validators/org'
+import { orgInvoicesValidator, orgPaymentsValidator } from '#validators/org_payments'
 import { paginationQueryValidator } from '#validators/query'
 
 /** Columns `?sortBy=` may name on the customers list. Identifiers, so never request input. */
@@ -449,10 +452,18 @@ export default class OrgsController {
     return response.ok(activities)
   }
 
+  /**
+   * The org's Stripe billing invoices, settled ones first.
+   *
+   * Stripe bills a customer, and an org is one customer, so every invoice here shares
+   * the same billing contact — it is carried on each row anyway so the tab can say who
+   * an invoice was addressed to.
+   */
   async invoices({ params, response, request }: HttpContext) {
     const appEnv = request.appEnv()
+    const { status } = await request.validateUsing(orgInvoicesValidator)
     const stripeService = new StripeService()
-    const result = await stripeService.viewInvoices(params.id, appEnv)
+    const result = await stripeService.viewInvoices(params.id, appEnv, resolveInvoiceStatus(status))
     const data = (result.data ?? []).map((inv: Stripe.Invoice) => ({
       id: inv.id,
       number: inv.number ?? inv.id,
@@ -464,8 +475,108 @@ export default class OrgsController {
       createdAt: inv.created ? new Date(inv.created * 1000).toISOString() : null,
       hostedInvoiceUrl: inv.hosted_invoice_url ?? null,
       invoicePdf: inv.invoice_pdf ?? null,
+      customerEmail: inv.customer_email ?? null,
+      customerName: inv.customer_name ?? null,
     }))
     return response.ok({ data })
+  }
+
+  /**
+   * Rent payments across the org's leases, filterable by the tenant who owes them.
+   *
+   * Payments hang off a lease rather than a person, and a lease can have several
+   * tenants, so "this user's payments" means every payment on a lease they are named
+   * on. The tenant filter is therefore a subquery over the pivot rather than a column
+   * comparison, and a payment on a shared lease shows for each of its tenants.
+   */
+  async payments({ params, response, request }: HttpContext) {
+    const appEnv = request.appEnv()
+    const query = await request.validateUsing(orgPaymentsValidator)
+    const paginationParams = await request.paginationQs()
+    const status = resolvePaymentStatus(query.status)
+
+    const base = () =>
+      Payment.query({ connection: appEnv })
+        .where('org_id', params.id)
+        .whereNull('archived_at')
+        .if(query.tenantId, (q) =>
+          q.whereIn(
+            'lease_id',
+            db
+              .connection(appEnv)
+              .from('lease_tenants')
+              .select('lease_id')
+              .where('tenant_id', query.tenantId!),
+          ),
+        )
+
+    const [paginator, counts] = await Promise.all([
+      base()
+        .if(status, (q) => q.where('status', status!))
+        .orderBy('due_date', 'desc')
+        .preload('lease', (q) =>
+          q.select('id', 'name', 'currency').preload('tenants', (t) => t.select('id', 'name')),
+        )
+        .paginate(paginationParams.page ?? 1, paginationParams.perPage ?? 10),
+      /** Drives the "showing x of y" line, so the default filter never hides rows silently. */
+      base().select('status').count('* as total').groupBy('status'),
+    ])
+
+    const statusCounts: Record<string, number> = {}
+    for (const row of counts) {
+      const key = String((row as unknown as { status: string | null }).status ?? 'unknown')
+      statusCounts[key] = Number((row as unknown as { $extras: { total: string } }).$extras.total)
+    }
+
+    return response.ok({
+      data: paginator.all().map((payment) => ({
+        id: payment.id,
+        leaseId: payment.leaseId,
+        leaseName: payment.lease?.name ?? null,
+        tenants: (payment.lease?.tenants ?? []).map((tenant) => ({
+          id: tenant.id,
+          name: tenant.name,
+        })),
+        amountDue: payment.amountDue,
+        amountPaid: payment.amountPaid,
+        currency: payment.lease?.currency ?? payment.currencyCode,
+        status: payment.status,
+        statusAlt: payment.statusAlt,
+        category: payment.category,
+        reference: payment.reference,
+        dueDate: payment.dueDate?.toISO() ?? null,
+        paymentDate: payment.paymentDate?.toISO() ?? null,
+      })),
+      meta: paginator.getMeta(),
+      statusCounts,
+    })
+  }
+
+  /** Tenants who have payments in this org, for the Invoices tab's user filter. */
+  async paymentUsers({ params, response, request }: HttpContext) {
+    const appEnv = request.appEnv()
+
+    const rows = await db
+      .connection(appEnv)
+      .from('payments as p')
+      .join('lease_tenants as lt', 'lt.lease_id', 'p.lease_id')
+      .join('tenants as t', 't.id', 'lt.tenant_id')
+      .where('p.org_id', params.id)
+      .whereNull('p.archived_at')
+      .groupBy('t.id', 't.name', 't.email')
+      .select('t.id', 't.name', 't.email')
+      .count('p.id as payments')
+      .orderBy('payments', 'desc')
+      .limit(200)
+
+    return response.ok({
+      data: rows.map((row) => ({
+        id: String(row.id),
+        name: row.name ?? null,
+        email: row.email ?? null,
+        payments: Number(row.payments),
+      })),
+    })
   }
 
   async createInvoice({ params, inertia, request, now }: HttpContext) {

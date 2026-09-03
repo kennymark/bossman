@@ -79,6 +79,8 @@ router
     router.get('/orgs/:id/properties', [OrgsController, 'properties'])
     router.get('/orgs/:id/activities', [OrgsController, 'activities'])
     router.get('/orgs/:id/invoices', [OrgsController, 'invoices'])
+    router.get('/orgs/:id/payments', [OrgsController, 'payments'])
+    router.get('/orgs/:id/payment-users', [OrgsController, 'paymentUsers'])
 
     router.get('/push-notifications/users', [PushNotificationsController, 'users'])
     router.post('/db-backups', [DbBackupsController, 'store']).as('api.db_backups.store')

@@ -6,13 +6,28 @@ import { useState } from 'react'
 import type { Column } from '#types/extra'
 import type { TogethaCurrencies } from '#utils/currency'
 import { formatCurrency } from '#utils/currency'
+import {
+  DEFAULT_INVOICE_STATUS,
+  INVOICE_STATUS_FILTERS,
+  type InvoiceStatusFilter,
+  statusLabel,
+} from '#utils/payments'
 import { DataTable } from '@/components/dashboard/data-table'
 import { AppCard } from '@/components/ui/app-card'
 import { Badge } from '@/components/ui/badge'
 import { BaseSheet } from '@/components/ui/base-sheet'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { dateFormatter } from '@/lib/date'
 import api from '@/lib/http'
+
+import { PaymentsCard } from './payments-card'
 
 const STRIPE_DASHBOARD_INVOICE_URL = (id: string) => `https://dashboard.stripe.com/invoices/${id}`
 
@@ -122,12 +137,16 @@ type InvoicesTabProps = {
 
 export function InvoicesTab({ orgId }: InvoicesTabProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<RawOrgInvoice | null>(null)
+  const [status, setStatus] = useState<InvoiceStatusFilter>(DEFAULT_INVOICE_STATUS)
   const columns = getColumns(orgId, (invoice) => setSelectedInvoice(invoice))
 
   const { data: invoices, isPending } = useQuery({
-    queryKey: ['org-invoices', orgId],
+    queryKey: ['org-invoices', orgId, status],
     queryFn: async () => {
-      return (await api.orgs.invoices({ params: { id: orgId } })) as { data: RawOrgInvoice[] }
+      return (await api.orgs.invoices({
+        params: { id: orgId },
+        query: { status } as never,
+      })) as { data: RawOrgInvoice[] }
     },
   })
 
@@ -135,14 +154,42 @@ export function InvoicesTab({ orgId }: InvoicesTabProps) {
 
   return (
     <>
-      <AppCard title='Invoices' description='Invoices for this organisation (from Stripe)'>
-        <DataTable
-          columns={columns}
-          data={invoiceList}
-          loading={isPending}
-          emptyMessage='No invoices yet.'
-        />
+      <AppCard
+        title='Billing invoices'
+        description='What this customer has been billed for their Togetha subscription (from Stripe)'>
+        <div className='space-y-4'>
+          <div className='w-full sm:max-w-xs space-y-1.5'>
+            <span className='text-xs font-medium text-muted-foreground'>Status</span>
+            <Select
+              value={status}
+              onValueChange={(value) => setStatus(value as InvoiceStatusFilter)}>
+              <SelectTrigger className='w-full'>
+                <SelectValue>{statusLabel(status)}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {INVOICE_STATUS_FILTERS.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {statusLabel(value)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={invoiceList}
+            loading={isPending}
+            emptyMessage={
+              status === 'all'
+                ? 'No invoices yet.'
+                : `No ${statusLabel(status).toLowerCase()} invoices. Try “All statuses”.`
+            }
+          />
+        </div>
       </AppCard>
+
+      <PaymentsCard orgId={orgId} />
 
       <BaseSheet
         open={!!selectedInvoice}
