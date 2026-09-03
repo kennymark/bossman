@@ -2,7 +2,7 @@ import logger from '@adonisjs/core/services/logger'
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
 
-import { worker } from '#boss/base'
+import { runsHostJobs, worker } from '#boss/base'
 import BackupRun from '#models/backup_run'
 import { SnitchService } from '#services/snitch_service'
 
@@ -26,7 +26,7 @@ export const backupHealthCheck = worker
   .input(vine.object({}))
   .retry({ limit: 3, delay: 300, backoff: true })
 
-backupHealthCheck.work(async () => {
+const checkBackupHealth = async () => {
   for (const appEnv of ['dev', 'prod'] as const) {
     const lastSuccess = await BackupRun.query()
       .where('appEnv', appEnv)
@@ -61,4 +61,12 @@ backupHealthCheck.work(async () => {
       },
     )
   }
-})
+}
+
+/**
+ * Only the deployed host alerts on backup health. A second subscriber would consume
+ * the hourly check and alert on the other host's behalf; see `runsHostJobs`.
+ */
+if (runsHostJobs()) {
+  backupHealthCheck.work(checkBackupHealth)
+}

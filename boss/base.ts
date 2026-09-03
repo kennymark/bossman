@@ -1,9 +1,11 @@
+import app from '@adonisjs/core/services/app'
 import logger from '@adonisjs/core/services/logger'
 import vine from '@vinejs/vine'
 import type { Infer } from '@vinejs/vine/types'
 import type { DateTime } from 'luxon'
 
 import boss from '#services/boss_service'
+import env from '#start/env'
 
 type VineSchema = Parameters<typeof vine.validate>[0]['schema']
 
@@ -133,4 +135,22 @@ async function ensureStarted() {
 export const worker = {
   createJob,
   ensureStarted,
+}
+
+/**
+ * Whether this process should run the jobs that belong to the deployed host.
+ *
+ * pg-boss schedules and queues live in the shared admin database, so a developer
+ * running the app locally registers the same crons as production and its worker
+ * competes for the same jobs. That is how a laptop ended up dumping the production
+ * database every six hours: it won the race for a `backup` job, failed on an older
+ * `pg_dump`, wrote a failed row into `backup_runs` and fired the critical alert, while
+ * the deployed server quietly succeeded a minute later.
+ *
+ * Backups, their health check and local dump pruning are infrastructure work tied to
+ * one host's disk and its `pg_dump`, so only production takes them on. Set
+ * `ENABLE_HOST_JOBS=true` to opt a local process in.
+ */
+export function runsHostJobs(): boolean {
+  return app.inProduction || env.get('ENABLE_HOST_JOBS') === true
 }

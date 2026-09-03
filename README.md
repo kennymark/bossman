@@ -187,6 +187,8 @@ Restores target a **named** database (`dev` or `prod`) whose connection string c
 
 Local dump files are a cache — R2 holds the artefact — and are pruned after each run and daily by `prune-local-backups`.
 
+Backups, their health check and dump pruning run **only on the deployed host**. Schedules and queues live in the shared admin database, so a developer running the app locally would otherwise register production's crons and compete for its jobs — which is how a laptop came to dump production every six hours and fail on an older `pg_dump`. Set `ENABLE_HOST_JOBS=true` to opt a local process in.
+
 ## Health checks
 
 `GET /health` returns liveness only (`{ isHealthy }`) to anonymous callers, so load balancer probes keep working without disclosing internals. The full report — every database connection, disk, memory — requires either a signed-in admin or the `x-monitoring-secret` header matching `HEALTH_CHECK_SECRET`.

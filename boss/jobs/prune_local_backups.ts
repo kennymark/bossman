@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine'
 
-import { worker } from '#boss/base'
+import { runsHostJobs, worker } from '#boss/base'
 import BackupService from '#services/backup_service'
 
 /**
@@ -16,6 +16,9 @@ export const pruneLocalBackups = worker
   .input(vine.object({ keep: vine.number().min(0).max(50).optional() }))
   .retry({ limit: 3, delay: 60, backoff: true })
 
-pruneLocalBackups.work(async (payload) => {
-  await new BackupService().pruneLocalBackups(payload.keep ?? 2)
-})
+/** Prunes this host's own dump directory; see `runsHostJobs`. */
+if (runsHostJobs()) {
+  pruneLocalBackups.work(async (payload) => {
+    await new BackupService().pruneLocalBackups(payload.keep ?? 2)
+  })
+}

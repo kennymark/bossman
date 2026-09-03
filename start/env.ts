@@ -83,6 +83,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   DEV_DB: Env.schema.string(),
   PROD_DB: Env.schema.string(),
 
+  /**
+   * Opt a non-production process into the jobs that belong to the deployed host —
+   * backups, their health check and local dump pruning. Off by default so a developer
+   * running the app does not compete with production for them.
+   */
+  ENABLE_HOST_JOBS: Env.schema.boolean.optional(),
+
   /** Base URL used to build links in invitation and account emails. */
   APP_URL: Env.schema.string(),
   NO_REPLY_EMAIL: Env.schema.string.optional(),

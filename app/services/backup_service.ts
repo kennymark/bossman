@@ -80,6 +80,23 @@ interface RunPgCommandOptions {
  * command — or worse. Arguments are passed as an array and the redirect is a real file
  * descriptor.
  */
+/**
+ * Turns a failed `pg_dump`/`psql` into something an operator can act on.
+ *
+ * The version mismatch is worth naming: `pg_dump` refuses to dump a server newer than
+ * itself, and the raw message says only that the versions differ. The fix is to
+ * install the client matching the server, which on the deployed host means the
+ * Postgres client in the image, not anything about this app's configuration.
+ */
+export function explainPgFailure(bin: string, code: number | null, stderr: string): string {
+  const base = `${bin} exited with code ${code}: ${stderr}`
+  const mismatch = stderr.match(/server version:\s*(\d+)[^\n]*?;\s*\w+ version:\s*(\d+)/i)
+  if (!mismatch) return base
+
+  const [, server, client] = mismatch
+  return `${base}\n\n${bin} ${client} cannot read a PostgreSQL ${server} server. Install PostgreSQL ${server}'s client tools on this host (macOS: brew install postgresql@${server}) and make sure its ${bin} is first on PATH.`
+}
+
 function runPgCommand(
   bin: 'pg_dump' | 'psql',
   args: string[],
@@ -131,7 +148,7 @@ function runPgCommand(
 
     child.on('close', (code) => {
       if (code === 0) return finish()
-      finish(new Error(`${bin} exited with code ${code}: ${stderr.trim().slice(0, 2000)}`))
+      finish(new Error(explainPgFailure(bin, code, stderr.trim().slice(0, 2000))))
     })
   })
 }

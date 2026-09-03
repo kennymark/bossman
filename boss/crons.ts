@@ -1,4 +1,6 @@
-import { worker } from '#boss/base'
+import logger from '@adonisjs/core/services/logger'
+
+import { runsHostJobs, worker } from '#boss/base'
 import { backup } from '#boss/jobs/backup'
 import { backupHealthCheck } from '#boss/jobs/backup_health_check'
 import { expireProdAccess } from '#boss/jobs/expire_prod_access'
@@ -11,6 +13,15 @@ import schedules from './schedules.js'
  * Starts boss if not already started, then registers each cron.
  */
 export async function registerCrons(): Promise<void> {
+  /**
+   * Schedules live in the shared admin database, so registering them from a laptop
+   * points production's own crons at a developer's machine. See `runsHostJobs`.
+   */
+  if (!runsHostJobs()) {
+    logger.info('Skipping cron registration: host jobs are off outside production')
+    return
+  }
+
   await worker.ensureStarted()
 
   await backup.scheduleCron(schedules.EVERY_6_HOURS, { database: 'prod' })

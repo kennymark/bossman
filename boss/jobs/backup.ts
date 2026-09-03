@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine'
 
-import { worker } from '#boss/base'
+import { runsHostJobs, worker } from '#boss/base'
 import BackupService from '#services/backup_service'
 
 export const backup = worker
@@ -13,7 +13,14 @@ export const backup = worker
   .retry({ limit: 10, backoff: true, delay: 10 })
   .deadLetter('failed-backup')
 
-backup.work(async (payload) => {
-  const backupService = new BackupService()
-  await backupService.createBackup(payload.database)
-})
+/**
+ * Only the deployed host runs this: the dump is written to its disk with its own
+ * `pg_dump`. A laptop subscribing here competes for production's backup jobs and
+ * fails them on whatever client version happens to be installed.
+ */
+if (runsHostJobs()) {
+  backup.work(async (payload) => {
+    const backupService = new BackupService()
+    await backupService.createBackup(payload.database)
+  })
+}
