@@ -9,6 +9,7 @@ import type { RawLease, RawUser } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
 import { timeAgo } from '#utils/date'
 import { formatNumber } from '#utils/functions'
+import { leaseTermLabel } from '#utils/lease_period'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import { DataAccessExpiredAlert } from '@/components/dashboard/data-access-expired-alert'
 import { DataTable } from '@/components/dashboard/data-table'
@@ -42,7 +43,7 @@ const columns: Column<RawLease>[] = [
         </Link>
         <Stack>
           <span className='text-xs text-muted-foreground'>
-            {dateFormatter(row.startDate)} - {dateFormatter(row.endDate)}
+            {leaseTermLabel(row, dateFormatter)}
           </span>
         </Stack>
       </div>

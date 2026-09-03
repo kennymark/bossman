@@ -5,6 +5,7 @@ import { IconPencil } from '@tabler/icons-react'
 import type { RawLease } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
 import { startCase } from '#utils/functions'
+import { leaseEndLabel } from '#utils/lease_period'
 import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import DetailRow from '@/components/dashboard/detail-row'
 import { type QuickActionOption, QuickActions } from '@/components/dashboard/quick-actions'
@@ -74,10 +75,7 @@ export default function LeaseShow({ lease }: LeaseShowProps) {
                 label='Start date'
                 value={lease.startDate ? dateFormatter(lease.startDate) : null}
               />
-              <DetailRow
-                label='End date'
-                value={lease.endDate ? dateFormatter(lease.endDate) : 'Rolling'}
-              />
+              <DetailRow label='End date' value={leaseEndLabel(lease, dateFormatter)} />
               <DetailRow
                 label='Deposit'
                 value={formatCurrency(lease.depositAmount, lease.currency)}

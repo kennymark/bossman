@@ -3,6 +3,7 @@ import { Link } from '@inertiajs/react'
 import type { Column } from '#types/extra'
 import type { RawLease } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
+import { leaseEndLabel } from '#utils/lease_period'
 import { LeaseStatusBadge } from '@/components/leases/status-badge'
 import { dateFormatter } from '@/lib/date'
 
@@ -41,6 +42,6 @@ export const leasesTableColumns: Column<RawLease>[] = [
     key: 'endDate',
     header: 'End',
     width: 110,
-    cell: (row) => (row.endDate ? dateFormatter(row.endDate) : '—'),
+    cell: (row) => leaseEndLabel(row, dateFormatter),
   },
 ]
