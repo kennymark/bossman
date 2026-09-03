@@ -171,13 +171,6 @@ export function PaymentsCard({ orgId }: PaymentsCardProps) {
   })
 
   const userOptions = users?.data ?? []
-  const selectedUser = userOptions.find((user) => user.id === tenantId)
-  /** Base UI renders the raw value unless it is given something to show. */
-  const userLabel =
-    tenantId === ALL_USERS
-      ? 'All users'
-      : (selectedUser?.name ?? selectedUser?.email ?? 'Selected user')
-
   const rows = data?.data ?? []
   const counts = data?.statusCounts ?? {}
   const totalAcrossStatuses = Object.values(counts).reduce((sum, count) => sum + count, 0)
@@ -200,7 +193,7 @@ export function PaymentsCard({ orgId }: PaymentsCardProps) {
                 reset()
               }}>
               <SelectTrigger className='w-full'>
-                <SelectValue>{userLabel}</SelectValue>
+                <SelectValue placeholder='All users' />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL_USERS}>All users</SelectItem>
@@ -222,7 +215,7 @@ export function PaymentsCard({ orgId }: PaymentsCardProps) {
                 reset()
               }}>
               <SelectTrigger className='w-full'>
-                <SelectValue>{statusLabel(status)}</SelectValue>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PAYMENT_STATUS_FILTERS.map((value) => (

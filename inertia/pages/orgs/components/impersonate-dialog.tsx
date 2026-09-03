@@ -177,20 +177,15 @@ export function ImpersonateDialog({
               }}
               disabled={targets.isLoading || !targets.data?.length}>
               <SelectTrigger className='w-full'>
-                {/* Given nothing to show, Base UI renders the raw value — here a user id. */}
-                {selected ? (
-                  <SelectValue>{selected.email}</SelectValue>
-                ) : (
-                  <SelectValue
-                    placeholder={
-                      targets.isLoading
-                        ? 'Loading users…'
-                        : targets.data?.length
-                          ? 'Choose a user'
-                          : 'No users found for this org'
-                    }
-                  />
-                )}
+                <SelectValue
+                  placeholder={
+                    targets.isLoading
+                      ? 'Loading users…'
+                      : targets.data?.length
+                        ? 'Choose a user'
+                        : 'No users found for this org'
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {targets.data?.map((target) => (

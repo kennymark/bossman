@@ -164,7 +164,7 @@ export function InvoicesTab({ orgId }: InvoicesTabProps) {
               value={status}
               onValueChange={(value) => setStatus(value as InvoiceStatusFilter)}>
               <SelectTrigger className='w-full'>
-                <SelectValue>{statusLabel(status)}</SelectValue>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {INVOICE_STATUS_FILTERS.map((value) => (

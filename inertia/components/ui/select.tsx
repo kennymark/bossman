@@ -2,11 +2,57 @@
 
 import { Select as SelectPrimitive } from '@base-ui/react/select'
 import { IconCheck, IconChevronDown, IconChevronUp } from '@tabler/icons-react'
-import type * as React from 'react'
+import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
-const Select = SelectPrimitive.Root
+type SelectItemsMap = NonNullable<React.ComponentProps<typeof SelectPrimitive.Root>['items']>
+type SelectItemsList = Extract<SelectItemsMap, ReadonlyArray<unknown>>
+
+/**
+ * Reads `value` and its label off every `SelectItem` in an element tree.
+ *
+ * This walks the JSX Base UI would render rather than the mounted DOM, so it works
+ * while the popup is closed — which is exactly when the trigger needs a label. Arrays
+ * from `.map()` and fragments are ordinary children, so recursion covers them.
+ */
+function collectSelectItems(node: React.ReactNode, found: Array<SelectItemsList[number]>) {
+  React.Children.forEach(node, (child) => {
+    if (!React.isValidElement(child)) return
+
+    if (child.type === SelectItem) {
+      const { value, children } = child.props as { value?: unknown; children?: React.ReactNode }
+      if (value !== undefined) found.push({ value, label: children })
+      return
+    }
+
+    const nested = (child.props as { children?: React.ReactNode }).children
+    if (nested) collectSelectItems(nested, found)
+  })
+}
+
+/**
+ * Shows what the reader picked, not the value behind it.
+ *
+ * Base UI renders the raw value in the trigger unless `Select.Root` is given an `items`
+ * map, so a status select read "paid" and a user select read a bare id. Deriving that
+ * map from the items already declared means every select in the app reads as its label
+ * without each call site restating one. Pass `items` explicitly to override.
+ */
+function Select({ items, children, ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
+  const derivedItems = React.useMemo(() => {
+    if (items) return items
+    const found: Array<SelectItemsList[number]> = []
+    collectSelectItems(children, found)
+    return found.length > 0 ? (found as SelectItemsMap) : undefined
+  }, [items, children])
+
+  return (
+    <SelectPrimitive.Root items={derivedItems} {...props}>
+      {children}
+    </SelectPrimitive.Root>
+  )
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
