@@ -16,6 +16,8 @@ test.group('pg command failures', () => {
     const message = explainPgFailure('pg_dump', 1, mismatch)
 
     assert.include(message, 'pg_dump 16 cannot read a PostgreSQL 17 server')
+    /** A newer client reads an older server, so the advice is a floor, not an exact version. */
+    assert.include(message, 'A client of 17 or newer can')
     assert.include(message, 'brew install postgresql@17')
     /** The original output is kept: it is what an operator pastes into a ticket. */
     assert.include(message, 'aborting because of server version mismatch')

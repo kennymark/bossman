@@ -84,9 +84,10 @@ interface RunPgCommandOptions {
  * Turns a failed `pg_dump`/`psql` into something an operator can act on.
  *
  * The version mismatch is worth naming: `pg_dump` refuses to dump a server newer than
- * itself, and the raw message says only that the versions differ. The fix is to
- * install the client matching the server, which on the deployed host means the
- * Postgres client in the image, not anything about this app's configuration.
+ * itself, and the raw message says only that the versions differ. A client of the
+ * server's major version or newer works, so the advice is a floor rather than an exact
+ * version — and on the deployed host it points at the image's Postgres client, not at
+ * anything in this app's configuration.
  */
 export function explainPgFailure(bin: string, code: number | null, stderr: string): string {
   const base = `${bin} exited with code ${code}: ${stderr}`
@@ -94,7 +95,7 @@ export function explainPgFailure(bin: string, code: number | null, stderr: strin
   if (!mismatch) return base
 
   const [, server, client] = mismatch
-  return `${base}\n\n${bin} ${client} cannot read a PostgreSQL ${server} server. Install PostgreSQL ${server}'s client tools on this host (macOS: brew install postgresql@${server}) and make sure its ${bin} is first on PATH.`
+  return `${base}\n\n${bin} ${client} cannot read a PostgreSQL ${server} server. A client of ${server} or newer can: install one on this host (macOS: brew install postgresql@${server}) and put its bin directory first on PATH.`
 }
 
 function runPgCommand(
