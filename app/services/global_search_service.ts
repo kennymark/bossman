@@ -267,7 +267,7 @@ const GROUPS: Record<SearchGroup, GroupDefinition> = {
 }
 
 /**
- * Record search behind the command palette.
+ * Record search for the header search field.
  *
  * Reads the customer database for `appEnv` only, with bound values and allow-listed
  * identifiers. Each group is queried independently and a failing group — typically a

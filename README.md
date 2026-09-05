@@ -159,7 +159,7 @@ Every index page has an **Export CSV** button. Exports apply the same filters as
 
 ## Global search
 
-`⌘K` searches records, not just pages: orgs (name, company, creator email, Stripe ids), users, tenants, leases, properties and maintenance requests. Trigram search uses the `<table>_search_text` columns the Togetha app maintains; the rest is ILIKE over an allow-list. Result groups are filtered by the caller's page grants.
+The header search field (⌘/ / Ctrl+/) queries records as you type: orgs (name, company, creator email, Stripe ids), users, tenants, leases, properties and maintenance requests. Trigram search uses the `<table>_search_text` columns the Togetha app maintains; the rest is ILIKE over an allow-list. Result groups are filtered by the caller's page grants. ⌘K opens the command palette for navigation and account actions only.
 
 ## Impersonation ("Log in as customer")
 

@@ -1,8 +1,8 @@
 import type { PageKey } from '#utils/page_access'
 
 /**
- * Pure helpers behind global record search. This file is imported by the command
- * palette, so it must stay free of AdonisJS services (see `agent.md`, landmine 1).
+ * Pure helpers behind global record search. This file is imported by the header
+ * search UI, so it must stay free of AdonisJS services (see `agent.md`, landmine 1).
  */
 
 export const SEARCH_GROUPS = [
@@ -116,7 +116,7 @@ export function filterSearchGroupsByPageAccess(
   return groups.filter((group) => allowed.has(SEARCH_GROUP_PAGE_KEY[group]))
 }
 
-/** Human labels for the palette's result rows. */
+/** Human labels for search result rows. */
 export const SEARCH_GROUP_LABELS: Record<SearchGroup, string> = {
   orgs: 'Customer',
   users: 'User',

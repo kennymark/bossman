@@ -33,7 +33,7 @@ import {
 import type { RawUser } from '#types/model-types'
 import { startCase } from '#utils/functions'
 import { CommandPalette } from '@/components/command-palette'
-import { GlobalSearchButton } from '@/components/dashboard/global-search-button'
+import { GlobalSearch } from '@/components/dashboard/global-search'
 import { NotificationCenter } from '@/components/notifications/notification-center'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { BaseSheet } from '@/components/ui/base-sheet'
@@ -485,7 +485,7 @@ export function Sidebar({ children }: SidebarProps) {
               )}
             </div>
             <div className='flex items-center gap-2'>
-              <GlobalSearchButton />
+              <GlobalSearch />
               {user?.id && <NotificationCenter userId={user.id} />}
             </div>
           </div>

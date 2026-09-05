@@ -103,7 +103,7 @@ router
     /** Drops the cached Railway reads; the next page load goes back to the API. */
     router.post('/railway/refresh', [RailwayController, 'refresh'])
 
-    /** Record search behind the command palette; results are filtered by page grant. */
+    /** Record search for the header field; results are filtered by page grant. */
     router.get('/search', [SearchController, 'index'])
 
     router.get('/billing/plans', [OrgBillingController, 'plans'])

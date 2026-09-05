@@ -24,20 +24,11 @@ import {
   IconStack,
   IconSun,
   IconTool,
-  IconUser,
   IconUsers,
-  IconUsersGroup,
 } from '@tabler/icons-react'
 import * as React from 'react'
 
 import type { PageKey } from '#utils/page_access'
-import {
-  MIN_QUERY_LENGTH,
-  SEARCH_GROUP_LABELS,
-  type SearchGroup,
-  type SearchResponse,
-  type SearchResult,
-} from '#utils/search'
 import {
   CommandDialog,
   CommandEmpty,
@@ -48,7 +39,6 @@ import {
   CommandSeparator,
 } from '@/components/ui/command'
 import { useTheme } from '@/hooks/use-theme'
-import api from '@/lib/http'
 
 type CommandEntry = {
   label: string
@@ -59,12 +49,10 @@ type CommandEntry = {
 }
 
 const OPEN_EVENT = 'command-palette:open'
-const SEARCH_DEBOUNCE_MS = 250
 
 /**
- * Opens the palette from anywhere — the header search button, a keyboard hint, a
- * toast action. The palette listens for the event while mounted, so callers need no
- * reference to it.
+ * Opens the palette from anywhere — a keyboard hint, a toast action. The palette
+ * listens for the event while mounted, so callers need no reference to it.
  */
 export function openCommandPalette() {
   window.dispatchEvent(new Event(OPEN_EVENT))
@@ -77,59 +65,10 @@ function isEditableTarget(target: EventTarget | null) {
   return target.isContentEditable
 }
 
-const GROUP_ICONS: Record<SearchGroup, React.ReactNode> = {
-  orgs: <IconBuilding className='mr-2 h-4 w-4 shrink-0' />,
-  users: <IconUser className='mr-2 h-4 w-4 shrink-0' />,
-  tenants: <IconUsersGroup className='mr-2 h-4 w-4 shrink-0' />,
-  leases: <IconFileText className='mr-2 h-4 w-4 shrink-0' />,
-  properties: <IconStack className='mr-2 h-4 w-4 shrink-0' />,
-  maintenance: <IconTool className='mr-2 h-4 w-4 shrink-0' />,
-}
-
-type SearchStatus = 'idle' | 'loading' | 'done' | 'error'
-
 /**
- * Debounced record search. Results are keyed to the query that produced them, so a
- * slow response for an earlier query can never overwrite a newer one.
+ * Cmd+K command palette for navigation, theme, and account actions.
+ * Record search lives in the header `GlobalSearch` field (⌘/), not here.
  */
-function useRecordSearch(query: string, enabled: boolean) {
-  const [status, setStatus] = React.useState<SearchStatus>('idle')
-  const [results, setResults] = React.useState<SearchResult[]>([])
-  const latest = React.useRef(0)
-
-  React.useEffect(() => {
-    const q = query.trim()
-    if (!enabled || q.length < MIN_QUERY_LENGTH) {
-      latest.current += 1
-      setStatus('idle')
-      setResults([])
-      return
-    }
-
-    const requestId = ++latest.current
-    setStatus('loading')
-
-    const timer = window.setTimeout(async () => {
-      try {
-        const res = (await api.search.index({
-          query: { q } as never,
-        })) as unknown as SearchResponse
-        if (requestId !== latest.current) return
-        setResults(Array.isArray(res?.results) ? res.results : [])
-        setStatus('done')
-      } catch {
-        if (requestId !== latest.current) return
-        setResults([])
-        setStatus('error')
-      }
-    }, SEARCH_DEBOUNCE_MS)
-
-    return () => window.clearTimeout(timer)
-  }, [query, enabled])
-
-  return { status, results }
-}
-
 export function CommandPalette() {
   const page = usePage<SharedProps>()
   const isLoggedIn = Boolean(page.props.isLoggedIn)
@@ -137,10 +76,6 @@ export function CommandPalette() {
   const pageAccess = (page.props as SharedProps & { pageAccess?: PageKey[] | null }).pageAccess
 
   const [open, setOpen] = React.useState(false)
-  const [query, setQuery] = React.useState('')
-
-  const searching = query.trim().length >= MIN_QUERY_LENGTH
-  const { status, results } = useRecordSearch(query, open && isLoggedIn)
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -164,11 +99,6 @@ export function CommandPalette() {
     }
   }, [])
 
-  /** A reopened palette starts clean rather than on the last search. */
-  React.useEffect(() => {
-    if (!open) setQuery('')
-  }, [open])
-
   const go = React.useCallback((href: string) => {
     setOpen(false)
     router.visit(href)
@@ -182,7 +112,6 @@ export function CommandPalette() {
     [setTheme],
   )
 
-  // CmdK is only mounted in dashboard layouts, but keep a guard anyway.
   if (!isLoggedIn) return null
 
   const appNav: CommandEntry[] = [
@@ -310,70 +239,11 @@ export function CommandPalette() {
     return appNav.filter((i) => !i.requires || pageAccess.includes(i.requires))
   })()
 
-  const showResults = searching && results.length > 0
-  const resultsMessage = (() => {
-    if (!searching) return null
-    if (status === 'loading') return 'Searching…'
-    if (status === 'error') return 'Search is unavailable right now.'
-    if (status === 'done' && results.length === 0) return 'No records'
-    return null
-  })()
-
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput
-        placeholder='Search records or type a command…'
-        value={query}
-        onValueChange={setQuery}
-      />
+      <CommandInput placeholder='Type a command…' />
       <CommandList>
-        {/*
-         * cmdk's own empty state counts only items that pass its filter, which the
-         * force-mounted results never do. While searching the message below stands in
-         * for it.
-         */}
-        {!searching && <CommandEmpty>No results found.</CommandEmpty>}
-
-        {resultsMessage && (
-          <div className='px-3 py-3 text-xs text-muted-foreground' aria-live='polite'>
-            {resultsMessage}
-          </div>
-        )}
-
-        {showResults && (
-          <>
-            {/*
-             * Results are fetched for the typed query, so cmdk must not filter them
-             * again: `forceMount` keeps every row rendered and keyboard-selectable.
-             */}
-            <CommandGroup heading='Results' forceMount>
-              {results.map((item) => (
-                <CommandItem
-                  key={`${item.group}:${item.id}`}
-                  forceMount
-                  className='cursor-pointer py-2'
-                  value={`result:${item.group}:${item.id}`}
-                  onSelect={() => go(item.href)}>
-                  {GROUP_ICONS[item.group]}
-                  <div className='flex min-w-0 flex-1 flex-col'>
-                    <span className='truncate'>{item.title}</span>
-                    {item.subtitle && (
-                      <span className='truncate text-xs text-muted-foreground'>
-                        {item.subtitle}
-                      </span>
-                    )}
-                  </div>
-                  <span className='ml-2 shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground'>
-                    {item.badge
-                      ? `${SEARCH_GROUP_LABELS[item.group]} · ${item.badge}`
-                      : SEARCH_GROUP_LABELS[item.group]}
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            <CommandSeparator />
-          </>
-        )}
+        <CommandEmpty>No results found.</CommandEmpty>
 
         <CommandGroup heading='App'>
           {visibleAppNav.map((item) => (

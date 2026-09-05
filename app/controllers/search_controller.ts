@@ -6,7 +6,7 @@ import { filterSearchGroupsByPageAccess, parseSearchGroups } from '#utils/search
 import { searchValidator } from '#validators/search'
 
 /**
- * Record search behind the command palette.
+ * Record search for the header search field.
  *
  * `/api/v1/search` names no page, so the route group's `pageAccess` gate lets every
  * admin through. The groups are filtered here against the caller's grants instead: a
