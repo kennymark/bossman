@@ -14,7 +14,7 @@ It is an operator console rather than a customer-facing product: it reads and wr
 | Data     | TanStack Query (client), VineJS (validation), Formik (multi-step) |
 | Database | PostgreSQL (three connections — see below)                        |
 | Jobs     | pg-boss                                                           |
-| Search   | Meilisearch                                                       |
+| Search   | PostgreSQL (pg_trgm + ILIKE)                                       |
 | Runtime  | Node 24+, npm 10+                                                 |
 
 ## The three databases
