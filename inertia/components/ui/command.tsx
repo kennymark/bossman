@@ -104,13 +104,21 @@ CommandSeparator.displayName = CommandPrimitive.Separator.displayName
 const CommandItem = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
->(({ className, ...props }, ref) => (
+>(({ className, onMouseDown, ...props }, ref) => (
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
       'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
+    onMouseDown={(e) => {
+      /**
+       * cmdk often skips onSelect on mouse click inside dialogs because the
+       * input blurs first. Keeping default prevented lets the click select.
+       */
+      if (e.button === 0) e.preventDefault()
+      onMouseDown?.(e)
+    }}
     {...props}
   />
 ))

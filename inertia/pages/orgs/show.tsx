@@ -2,6 +2,7 @@ import type { SharedProps } from '@adonisjs/inertia/types'
 import { Head, Link, router, usePage } from '@inertiajs/react'
 import {
   IconBuildingStore,
+  IconFileText,
   IconFlask,
   IconPencil,
   IconShieldLock,
@@ -14,7 +15,7 @@ import {
 } from '@tabler/icons-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useFormik } from 'formik'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import * as Yup from 'yup'
 
@@ -27,6 +28,7 @@ import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import DetailRow from '@/components/dashboard/detail-row'
 import { type QuickActionOption, QuickActions } from '@/components/dashboard/quick-actions'
 import { DateTimePicker, OnlyShowIf, SimpleGrid } from '@/components/ui'
+import { useRegisterPageCommands } from '@/contexts/page-commands'
 import { AppCard } from '@/components/ui/app-card'
 import { Badge } from '@/components/ui/badge'
 import { BaseDialog } from '@/components/ui/base-dialog'
@@ -279,6 +281,38 @@ export default function OrgShow({ org, isLoopsUser }: OrgShowProps) {
       onClick: () => setRequestDeleteDialogOpen(true),
     },
   ]
+
+  const headerCommands = useMemo(
+    () => [
+      {
+        id: 'edit-org',
+        label: 'Edit customer',
+        description: 'Open the customer edit form.',
+        keywords: 'edit org organisation',
+        icon: <IconPencil className='mr-2 h-4 w-4' />,
+        onSelect: () => router.visit(`/orgs/${id}/edit`),
+      },
+      {
+        id: 'create-invoice',
+        label: 'Create invoice',
+        description: 'Create a new invoice for this customer.',
+        keywords: 'billing invoice',
+        icon: <IconFileText className='mr-2 h-4 w-4' />,
+        onSelect: () => router.visit(`/orgs/${id}/invoices/create`),
+      },
+      {
+        id: 'audit-trail',
+        label: 'Audit trail',
+        description: 'View admin actions for this customer.',
+        keywords: 'audit log history',
+        icon: <IconShieldLock className='mr-2 h-4 w-4' />,
+        onSelect: () => router.visit(`/audits?targetType=Org&targetId=${id}`),
+      },
+    ],
+    [id],
+  )
+
+  useRegisterPageCommands(headerCommands, 'org-header')
 
   return (
     <DashboardPage

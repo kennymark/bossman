@@ -1,6 +1,6 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
 import { Link } from '@inertiajs/react'
-import { IconPencil } from '@tabler/icons-react'
+import { IconBuilding, IconPencil, IconStack } from '@tabler/icons-react'
 
 import type { RawLease } from '#types/model-types'
 import { formatCurrency } from '#utils/currency'
@@ -36,8 +36,21 @@ export default function LeaseShow({ lease }: LeaseShowProps) {
       title: 'Edit lease',
       description: 'Open the lease edit page to change details.',
       icon: IconPencil,
-      dontShowIf: false,
       href: `/leases/${lease.id}/edit`,
+    },
+    {
+      title: 'Open property',
+      description: 'Go to the property for this lease.',
+      icon: IconStack,
+      href: `/properties/${lease.leaseableEntityId}`,
+      dontShowIf: !lease.leaseableEntityId,
+    },
+    {
+      title: 'Open customer',
+      description: 'Go to the organisation for this lease.',
+      icon: IconBuilding,
+      href: `/orgs/${lease.orgId}`,
+      dontShowIf: !lease.orgId,
     },
   ]
 

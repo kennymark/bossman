@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { LoadingSkeleton } from '@/components/ui/loading'
 import { SimpleGrid } from '@/components/ui/simplegrid'
+import { useRegisterPageCommands } from '@/contexts/page-commands'
 import { dateTimeFormatter } from '@/lib/date'
 import api from '@/lib/http'
 
@@ -79,6 +80,41 @@ export default function JobShow({ jobId }: JobShowProps) {
   const previousJobId = job ? previousJobIdOf(job.data) : null
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['jobs', appEnv] })
+
+  useRegisterPageCommands(
+    !job || notFound
+      ? []
+      : [
+          {
+            id: 'refresh-job',
+            label: 'Refresh',
+            description: 'Reload this job from the store.',
+            icon: <IconRefresh className='mr-2 h-4 w-4' />,
+            onSelect: refresh,
+          },
+          ...(canMutate
+            ? [
+                {
+                  id: 'rerun-job',
+                  label: 'Re-run',
+                  description: 'Queue this job again with the same payload.',
+                  keywords: 'rerun retry',
+                  icon: <IconPlayerPlay className='mr-2 h-4 w-4' />,
+                  onSelect: () => setRerunTarget({ id: job.id, name: job.name }),
+                },
+                {
+                  id: 'delete-job',
+                  label: 'Delete',
+                  description: 'Remove this job from the store.',
+                  keywords: 'remove destroy',
+                  icon: <IconTrash className='mr-2 h-4 w-4' />,
+                  onSelect: () => setDeleteTarget({ id: job.id, name: job.name }),
+                },
+              ]
+            : []),
+        ],
+    'job-detail',
+  )
 
   return (
     <DashboardPage

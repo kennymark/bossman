@@ -1,5 +1,7 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
-import { Deferred, Link } from '@inertiajs/react'
+import { Deferred, Link, router } from '@inertiajs/react'
+import { IconBuilding, IconFileText, IconStack } from '@tabler/icons-react'
+import { useMemo } from 'react'
 
 import type { RawActivity, RawMaintenanceRequest } from '#types/model-types'
 import { timeAgo } from '#utils/date'
@@ -16,6 +18,7 @@ import {
 } from '@/components/maintenance'
 import { Badge, LoadingSkeleton } from '@/components/ui'
 import { AppCard } from '@/components/ui/app-card'
+import { type PageCommand, useRegisterPageCommands } from '@/contexts/page-commands'
 import { dateFormatter } from '@/lib/date'
 
 interface ActivityRow {
@@ -53,6 +56,42 @@ export default function MaintenanceShow({ maintenanceRequest, activities }: Main
       : null
 
   const availableDays = Array.isArray(request.availableDays) ? request.availableDays : []
+
+  const pageCommands = useMemo(() => {
+    const commands: PageCommand[] = []
+    const orgId = request.org?.id ?? request.orgId
+    if (orgId) {
+      commands.push({
+        id: 'view-org',
+        label: 'Open customer',
+        description: 'Go to the linked organisation.',
+        keywords: 'org organisation customer',
+        icon: <IconBuilding className='mr-2 h-4 w-4' />,
+        onSelect: () => router.visit(`/orgs/${orgId}`),
+      })
+    }
+    if (request.leaseId) {
+      commands.push({
+        id: 'view-lease',
+        label: 'Open lease',
+        description: leaseDisplayName(request.lease) ?? 'Go to the linked lease.',
+        icon: <IconFileText className='mr-2 h-4 w-4' />,
+        onSelect: () => router.visit(`/leases/${request.leaseId}`),
+      })
+    }
+    if (propertyHref) {
+      commands.push({
+        id: 'view-property',
+        label: 'Open property',
+        description: property ?? 'Go to the linked property.',
+        icon: <IconStack className='mr-2 h-4 w-4' />,
+        onSelect: () => router.visit(propertyHref),
+      })
+    }
+    return commands
+  }, [request, property, propertyHref])
+
+  useRegisterPageCommands(pageCommands, 'maintenance-detail')
 
   return (
     <DashboardPage

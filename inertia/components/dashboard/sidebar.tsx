@@ -32,8 +32,9 @@ import {
 
 import type { RawUser } from '#types/model-types'
 import { startCase } from '#utils/functions'
-import { CommandPalette } from '@/components/command-palette'
+import { CommandPalette, CommandPaletteTrigger } from '@/components/command-palette'
 import { GlobalSearch } from '@/components/dashboard/global-search'
+import { PageCommandsProvider } from '@/contexts/page-commands'
 import { NotificationCenter } from '@/components/notifications/notification-center'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { BaseSheet } from '@/components/ui/base-sheet'
@@ -442,56 +443,63 @@ export function Sidebar({ children }: SidebarProps) {
   )
 
   return (
-    <div className='flex h-screen overflow-hidden bg-background'>
-      {/* Desktop Sidebar */}
-      <aside
-        className={cn(
-          'hidden md:flex min-h-0 flex-col border-r border-sidebar-border bg-sidebar shadow-sm transition-all duration-300',
-          isOpen ? 'w-64' : 'w-16',
-        )}
-        style={{
-          backgroundColor: 'var(--sidebar-background)',
-          color: 'var(--sidebar-foreground)',
-        }}>
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile Sidebar Sheet */}
-      {isMobile && (
-        <BaseSheet
-          open={isMobileMenuOpen}
-          onOpenChange={closeMobileMenu}
-          side='left'
-          className='w-64 p-0 bg-sidebar'
-          contentStyle={{
+    <PageCommandsProvider>
+      <div className='flex h-screen overflow-hidden bg-background'>
+        {/* Desktop Sidebar */}
+        <aside
+          className={cn(
+            'hidden md:flex min-h-0 flex-col border-r border-sidebar-border bg-sidebar shadow-sm transition-all duration-300',
+            isOpen ? 'w-64' : 'w-16',
+          )}
+          style={{
             backgroundColor: 'var(--sidebar-background)',
             color: 'var(--sidebar-foreground)',
           }}>
           <SidebarContent />
-        </BaseSheet>
-      )}
+        </aside>
 
-      {/* Main content */}
-      <main className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-background'>
-        <CommandPalette />
-        {/* Header */}
-        <div className='sticky top-0 z-30 border-b border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 supports-[backdrop-filter]:backdrop-blur-sm'>
-          <div className='w-full flex h-16 items-center justify-between gap-2 px-4 sm:px-6'>
-            <div className='flex items-center gap-2'>
-              {isMobile && (
-                <Button variant='ghost' size='icon' onClick={openMobileMenu} aria-label='Open menu'>
-                  <IconMenu2 className='h-5 w-5' />
-                </Button>
-              )}
-            </div>
-            <div className='flex items-center gap-2'>
-              <GlobalSearch />
-              {user?.id && <NotificationCenter userId={user.id} />}
+        {/* Mobile Sidebar Sheet */}
+        {isMobile && (
+          <BaseSheet
+            open={isMobileMenuOpen}
+            onOpenChange={closeMobileMenu}
+            side='left'
+            className='w-64 p-0 bg-sidebar'
+            contentStyle={{
+              backgroundColor: 'var(--sidebar-background)',
+              color: 'var(--sidebar-foreground)',
+            }}>
+            <SidebarContent />
+          </BaseSheet>
+        )}
+
+        {/* Main content */}
+        <main className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-background'>
+          <CommandPalette />
+          {/* Header */}
+          <div className='sticky top-0 z-30 border-b border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 supports-[backdrop-filter]:backdrop-blur-sm'>
+            <div className='w-full flex h-16 items-center justify-between gap-2 px-4 sm:px-6'>
+              <div className='flex items-center gap-2'>
+                {isMobile && (
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    onClick={openMobileMenu}
+                    aria-label='Open menu'>
+                    <IconMenu2 className='h-5 w-5' />
+                  </Button>
+                )}
+              </div>
+              <div className='flex items-center gap-2'>
+                <GlobalSearch />
+                <CommandPaletteTrigger />
+                {user?.id && <NotificationCenter userId={user.id} />}
+              </div>
             </div>
           </div>
-        </div>
-        <div className='container mx-auto p-4 sm:p-6'>{children}</div>
-      </main>
-    </div>
+          <div className='container mx-auto p-4 sm:p-6'>{children}</div>
+        </main>
+      </div>
+    </PageCommandsProvider>
   )
 }

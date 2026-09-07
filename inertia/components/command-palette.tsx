@@ -23,6 +23,7 @@ import {
   IconSquarePlus,
   IconStack,
   IconSun,
+  IconTerminal2,
   IconTool,
   IconUsers,
 } from '@tabler/icons-react'
@@ -38,7 +39,9 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
+import { usePageCommands } from '@/contexts/page-commands'
 import { useTheme } from '@/hooks/use-theme'
+import { cn } from '@/lib/utils'
 
 type CommandEntry = {
   label: string
@@ -65,8 +68,42 @@ function isEditableTarget(target: EventTarget | null) {
   return target.isContentEditable
 }
 
+function useCommandShortcutLabel() {
+  const [label, setLabel] = React.useState('⌘K')
+
+  React.useEffect(() => {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+    setLabel(isMac ? '⌘K' : 'Ctrl K')
+  }, [])
+
+  return label
+}
+
+/** Header control that opens the command palette with a mouse click. */
+export function CommandPaletteTrigger({ className }: { className?: string }) {
+  const shortcut = useCommandShortcutLabel()
+
+  return (
+    <button
+      type='button'
+      onClick={() => openCommandPalette()}
+      className={cn(
+        'inline-flex h-9 items-center gap-2 rounded-md border border-border bg-background px-2.5 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground',
+        className,
+      )}
+      aria-label='Open command palette'
+      aria-keyshortcuts='Meta+K Control+K'>
+      <IconTerminal2 className='h-4 w-4 shrink-0' />
+      <span className='hidden sm:inline'>Commands</span>
+      <kbd className='pointer-events-none hidden h-5 select-none items-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex'>
+        {shortcut}
+      </kbd>
+    </button>
+  )
+}
+
 /**
- * Cmd+K command palette for navigation, theme, and account actions.
+ * Cmd+K command palette for navigation, theme, account, and page-contextual actions.
  * Record search lives in the header `GlobalSearch` field (⌘/), not here.
  */
 export function CommandPalette() {
@@ -74,6 +111,7 @@ export function CommandPalette() {
   const isLoggedIn = Boolean(page.props.isLoggedIn)
   const { theme, setTheme } = useTheme()
   const pageAccess = (page.props as SharedProps & { pageAccess?: PageKey[] | null }).pageAccess
+  const pageCommands = usePageCommands()
 
   const [open, setOpen] = React.useState(false)
 
@@ -99,17 +137,27 @@ export function CommandPalette() {
     }
   }, [])
 
-  const go = React.useCallback((href: string) => {
+  const run = React.useCallback((action: () => void) => {
     setOpen(false)
-    router.visit(href)
+    /**
+     * Close the dialog before running the action so sheets/dialogs opened by
+     * page commands are not fighting the palette for focus.
+     */
+    queueMicrotask(action)
   }, [])
+
+  const go = React.useCallback(
+    (href: string) => {
+      run(() => router.visit(href))
+    },
+    [run],
+  )
 
   const selectTheme = React.useCallback(
     (next: 'light' | 'dark' | 'system') => {
-      setOpen(false)
-      setTheme(next)
+      run(() => setTheme(next))
     },
-    [setTheme],
+    [run, setTheme],
   )
 
   if (!isLoggedIn) return null
@@ -245,6 +293,31 @@ export function CommandPalette() {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 
+        {pageCommands.length > 0 ? (
+          <>
+            <CommandGroup heading='This page'>
+              {pageCommands.map((item) => (
+                <CommandItem
+                  key={item.id}
+                  className='cursor-pointer py-2'
+                  value={`${item.label} ${item.keywords || ''} ${item.description || ''}`}
+                  onSelect={() => run(() => item.onSelect())}>
+                  {item.icon}
+                  <div className='flex min-w-0 flex-col'>
+                    <span>{item.label}</span>
+                    {item.description ? (
+                      <span className='truncate text-xs text-muted-foreground'>
+                        {item.description}
+                      </span>
+                    ) : null}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        ) : null}
+
         <CommandGroup heading='App'>
           {visibleAppNav.map((item) => (
             <CommandItem
@@ -260,12 +333,18 @@ export function CommandPalette() {
 
         <CommandSeparator />
         <CommandGroup heading='Theme'>
-          <CommandItem value='Theme: Light' onSelect={() => selectTheme('light')}>
+          <CommandItem
+            className='cursor-pointer'
+            value='Theme: Light'
+            onSelect={() => selectTheme('light')}>
             <IconSun className='mr-2 h-4 w-4' />
             Light
             {theme === 'light' ? <IconCheck className='ml-auto h-4 w-4' /> : null}
           </CommandItem>
-          <CommandItem value='Theme: Dark' onSelect={() => selectTheme('dark')}>
+          <CommandItem
+            className='cursor-pointer'
+            value='Theme: Dark'
+            onSelect={() => selectTheme('dark')}>
             <IconMoon className='mr-2 h-4 w-4' />
             Dark
             {theme === 'dark' ? <IconCheck className='ml-auto h-4 w-4' /> : null}
@@ -277,6 +356,7 @@ export function CommandPalette() {
           {accountActions.map((item) => (
             <CommandItem
               key={item.href}
+              className='cursor-pointer'
               value={`${item.label} ${item.keywords || ''}`}
               onSelect={() => go(item.href)}>
               {item.icon}

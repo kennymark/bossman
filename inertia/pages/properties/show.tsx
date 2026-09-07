@@ -1,5 +1,7 @@
 import type { SharedProps } from '@adonisjs/inertia/types'
-import { Link, router, usePage } from '@inertiajs/react'
+import { router } from '@inertiajs/react'
+import { IconBuilding } from '@tabler/icons-react'
+import { useMemo } from 'react'
 
 import type { RawLeaseableEntity } from '#types/model-types'
 import { startCase } from '#utils/functions'
@@ -7,15 +9,12 @@ import { DashboardPage } from '@/components/dashboard/dashboard-page'
 import DetailRow from '@/components/dashboard/detail-row'
 import { AppCard } from '@/components/ui/app-card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { type PageCommand, useRegisterPageCommands } from '@/contexts/page-commands'
 import { useInertiaParams } from '@/hooks/use-inertia-params'
 
 import { ActivityTab } from './components/activity-tab'
 import { LeasesTab } from './components/leases-tab'
-
-const validTabs = ['details', 'leases', 'activity'] as const
 
 interface PropertyShowProps extends SharedProps {
   property: RawLeaseableEntity
@@ -29,6 +28,22 @@ export default function PropertyShow({ property }: PropertyShowProps) {
   const handleTabChange = (value: string) => {
     updateQuery({ tab: value })
   }
+
+  const pageCommands = useMemo<PageCommand[]>(() => {
+    if (!property.orgId) return []
+    return [
+      {
+        id: 'view-org',
+        label: 'Open customer',
+        description: 'Go to the organisation that owns this property.',
+        keywords: 'org organisation customer',
+        icon: <IconBuilding className='mr-2 h-4 w-4' />,
+        onSelect: () => router.visit(`/orgs/${property.orgId}`),
+      },
+    ]
+  }, [property.orgId])
+
+  useRegisterPageCommands(pageCommands, 'property-detail')
 
   return (
     <DashboardPage

@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { type PageCommand, useRegisterPageCommands } from '@/contexts/page-commands'
 import { cn } from '@/lib/utils'
 
 function isIconComponent(icon: Icon | ReactNode): icon is Icon {
@@ -38,10 +39,43 @@ interface QuickActionsProps {
   options: QuickActionOption[]
   /** Optional class for the wrapper. */
   className?: string
+  /**
+   * Cmd+K registration source. Override when a page registers multiple QuickActions.
+   * @default 'quick-actions'
+   */
+  commandSourceId?: string
 }
 
-export function QuickActions({ options, className: classNameProp }: QuickActionsProps) {
+function optionIcon(icon: Icon | ReactNode) {
+  if (isIconComponent(icon)) {
+    return React.createElement(icon, { className: 'mr-2 h-4 w-4 shrink-0' })
+  }
+  return <span className='mr-2 [&_svg]:h-4 [&_svg]:w-4 shrink-0'>{icon}</span>
+}
+
+export function QuickActions({
+  options,
+  className: classNameProp,
+  commandSourceId = 'quick-actions',
+}: QuickActionsProps) {
   const visible = options.filter((opt) => !opt.dontShowIf)
+
+  const pageCommands: PageCommand[] = visible.map((opt) => ({
+    id: `${opt.title}-${opt.href ?? 'action'}`,
+    label: opt.title,
+    description: opt.description,
+    keywords: `${opt.title} ${opt.description}`,
+    icon: optionIcon(opt.icon),
+    onSelect: () => {
+      if (opt.href != null) {
+        router.visit(opt.href)
+      } else {
+        opt.onClick?.()
+      }
+    },
+  }))
+
+  useRegisterPageCommands(pageCommands, commandSourceId)
 
   if (visible.length === 0) return null
 
