@@ -11,6 +11,7 @@ export default class extends BaseSeeder {
         email: 'kenneth@togetha.co.uk',
         password: 'password',
         role: 'super_admin',
+        isGodAdmin: true,
         emailVerified: true,
         emailVerifiedAt: DateTime.now(),
       },

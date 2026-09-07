@@ -1,5 +1,19 @@
 import { defineConfig } from 'adonisjs-server-stats'
 
+import env from '#start/env'
+
+/**
+ * Keep this inline in the config file (not a `#utils` import) so a hot-hook reload of
+ * the stats package cannot pull application modules into the config graph mid-request.
+ * Transmit uses the same rules via `#utils/server_stats_access`.
+ */
+function canAccessServerStats(user: { isGodAdmin?: boolean; role?: string } | null | undefined) {
+  if (!user) return false
+  if (user.isGodAdmin) return true
+  if (env.get('NODE_ENV') === 'production') return false
+  return user.role === 'admin' || user.role === 'super_admin'
+}
+
 export default defineConfig({
   /**
    * Who may read the stats endpoint and see the toolbar.
@@ -8,7 +22,7 @@ export default defineConfig({
    * resolved the session. That middleware used to skip this very path, which meant the
    * guard always saw an anonymous request and denied everyone — do not add a skip back.
    */
-  authorize: (ctx) => Boolean(ctx.auth.user?.isGodAdmin),
+  authorize: (ctx) => canAccessServerStats(ctx.auth?.user),
 
   /**
    * How often the client polls for stats, in milliseconds. Higher means fewer HTTP
@@ -48,11 +62,11 @@ export default defineConfig({
    * That is why the deployed app rendered the literal text `@serverStats()`: an
    * unregistered Edge tag is emitted verbatim.
    *
-   * Enabling requires the `authorize` guard above, which limits both the endpoint and
-   * the toolbar to god admins. `capture` is deliberately omitted: every capture
-   * subsystem defaults to off in production, so metrics are collected but request
-   * bodies and queries are not. Set `enabled: false` to turn the whole thing off in
-   * production again.
+   * Enabling requires the `authorize` guard above. In production that means god
+   * admins only; locally any signed-in admin can use the toolbar. `capture` is
+   * deliberately omitted: every capture subsystem defaults to off in production, so
+   * metrics are collected but request bodies and queries are not. Set
+   * `enabled: false` to turn the whole thing off in production again.
    */
   production: {
     enabled: true,

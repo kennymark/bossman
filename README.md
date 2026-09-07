@@ -139,7 +139,7 @@ Drop a file in `boss/jobs/` and it is picked up automatically. Register recurrin
 | `config/shield.ts`       | CSRF, HSTS, frame options                          |
 | `config/inertia.ts`      | Root view, SSR                                     |
 | `config/boss.ts`         | pg-boss connection and schema                      |
-| `config/server_stats.ts` | Stats toolbar; `authorize` limits it to god admins |
+| `config/server_stats.ts` | Stats toolbar; god admins always, any admin outside production |
 | `start/routes.ts`        | Web routes and route groups                        |
 | `start/api/api.ts`       | `/api/v1` routes                                   |
 | `start/kernel.ts`        | Middleware stacks and ordering                     |
