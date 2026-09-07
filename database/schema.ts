@@ -251,7 +251,7 @@ export class PasswordResetSchema extends BaseModel {
 }
 
 export class PushNotificationSchema extends BaseModel {
-  static $columns = ['id', 'targetType', 'targetUserIds', 'title', 'description', 'imageUrl', 'url', 'scheduledAt', 'sentAt', 'status', 'oneSignalResponse', 'errorMessage', 'createdAt', 'updatedAt'] as const
+  static $columns = ['id', 'targetType', 'targetUserIds', 'title', 'description', 'imageUrl', 'url', 'scheduledAt', 'sentAt', 'status', 'oneSignalResponse', 'errorMessage', 'createdAt', 'updatedAt', 'appEnv'] as const
   $columns = PushNotificationSchema.$columns
   @column({ isPrimary: true })
   declare id: string
@@ -281,6 +281,8 @@ export class PushNotificationSchema extends BaseModel {
   declare createdAt: DateTime | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+  @column()
+  declare appEnv: string
 }
 
 export class RateLimitSchema extends BaseModel {
@@ -372,7 +374,7 @@ export class TeamInvitationSchema extends BaseModel {
 }
 
 export class TeamMemberSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'role', 'allowedPages', 'enableProdAccess', 'createdAt', 'updatedAt', 'dataAccessMode', 'allowedLeaseableEntityIds', 'allowedLeaseIds', 'propertiesAccessMode', 'leasesAccessMode', 'dataAccessExpiresAt', 'prodAccessExpiresAt'] as const
+  static $columns = ['id', 'userId', 'role', 'allowedPages', 'enableProdAccess', 'createdAt', 'updatedAt', 'dataAccessMode', 'allowedLeaseableEntityIds', 'allowedLeaseIds', 'propertiesAccessMode', 'leasesAccessMode', 'dataAccessExpiresAt', 'prodAccessExpiresAt', 'prodAccessMode'] as const
   $columns = TeamMemberSchema.$columns
   @column({ isPrimary: true })
   declare id: string
@@ -402,10 +404,12 @@ export class TeamMemberSchema extends BaseModel {
   declare dataAccessExpiresAt: DateTime | null
   @column.dateTime()
   declare prodAccessExpiresAt: DateTime | null
+  @column()
+  declare prodAccessMode: string
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['id', 'fullName', 'email', 'password', 'role', 'avatar', 'googleData', 'token', 'pendingEmail', 'emailVerified', 'emailVerifiedAt', 'emailChangeToken', 'settings', 'twoFactorEnabled', 'twoFactorSecret', 'twoFactorRecoveryCodes', 'lastLoginAt', 'createdAt', 'updatedAt', 'isGodAdmin', 'enableProdAccess', 'prodAccessExpiresAt', 'prodAccessReason', 'prodAccessGrantedBy', 'prodAccessGrantedAt'] as const
+  static $columns = ['id', 'fullName', 'email', 'password', 'role', 'avatar', 'googleData', 'token', 'pendingEmail', 'emailVerified', 'emailVerifiedAt', 'emailChangeToken', 'settings', 'twoFactorEnabled', 'twoFactorSecret', 'twoFactorRecoveryCodes', 'lastLoginAt', 'createdAt', 'updatedAt', 'isGodAdmin', 'enableProdAccess', 'prodAccessExpiresAt', 'prodAccessReason', 'prodAccessGrantedBy', 'prodAccessGrantedAt', 'prodAccessMode'] as const
   $columns = UserSchema.$columns
   @column({ isPrimary: true })
   declare id: string
@@ -457,4 +461,6 @@ export class UserSchema extends BaseModel {
   declare prodAccessGrantedBy: string | null
   @column.dateTime()
   declare prodAccessGrantedAt: DateTime | null
+  @column()
+  declare prodAccessMode: string
 }

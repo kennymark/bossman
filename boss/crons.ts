@@ -5,6 +5,7 @@ import { backup } from '#boss/jobs/backup'
 import { backupHealthCheck } from '#boss/jobs/backup_health_check'
 import { expireProdAccess } from '#boss/jobs/expire_prod_access'
 import { pruneLocalBackups } from '#boss/jobs/prune_local_backups'
+import { sendScheduledPushNotifications } from '#boss/jobs/send_scheduled_push_notifications'
 
 import schedules from './schedules.js'
 
@@ -34,4 +35,7 @@ export async function registerCrons(): Promise<void> {
 
   /** Drops lapsed production grants so the stored flag matches what is enforced. */
   await expireProdAccess.scheduleCron(schedules.EVERY_HOUR, {})
+
+  /** Sends OneSignal pushes whose scheduled_at has passed. */
+  await sendScheduledPushNotifications.scheduleCron(schedules.EVERY_MINUTE, {})
 }

@@ -1,14 +1,17 @@
 /**
  * Send pending push notifications that are due (scheduled_at <= now).
- * Run via cron every minute for scheduled sends, e.g.:
- *   * * * * * cd /path/to/app && node ace push:send-scheduled
+ *
+ * Prefer the pg-boss cron (`send-scheduled-push-notifications` job). This Ace
+ * command remains for manual runs and local debugging:
+ *   node ace push:send-scheduled
  */
 
 import { BaseCommand } from '@adonisjs/core/ace'
 
 import PushNotification from '#models/push_notification'
 import { resolveUserIds, sendToRecipients } from '#services/push_notification_service'
-import env from '#start/env'
+import type { AppEnv } from '#types/env'
+
 export default class SendScheduledPushNotifications extends BaseCommand {
   static commandName = 'push:send-scheduled'
   static description = 'Send pending push notifications that are due (scheduled_at <= now)'
@@ -18,9 +21,13 @@ export default class SendScheduledPushNotifications extends BaseCommand {
   }
 
   async run() {
-    const appEnv = env.get('NODE_ENV') === 'production' ? 'prod' : 'dev'
     const now = new Date().toISOString()
-    const pending = await PushNotification.query({ connection: appEnv })
+    /**
+     * Push notification rows live on ADMIN_DB (`default`). Querying `dev`/`prod`
+     * looked at the customer databases, which have no `push_notifications` table —
+     * so scheduled sends never found anything.
+     */
+    const pending = await PushNotification.query()
       .where('status', 'pending')
       .whereNotNull('scheduled_at')
       .where('scheduled_at', '<=', now)
@@ -36,6 +43,7 @@ export default class SendScheduledPushNotifications extends BaseCommand {
 
     for (const notification of pending) {
       try {
+        const appEnv = (notification.appEnv ?? 'dev') as AppEnv
         const userIds = await resolveUserIds(
           notification.targetType,
           notification.targetUserIds ?? undefined,

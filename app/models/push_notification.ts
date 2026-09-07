@@ -23,6 +23,13 @@ export default class PushNotification extends compose(SuperBaseModel, Auditable)
   @column()
   declare targetType: PushNotificationTargetType
 
+  /**
+   * Togetha database the audience belongs to (`dev` / `prod`). Scheduled sends use
+   * this so they do not resolve recipients against the wrong connection.
+   */
+  @column()
+  declare appEnv: 'dev' | 'prod'
+
   @column({
     prepare: prepareJson,
     consume: (value: unknown) => consumeJsonArray<string>(value),

@@ -15,13 +15,20 @@ export default class PushNotificationsController {
     const appEnv = request.appEnv()
     await request.validateUsing(pushNotificationUsersValidator)
     const search = request.qs().search as string | undefined
-    const users = TogethaUser.query({ connection: appEnv })
+    const users = await TogethaUser.query({ connection: appEnv })
       .select('id', 'name', 'email', 'landlordId', 'agencyId', 'tenantId')
       .orderBy('name', 'asc')
       .if(search, (q) => q.whereILike('name', `%${search}%`).orWhereILike('email', `%${search}%`))
       .limit(200)
 
-    return response.ok(users)
+    return response.ok(
+      users.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        accountType: user.accountType,
+      })),
+    )
   }
 
   async index({ request, inertia }: HttpContext) {
@@ -53,7 +60,7 @@ export default class PushNotificationsController {
       logger.warn({ id, status: notification.status }, 'push-notifications/resend: not failed')
       return response.badRequest({ error: 'Only failed notifications can be resent.' })
     }
-    const appEnv = request.appEnv()
+    const appEnv = notification.appEnv ?? request.appEnv()
     const userIds = await resolveUserIds(
       notification.targetType,
       notification.targetUserIds ?? undefined,
@@ -85,6 +92,7 @@ export default class PushNotificationsController {
 
       const notification = await PushNotification.create({
         targetType: payload.targetType as PushNotification['targetType'],
+        appEnv,
         targetUserIds: payload.targetUserIds ?? null,
         title: payload.title,
         description: payload.description,
@@ -95,11 +103,17 @@ export default class PushNotificationsController {
         status: 'pending',
       })
 
-      if (sendNow && userIds.length > 0) {
-        try {
-          await sendToRecipients(notification, userIds)
-        } catch {
-          // Service already updated notification status and errorMessage
+      if (sendNow) {
+        if (userIds.length === 0) {
+          await notification
+            .merge({ status: 'failed', errorMessage: 'No recipients matched the audience.' })
+            .save()
+        } else {
+          try {
+            await sendToRecipients(notification, userIds)
+          } catch {
+            // Service already updated notification status and errorMessage
+          }
         }
       }
       return response.redirect('/push-notifications')

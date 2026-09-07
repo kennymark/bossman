@@ -7,6 +7,7 @@ export default class PushNotificationTransformer extends BaseTransformer<PushNot
     return this.pick(this.resource, [
       'id',
       'targetType',
+      'appEnv',
       'targetUserIds',
       'title',
       'description',
