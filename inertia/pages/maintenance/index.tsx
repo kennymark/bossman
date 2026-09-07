@@ -6,7 +6,6 @@ import {
   IconClockExclamation,
   IconDownload,
   IconTool,
-  IconTools,
 } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
@@ -122,13 +121,7 @@ export default function MaintenanceIndex({ maintenanceRequests }: MaintenanceInd
           </a>
         </Button>
       }>
-      <SimpleGrid cols={{ base: 1, md: 2, lg: 5 }} spacing={4}>
-        <StatCard
-          title='Total'
-          description='All live requests'
-          value={formatNumber(stats?.total)}
-          icon={IconTools}
-        />
+      <SimpleGrid cols={{ base: 1, md: 2, lg: 4 }} spacing={4}>
         <StatCard
           title='Open'
           description='To do or in progress'

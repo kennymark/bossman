@@ -3,7 +3,7 @@ import env from '#start/env'
 type StatsUser = {
   isGodAdmin?: boolean
   role?: string
-} | null
+} | null | undefined
 
 /**
  * Who may hit `/admin/api/server-stats`, the debug APIs, and the Transmit channels.
